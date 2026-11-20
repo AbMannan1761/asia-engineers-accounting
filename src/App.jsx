@@ -12,6 +12,7 @@ import { VouchersView } from './components/views/VouchersView';
 import { ReportsView } from './components/views/ReportsView';
 import { BackupSecurityView } from './components/views/BackupSecurityView';
 import { SettingsView } from './components/views/SettingsView';
+import { LoginModal } from './components/layout/LoginModal';
 
 const MainLayout = () => {
   const { activeTab } = useApp();
@@ -55,6 +56,8 @@ const MainLayout = () => {
           {renderCurrentView()}
         </main>
       </div>
+
+      <LoginModal />
     </div>
   );
 };

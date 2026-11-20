@@ -19,7 +19,9 @@ const STORAGE_KEY = 'AE_ACCOUNTING_DATA_V1';
 
 export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => localStorage.getItem('AE_LANG') || 'bn');
-  const [currentUser] = useState({
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('AE_AUTH') !== 'false');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState({
     name: 'Engr. M. A. Hannan',
     role: 'Administrator / Director',
     phone: '01830002040',
@@ -68,6 +70,30 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('AE_LANG', language);
   }, [language]);
+
+  const login = (username, password) => {
+    // Standard credential check for Director / Administrator
+    const cleanUser = (username || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    if (
+      (cleanUser === 'admin' || cleanUser === '01830002040' || cleanUser === 'hannan' || cleanUser === 'director') &&
+      (cleanPass === 'ae2026' || cleanPass === 'admin' || cleanPass === '1234' || cleanPass === '01830002040')
+    ) {
+      setIsAuthenticated(true);
+      setShowLoginModal(false);
+      localStorage.setItem('AE_AUTH', 'true');
+      logAudit('USER_LOGIN', `Director ${currentUser.name} signed in successfully`);
+      return { success: true };
+    }
+    return { success: false, error: language === 'bn' ? 'ইউজারনেম বা পাসওয়ার্ড সঠিক নয়!' : 'Invalid username or password!' };
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.setItem('AE_AUTH', 'false');
+    logAudit('USER_LOGOUT', `Director ${currentUser.name} logged out`);
+  };
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'bn' ? 'en' : 'bn');
@@ -554,6 +580,12 @@ export const AppProvider = ({ children }) => {
         language,
         toggleLanguage,
         currentUser,
+        isAuthenticated,
+        setIsAuthenticated,
+        showLoginModal,
+        setShowLoginModal,
+        login,
+        logout,
         activeTab,
         setActiveTab,
         data,

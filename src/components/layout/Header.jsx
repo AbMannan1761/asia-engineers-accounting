@@ -9,7 +9,9 @@ import {
   FileSpreadsheet, 
   DownloadCloud, 
   Menu,
-  Phone
+  Phone,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
@@ -19,6 +21,9 @@ export const Header = ({ onToggleSidebar }) => {
     language, 
     toggleLanguage, 
     currentUser, 
+    isAuthenticated,
+    setShowLoginModal,
+    logout,
     data, 
     totalCashBalance, 
     totalBankBalance,
@@ -88,6 +93,27 @@ export const Header = ({ onToggleSidebar }) => {
             {data.gdriveConnected ? <CloudCheck className="w-3.5 h-3.5" /> : <CloudOff className="w-3.5 h-3.5" />}
             <span>{data.gdriveConnected ? 'Cloud Synced' : 'Offline Backup'}</span>
           </div>
+
+          {/* Login / Logout Button */}
+          {isAuthenticated ? (
+            <button
+              onClick={logout}
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+              title="Logout from Accounting Session"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              <span>{language === 'bn' ? 'লগআউট' : 'Logout'}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow"
+              title="Director / Admin Login"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>{language === 'bn' ? 'লগইন' : 'Login'}</span>
+            </button>
+          )}
 
           {/* Quick Excel Export */}
           <button
