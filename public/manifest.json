@@ -1,0 +1,21 @@
+{
+  "short_name": "AE Accounting",
+  "name": "Asia Engineers Accounting & Project Management",
+  "icons": [
+    {
+      "src": "./images/asia_engineers_logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./images/asia_engineers_logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0b192c",
+  "theme_color": "#0b192c",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}

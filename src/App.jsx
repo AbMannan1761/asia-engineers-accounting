@@ -1,0 +1,68 @@
+import React, { useState } from 'react';
+import { AppProvider, useApp } from './context/AppContext';
+import { Header } from './components/layout/Header';
+import { Sidebar } from './components/layout/Sidebar';
+import { DashboardView } from './components/views/DashboardView';
+import { AccountingView } from './components/views/AccountingView';
+import { ProjectsView } from './components/views/ProjectsView';
+import { InventoryView } from './components/views/InventoryView';
+import { EmployeesView } from './components/views/EmployeesView';
+import { LedgersView } from './components/views/LedgersView';
+import { VouchersView } from './components/views/VouchersView';
+import { ReportsView } from './components/views/ReportsView';
+import { BackupSecurityView } from './components/views/BackupSecurityView';
+import { SettingsView } from './components/views/SettingsView';
+
+const MainLayout = () => {
+  const { activeTab } = useApp();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const renderCurrentView = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardView />;
+      case 'accounting':
+        return <AccountingView />;
+      case 'projects':
+        return <ProjectsView />;
+      case 'inventory':
+        return <InventoryView />;
+      case 'employees':
+        return <EmployeesView />;
+      case 'ledgers':
+        return <LedgersView />;
+      case 'vouchers':
+        return <VouchersView />;
+      case 'reports':
+        return <ReportsView />;
+      case 'backup':
+        return <BackupSecurityView />;
+      case 'settings':
+        return <SettingsView />;
+      default:
+        return <DashboardView />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      <Header onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
+
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 max-w-7xl mx-auto w-full">
+          {renderCurrentView()}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <AppProvider>
+      <MainLayout />
+    </AppProvider>
+  );
+}
