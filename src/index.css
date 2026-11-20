@@ -2,17 +2,21 @@
 
 @font-face {
   font-family: 'Nikosh';
-  src: url('/fonts/Nikosh.woff2') format('woff2'),
-       url('/fonts/Nikosh.woff') format('woff'),
-       url('/fonts/Nikosh.ttf') format('truetype');
-  font-weight: normal;
+  src: local('Nikosh'), local('NikoshBAN'),
+       url('./fonts/Nikosh.woff2') format('woff2'),
+       url('./fonts/Nikosh.woff') format('woff'),
+       url('./fonts/Nikosh.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 :root {
-  font-family: 'Nikosh', 'NikoshBAN', 'Hind Siliguri', 'Inter', system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.01em;
+  font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
+}
+
+*, body, button, input, select, textarea, table, th, td, h1, h2, h3, h4, h5, h6, span, p, div {
+  font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
 }
 
 /* Custom scrollbars */
@@ -33,7 +37,7 @@
 
 /* Dedicated Print Styles for Vouchers and Receipts */
 @media print {
-  body {
+  body, table, th, td, div, span, p {
     background: white !important;
     color: black !important;
     font-size: 11pt;
@@ -57,7 +61,7 @@
 }
 
 .printable-voucher-card {
-  font-family: 'Nikosh', 'NikoshBAN', 'Hind Siliguri', sans-serif;
+  font-family: 'Nikosh', 'NikoshBAN', serif, sans-serif !important;
 }
 
 .print-only {
