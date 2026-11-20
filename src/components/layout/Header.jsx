@@ -39,28 +39,15 @@ export const Header = ({ onToggleSidebar }) => {
             <Menu className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center p-1">
-              <img 
-                src="./images/asia_engineers_logo.png" 
-                alt="Asia Engineers" 
-                className="w-full h-full object-contain"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-bold text-white text-base lg:text-lg leading-tight tracking-wide">
-                  {COMPANY_INFO.name}
-                </h1>
-                <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] uppercase font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded">
-                  ERP v1.0
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
-                {language === 'bn' ? 'অ্যাকাউন্টিং ও প্রজেক্ট ম্যানেজমেন্ট সফটওয়্যার' : 'Accounting & Project Management Software'}
-              </p>
-            </div>
+          <div className="flex items-center gap-3">
+            <img 
+              src="./images/asia_engineers_logo.png" 
+              alt="ASIA ENGINEERS STEEL STRUCTURE" 
+              className="h-8 sm:h-9 max-w-[180px] sm:max-w-[210px] object-contain"
+            />
+            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] uppercase font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded">
+              ERP v1.0
+            </span>
           </div>
         </div>
 

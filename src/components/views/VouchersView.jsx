@@ -86,12 +86,11 @@ export const VouchersView = () => {
         <div className="border-b-2 border-slate-900 pb-4 mb-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 bg-slate-100 border border-slate-300 rounded-lg p-1 flex items-center justify-center">
+              <div className="h-16 px-2.5 py-1 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center">
                 <img 
                   src="./images/asia_engineers_logo.png" 
                   alt="Asia Engineers" 
-                  className="w-full h-full object-contain"
-                  onError={(e) => { e.target.style.display = 'none'; }}
+                  className="h-12 object-contain"
                 />
               </div>
               <div>

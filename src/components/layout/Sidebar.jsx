@@ -103,8 +103,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
         }`}
       >
         {/* Mobile Sidebar Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between lg:hidden">
-          <div className="font-bold text-white text-base">ASIA ENGINEERS</div>
+        <div className="p-3.5 border-b border-slate-800 flex items-center justify-between lg:hidden">
+          <img 
+            src="./images/asia_engineers_logo.png" 
+            alt="ASIA ENGINEERS" 
+            className="h-7 object-contain"
+          />
           <button 
             onClick={onClose}
             className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
