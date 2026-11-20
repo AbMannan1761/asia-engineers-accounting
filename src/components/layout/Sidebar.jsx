@@ -98,7 +98,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Main Desktop Sidebar / Mobile Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 h-full shrink-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

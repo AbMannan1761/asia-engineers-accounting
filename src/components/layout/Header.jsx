@@ -27,7 +27,7 @@ export const Header = ({ onToggleSidebar }) => {
   } = useApp();
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 lg:px-6 py-2.5">
+    <header className="sticky top-0 z-40 shrink-0 bg-slate-900 border-b border-slate-800 px-4 lg:px-6 py-2.5 shadow-md">
       <div className="flex items-center justify-between gap-4">
         {/* Left: Mobile hamburger + Company Brand */}
         <div className="flex items-center gap-3">

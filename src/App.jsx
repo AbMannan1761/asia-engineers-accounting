@@ -45,13 +45,13 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="h-screen w-full bg-slate-950 text-slate-100 flex flex-col font-sans overflow-hidden">
       <Header onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 max-w-7xl mx-auto w-full min-h-0">
           {renderCurrentView()}
         </main>
       </div>
