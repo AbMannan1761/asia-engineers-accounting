@@ -102,25 +102,17 @@ export const Sidebar = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Mobile Sidebar Header */}
-        <div className="p-3.5 border-b border-slate-800 flex items-center justify-between lg:hidden">
-          <img 
-            src="./images/asia_engineers_logo.png" 
-            alt="ASIA ENGINEERS" 
-            className="h-7 object-contain"
-          />
-          <button 
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
         {/* Navigation List */}
         <div className="flex-1 py-4 px-3 overflow-y-auto space-y-1">
-          <div className="px-3 pb-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            {language === 'bn' ? 'মডিউলসমূহ' : 'Software Modules'}
+          <div className="px-3 pb-2 flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span>{language === 'bn' ? 'মডিউলসমূহ' : 'Software Modules'}</span>
+            <button 
+              onClick={onClose}
+              className="lg:hidden p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800"
+              title="Close Menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           {menuItems.map((item) => {
