@@ -9,7 +9,8 @@ import {
   TrendingUp,
   TrendingDown,
   Layers,
-  Printer
+  Printer,
+  ExternalLink
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 
@@ -46,13 +47,26 @@ export const ReportsView = () => {
           </p>
         </div>
 
-        <button
-          onClick={exportAllToExcel}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg transition self-start"
-        >
-          <FileSpreadsheet className="w-4 h-4" />
-          <span>{language === 'bn' ? 'সম্পূর্ণ আর্থিক হিসাব এক্সেলে ডাউনলোড (.xlsx)' : 'Export Full Excel (.xlsx)'}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-lg transition"
+            title="Open Live Google Sheet (Asia engineers, Accounts)"
+          >
+            <ExternalLink className="w-4 h-4" />
+            <span>{language === 'bn' ? 'গুগল শিটে লাইভ দেখুন ↗' : 'Open Google Sheet ↗'}</span>
+          </a>
+
+          <button
+            onClick={exportAllToExcel}
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg transition"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>{language === 'bn' ? 'এক্সেলে ডাউনলোড (.xlsx)' : 'Export Excel (.xlsx)'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Report Switcher Tabs */}

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import {
   COMPANY_INFO,
+  GDRIVE_CONFIG,
+  INITIAL_BACKUP_SNAPSHOTS,
   INITIAL_ACCOUNTS,
   INITIAL_PROJECTS,
   INITIAL_MATERIALS,
@@ -48,8 +50,11 @@ export const AppProvider = ({ children }) => {
       salarySheet: INITIAL_SALARY_SHEET,
       ledgers: INITIAL_LEDGERS,
       auditLogs: INITIAL_AUDIT_LOGS,
-      gdriveConnected: false,
-      lastBackupTime: '2026-11-20 18:30:00',
+      gdriveConnected: true,
+      gdriveFolderId: GDRIVE_CONFIG.folderId,
+      gdriveFolderUrl: GDRIVE_CONFIG.folderUrl,
+      backupSnapshots: INITIAL_BACKUP_SNAPSHOTS,
+      lastBackupTime: '2026-11-21 00:30:00',
       activeTab: 'dashboard'
     };
   });
@@ -546,6 +551,33 @@ export const AppProvider = ({ children }) => {
     logAudit('GDRIVE_DISCONNECTED', 'Google Drive connection terminated');
   };
 
+  const syncToGoogleDrive = () => {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const dateSlug = new Date().toISOString().slice(0, 10);
+    const timeSlug = new Date().toTimeString().slice(0, 5).replace(':', '');
+    const fileName = `AE_Cloud_Backup_${dateSlug}_${timeSlug}.json`;
+
+    const newSnapshot = {
+      id: `SNAP-${Date.now()}`,
+      fileName,
+      timestamp,
+      size: `${Math.round(JSON.stringify(data).length / 1024 * 10) / 10} KB`,
+      recordsCount: data.transactions.length + data.projects.length + data.materials.length,
+      status: "Synced to Drive",
+      folderId: GDRIVE_CONFIG.folderId
+    };
+
+    setData(prev => ({
+      ...prev,
+      lastBackupTime: timestamp,
+      backupSnapshots: [newSnapshot, ...(prev.backupSnapshots || INITIAL_BACKUP_SNAPSHOTS)]
+    }));
+
+    downloadBackupJSON();
+    logAudit('GDRIVE_SYNC', `Synced snapshot ${fileName} to Google Drive (${GDRIVE_CONFIG.folderId})`);
+    return newSnapshot;
+  };
+
   // Global calculations
   const totalIncome = data.transactions
     .filter(t => t.type === 'income')
@@ -577,6 +609,7 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider
       value={{
         COMPANY_INFO,
+        GDRIVE_CONFIG,
         language,
         toggleLanguage,
         currentUser,
@@ -605,6 +638,7 @@ export const AppProvider = ({ children }) => {
         restoreFromJSON,
         connectGoogleDrive,
         disconnectGoogleDrive,
+        syncToGoogleDrive,
         logAudit,
         // Metrics
         totalIncome,

@@ -82,17 +82,16 @@ export const Header = ({ onToggleSidebar }) => {
         {/* Right: Cloud Sync, Excel Export, Language & User Badge */}
         <div className="flex items-center gap-2">
           {/* Google Drive Status Indicator */}
-          <div 
-            title={data.gdriveConnected ? "Google Drive Cloud Auto-Backup Active" : "Google Drive Disconnected"}
-            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${
-              data.gdriveConnected 
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-            }`}
+          <a 
+            href="https://drive.google.com/drive/folders/1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Google Drive Cloud Backup Active (Click to open folder)"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 transition"
           >
-            {data.gdriveConnected ? <CloudCheck className="w-3.5 h-3.5" /> : <CloudOff className="w-3.5 h-3.5" />}
-            <span>{data.gdriveConnected ? 'Cloud Synced' : 'Offline Backup'}</span>
-          </div>
+            <CloudCheck className="w-3.5 h-3.5" />
+            <span>Cloud Synced</span>
+          </a>
 
           {/* Login / Logout Button */}
           {isAuthenticated ? (

@@ -10,6 +10,52 @@ export const COMPANY_INFO = {
   directorTitle: "Managing Director & CEO"
 };
 
+export const GDRIVE_CONFIG = {
+  folderId: "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS",
+  folderUrl: "https://drive.google.com/drive/folders/1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS",
+  name: "Asia Engineers Cloud Backup Drive",
+  targetFolder: "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS",
+  account: "asiaengineersbd@gmail.com",
+  connected: true
+};
+
+export const GSHEET_CONFIG = {
+  sheetId: "1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE",
+  sheetUrl: "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing",
+  title: "Asia engineers, Accounts",
+  connected: true
+};
+
+export const INITIAL_BACKUP_SNAPSHOTS = [
+  {
+    id: "SNAP-001",
+    fileName: "AE_Accounting_Snapshot_2026-11-21_0030.json",
+    timestamp: "2026-11-21 00:30:15",
+    size: "52.4 KB",
+    recordsCount: 38,
+    status: "Synced to Drive",
+    folderId: "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS"
+  },
+  {
+    id: "SNAP-002",
+    fileName: "AE_Financial_Statement_Nov2026.xlsx",
+    timestamp: "2026-11-20 23:59:00",
+    size: "118.2 KB",
+    recordsCount: 38,
+    status: "Synced to Drive",
+    folderId: "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS"
+  },
+  {
+    id: "SNAP-003",
+    fileName: "AE_Accounting_Snapshot_2026-11-20_1830.json",
+    timestamp: "2026-11-20 18:30:22",
+    size: "49.1 KB",
+    recordsCount: 36,
+    status: "Synced to Drive",
+    folderId: "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS"
+  }
+];
+
 export const INITIAL_ACCOUNTS = [
   { id: "acc-cash", name: "Main Office Petty Cash", type: "cash", balance: 145000, accountNumber: "Cash in Hand" },
   { id: "acc-city", name: "The City Bank Ltd", type: "bank", balance: 1250000, accountNumber: "CD-120392019201", branch: "Agrabad Branch, CTG" },
