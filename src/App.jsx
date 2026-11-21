@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { DashboardView } from './components/views/DashboardView';
+import { MasterPortalView } from './components/views/MasterPortalView';
 import { AccountingView } from './components/views/AccountingView';
 import { ProjectsView } from './components/views/ProjectsView';
 import { InventoryView } from './components/views/InventoryView';
@@ -23,6 +24,8 @@ const MainLayout = () => {
     switch (activeTab) {
       case 'dashboard':
         return <DashboardView />;
+      case 'master-portal':
+        return <MasterPortalView />;
       case 'accounting':
         return <AccountingView />;
       case 'projects':

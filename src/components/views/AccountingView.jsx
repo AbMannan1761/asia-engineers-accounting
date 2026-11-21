@@ -36,7 +36,7 @@ export const AccountingView = () => {
   const [selectedAccountId, setSelectedAccountId] = useState('all');
   const [selectedProjectId, setSelectedProjectId] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -106,8 +106,8 @@ export const AccountingView = () => {
       note: ''
     });
 
-    if (window.confirm(language === 'bn' 
-      ? `লেনদেন সফলভাবে সংরক্ষণ করা হয়েছে (${created.voucherNo})। আপনি কি ভাউচার প্রিন্ট করতে চান?` 
+    if (window.confirm(language === 'bn'
+      ? `লেনদেন সফলভাবে সংরক্ষণ করা হয়েছে (${created.voucherNo})। আপনি কি ভাউচার প্রিন্ট করতে চান?`
       : `Transaction saved (${created.voucherNo}). Do you want to print the voucher now?`)) {
       setSelectedVoucherForPrint(created);
       setActiveTab('vouchers');
@@ -143,8 +143,8 @@ export const AccountingView = () => {
             <span>{language === 'bn' ? 'জমা-খরচ ও ব্যাংক হিসাব' : 'Cash & Bank Accounting'}</span>
           </h2>
           <p className="text-xs text-slate-400">
-            {language === 'bn' 
-              ? 'প্রতিটি লেনদেনের ক্যাশ, ব্যাংক ও ভাউচার ট্র্যাকিং' 
+            {language === 'bn'
+              ? 'প্রতিটি লেনদেনের ক্যাশ, ব্যাংক ও ভাউচার ট্র্যাকিং'
               : 'Record all daily income, payments, and inter-account transfers'}
           </p>
         </div>
@@ -188,11 +188,10 @@ export const AccountingView = () => {
           <div
             key={acc.id}
             onClick={() => setSelectedAccountId(selectedAccountId === acc.id ? 'all' : acc.id)}
-            className={`cursor-pointer border rounded-xl p-3 transition-all ${
-              selectedAccountId === acc.id 
-                ? 'bg-amber-500/10 border-amber-500/60 ring-1 ring-amber-500/30' 
-                : 'bg-slate-800/80 border-slate-700/60 hover:border-slate-600'
-            }`}
+            className={`cursor-pointer border rounded-xl p-3 transition-all ${selectedAccountId === acc.id
+              ? 'bg-amber-500/10 border-amber-500/60 ring-1 ring-amber-500/30'
+              : 'bg-slate-800/80 border-slate-700/60 hover:border-slate-600'
+              }`}
           >
             <div className="text-[11px] text-slate-400 truncate">{acc.name}</div>
             <div className="text-sm font-bold text-white mt-1">{formatBDT(acc.balance)}</div>
@@ -214,11 +213,10 @@ export const AccountingView = () => {
             <button
               key={tab.id}
               onClick={() => setActiveFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                activeFilter === tab.id
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeFilter === tab.id
+                ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                : 'text-slate-400 hover:text-white'
+                }`}
             >
               {tab.label}
             </button>
@@ -321,9 +319,8 @@ export const AccountingView = () => {
                           <span className="text-slate-500">-</span>
                         )}
                       </td>
-                      <td className={`py-3 px-3 text-right font-bold text-xs ${
-                        isIncome ? 'text-emerald-400' : isTransfer ? 'text-blue-400' : 'text-rose-400'
-                      }`}>
+                      <td className={`py-3 px-3 text-right font-bold text-xs ${isIncome ? 'text-emerald-400' : isTransfer ? 'text-blue-400' : 'text-rose-400'
+                        }`}>
                         {isIncome ? '+' : isTransfer ? '⇄ ' : '-'}{formatBDT(txn.amount)}
                       </td>
                       <td className="py-3 px-3 text-center">
@@ -375,12 +372,12 @@ export const AccountingView = () => {
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
                 <PlusCircle className={`w-4 h-4 ${formData.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`} />
                 <span>
-                  {formData.type === 'income' 
-                    ? (language === 'bn' ? 'নতুন ক্রেডিট ভাউচার এন্ট্রি (জমা / প্রাপ্তি)' : 'New Credit Voucher (Income / Receipt)') 
+                  {formData.type === 'income'
+                    ? (language === 'bn' ? 'নতুন ক্রেডিট ভাউচার এন্ট্রি (জমা / প্রাপ্তি)' : 'New Credit Voucher (Income / Receipt)')
                     : (language === 'bn' ? 'নতুন ডেবিট ভাউচার এন্ট্রি (ব্যয় / পরিশোধ)' : 'New Debit Voucher (Expense / Payment)')}
                 </span>
               </h3>
-              <button 
+              <button
                 onClick={() => setShowAddModal(false)}
                 className="text-slate-400 hover:text-white"
               >
@@ -394,22 +391,20 @@ export const AccountingView = () => {
                 <button
                   type="button"
                   onClick={() => setFormData(p => ({ ...p, type: 'income', category: 'Client Milestone Bill' }))}
-                  className={`py-2 rounded-lg font-bold transition ${
-                    formData.type === 'income'
-                      ? 'bg-emerald-600 text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`py-2 rounded-lg font-bold transition ${formData.type === 'income'
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'ক্রেডিট ভাউচার (জমা / প্রাপ্তি)' : 'Credit Voucher (Income)'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData(p => ({ ...p, type: 'expense', category: 'Material Purchase' }))}
-                  className={`py-2 rounded-lg font-bold transition ${
-                    formData.type === 'expense'
-                      ? 'bg-rose-600 text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`py-2 rounded-lg font-bold transition ${formData.type === 'expense'
+                    ? 'bg-rose-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'ডেবিট ভাউচার (ব্যয় / পরিশোধ)' : 'Debit Voucher (Expense)'}
                 </button>
@@ -441,8 +436,8 @@ export const AccountingView = () => {
 
               <div>
                 <label className="block text-slate-400 mb-1 font-medium">
-                  {formData.type === 'income' 
-                    ? (language === 'bn' ? 'কার কাছ থেকে গ্রহণ (Received From)' : 'Received From (Client/Party)') 
+                  {formData.type === 'income'
+                    ? (language === 'bn' ? 'কার কাছ থেকে গ্রহণ (Received From)' : 'Received From (Client/Party)')
                     : (language === 'bn' ? 'কাকে প্রদান (Paid To / Payee)' : 'Paid To (Vendor/Payee)')} *
                 </label>
                 <input
@@ -547,9 +542,8 @@ export const AccountingView = () => {
                 </button>
                 <button
                   type="submit"
-                  className={`px-5 py-2 rounded-xl font-bold text-white shadow-lg ${
-                    formData.type === 'income' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-rose-600 hover:bg-rose-500'
-                  }`}
+                  className={`px-5 py-2 rounded-xl font-bold text-white shadow-lg ${formData.type === 'income' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-rose-600 hover:bg-rose-500'
+                    }`}
                 >
                   {language === 'bn' ? 'সংরক্ষণ ও ভাউচার তৈরি করুন' : 'Save & Generate Voucher'}
                 </button>
@@ -568,7 +562,7 @@ export const AccountingView = () => {
                 <ArrowLeftRight className="w-4 h-4 text-blue-400" />
                 <span>{language === 'bn' ? 'এক অ্যাকাউন্ট থেকে অন্য অ্যাকাউন্টে ট্রান্সফার' : 'Inter-Account Fund Transfer'}</span>
               </h3>
-              <button 
+              <button
                 onClick={() => setShowTransferModal(false)}
                 className="text-slate-400 hover:text-white"
               >
@@ -666,7 +660,7 @@ export const AccountingView = () => {
                 <Edit2 className="w-4 h-4 text-amber-400" />
                 <span>{language === 'bn' ? `লেনদেন এডিট ও আপডেট (${editingTxn.voucherNo})` : `Edit Transaction (${editingTxn.voucherNo})`}</span>
               </h3>
-              <button 
+              <button
                 onClick={() => setEditingTxn(null)}
                 className="text-slate-400 hover:text-white"
               >

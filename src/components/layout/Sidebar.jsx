@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   LayoutDashboard,
+  FolderKanban,
   Receipt,
   Briefcase,
   Boxes,
@@ -25,6 +26,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
       icon: LayoutDashboard,
       labelBn: 'ড্যাশবোর্ড ও সারাংশ',
       labelEn: 'Dashboard'
+    },
+    {
+      id: 'master-portal',
+      icon: FolderKanban,
+      labelBn: 'প্রজেক্ট, কর্মী ও ভেন্ডর পোর্টাল',
+      labelEn: 'Project, Emp & Vendor Portal'
     },
     {
       id: 'accounting',
