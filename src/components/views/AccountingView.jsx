@@ -158,7 +158,7 @@ export const AccountingView = () => {
             className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>{language === 'bn' ? '+ জমা (Receipt)' : '+ Income Receipt'}</span>
+            <span>{language === 'bn' ? '+ ক্রেডিট ভাউচার (জমা)' : '+ Credit Voucher (Income)'}</span>
           </button>
 
           <button
@@ -169,7 +169,7 @@ export const AccountingView = () => {
             className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>{language === 'bn' ? '+ খরচ (Payment)' : '+ Payment Voucher'}</span>
+            <span>{language === 'bn' ? '+ ডেবিট ভাউচার (খরচ)' : '+ Debit Voucher (Payment)'}</span>
           </button>
 
           <button
@@ -177,7 +177,7 @@ export const AccountingView = () => {
             className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
           >
             <ArrowLeftRight className="w-4 h-4" />
-            <span>{language === 'bn' ? 'ট্রান্সফার' : 'Transfer'}</span>
+            <span>{language === 'bn' ? 'জার্নাল (ট্রান্সফার)' : 'Journal Transfer'}</span>
           </button>
         </div>
       </div>
@@ -206,10 +206,10 @@ export const AccountingView = () => {
         {/* Type Tabs */}
         <div className="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start">
           {[
-            { id: 'all', label: language === 'bn' ? 'সকল' : 'All' },
-            { id: 'income', label: language === 'bn' ? 'জমা (Income)' : 'Income' },
-            { id: 'expense', label: language === 'bn' ? 'খরচ (Expense)' : 'Expense' },
-            { id: 'transfer', label: language === 'bn' ? 'ট্রান্সফার' : 'Transfer' }
+            { id: 'all', label: language === 'bn' ? 'সকল ভাউচার' : 'All Vouchers' },
+            { id: 'income', label: language === 'bn' ? 'ক্রেডিট ভাউচার (জমা)' : 'Credit (Income)' },
+            { id: 'expense', label: language === 'bn' ? 'ডেবিট ভাউচার (খরচ)' : 'Debit (Expense)' },
+            { id: 'transfer', label: language === 'bn' ? 'জার্নাল (স্থানান্তর)' : 'Journal (Transfer)' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -376,8 +376,8 @@ export const AccountingView = () => {
                 <PlusCircle className={`w-4 h-4 ${formData.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`} />
                 <span>
                   {formData.type === 'income' 
-                    ? (language === 'bn' ? 'নতুন জমা / মানি রিসিট এন্ট্রি' : 'New Money Receipt (Income)') 
-                    : (language === 'bn' ? 'নতুন খরচ / পেমেন্ট ভাউচার এন্ট্রি' : 'New Payment Voucher (Expense)')}
+                    ? (language === 'bn' ? 'নতুন ক্রেডিট ভাউচার এন্ট্রি (জমা / প্রাপ্তি)' : 'New Credit Voucher (Income / Receipt)') 
+                    : (language === 'bn' ? 'নতুন ডেবিট ভাউচার এন্ট্রি (ব্যয় / পরিশোধ)' : 'New Debit Voucher (Expense / Payment)')}
                 </span>
               </h3>
               <button 
@@ -400,7 +400,7 @@ export const AccountingView = () => {
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  {language === 'bn' ? 'জমা (Income / Receipt)' : 'Income Receipt'}
+                  {language === 'bn' ? 'ক্রেডিট ভাউচার (জমা / প্রাপ্তি)' : 'Credit Voucher (Income)'}
                 </button>
                 <button
                   type="button"
@@ -411,7 +411,7 @@ export const AccountingView = () => {
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  {language === 'bn' ? 'খরচ (Expense / Payment)' : 'Expense Voucher'}
+                  {language === 'bn' ? 'ডেবিট ভাউচার (ব্যয় / পরিশোধ)' : 'Debit Voucher (Expense)'}
                 </button>
               </div>
 

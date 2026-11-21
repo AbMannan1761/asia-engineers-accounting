@@ -65,8 +65,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
     {
       id: 'vouchers',
       icon: FileText,
-      labelBn: 'ভাউচার ও রিসিট প্রিন্ট',
-      labelEn: 'Voucher & Receipts'
+      labelBn: 'ডেবিট ও ক্রেডিট ভাউচার প্রিন্ট',
+      labelEn: 'Debit & Credit Vouchers'
     },
     {
       id: 'reports',
