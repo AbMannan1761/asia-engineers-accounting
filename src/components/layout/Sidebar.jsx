@@ -6,6 +6,7 @@ import {
   Briefcase,
   Boxes,
   Users2,
+  ClipboardList,
   BookOpenCheck,
   FileText,
   BarChart3,
@@ -44,10 +45,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
       labelEn: 'Material Inventory'
     },
     {
+      id: 'daily-wages',
+      icon: ClipboardList,
+      labelBn: 'ডেইলি হাজিরা শীট ও বেতন',
+      labelEn: 'Daily Attendance & Wages'
+    },
+    {
       id: 'employees',
       icon: Users2,
-      labelBn: 'কর্মী, লেবার হাজিরা ও বেতন',
-      labelEn: 'Labor Attendance & Salary'
+      labelBn: 'কর্মচারী ও মাসিক বেতন',
+      labelEn: 'Employee & Salary'
     },
     {
       id: 'ledgers',

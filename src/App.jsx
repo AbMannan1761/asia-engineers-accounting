@@ -6,6 +6,7 @@ import { DashboardView } from './components/views/DashboardView';
 import { AccountingView } from './components/views/AccountingView';
 import { ProjectsView } from './components/views/ProjectsView';
 import { InventoryView } from './components/views/InventoryView';
+import { DailyAttendanceView } from './components/views/DailyAttendanceView';
 import { EmployeesView } from './components/views/EmployeesView';
 import { LedgersView } from './components/views/LedgersView';
 import { VouchersView } from './components/views/VouchersView';
@@ -28,6 +29,8 @@ const MainLayout = () => {
         return <ProjectsView />;
       case 'inventory':
         return <InventoryView />;
+      case 'daily-wages':
+        return <DailyAttendanceView />;
       case 'employees':
         return <EmployeesView />;
       case 'ledgers':
