@@ -20,6 +20,8 @@ export const Header = ({ onToggleSidebar }) => {
     COMPANY_INFO, 
     GSHEET_CONFIG,
     gsheetSyncStatus,
+    syncToGoogleSheet,
+    setActiveTab,
     language, 
     toggleLanguage, 
     currentUser, 
@@ -83,12 +85,11 @@ export const Header = ({ onToggleSidebar }) => {
 
         {/* Right: Cloud Sync, Excel Export, Language & User Badge */}
         <div className="flex items-center gap-2">
-          {/* Google Sheet Live Real-time Sync Indicator */}
-          <a
-            href={GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing"}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={`${GSHEET_CONFIG?.title || 'Asia engineers, Accounts'} - গুগল শীট লাইভ সিংক (ক্লিক করে শীট দেখুন)`}
+          {/* Google Sheet Live Real-time Sync Indicator Button (Syncs internally, does not open external link) */}
+          <button
+            onClick={() => syncToGoogleSheet('MANUAL_SYNC')}
+            type="button"
+            title={language === 'bn' ? 'গুগল শীট লাইভ সিংক সক্রিয় (ক্লিক করলে এখনই সিংক হবে)' : 'Google Sheet Live Sync Active (Click to sync now)'}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
               gsheetSyncStatus === 'syncing'
                 ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 animate-pulse'
@@ -101,21 +102,20 @@ export const Header = ({ onToggleSidebar }) => {
             </span>
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden sm:inline font-bold">
-              {language === 'bn' ? (gsheetSyncStatus === 'syncing' ? 'শীট সিংক হচ্ছে...' : 'শীট লাইভ সিংক') : 'Sheet Live Synced'}
+              {language === 'bn' ? (gsheetSyncStatus === 'syncing' ? 'সিংক হচ্ছে...' : 'শীট সিংক') : 'Sheet Sync'}
             </span>
-          </a>
+          </button>
 
-          {/* Google Drive Status Indicator */}
-          <a 
-            href="https://drive.google.com/drive/folders/1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Google Drive Cloud Backup Active (Click to open folder)"
+          {/* Google Drive Status Indicator (Navigates to internal backup tab) */}
+          <button
+            onClick={() => setActiveTab('backup')}
+            type="button"
+            title={language === 'bn' ? 'গুগল ড্রাইভ ও ক্লাউড ব্যাকআপ সেটিংস' : 'Google Drive Cloud Backup Settings'}
             className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20 transition"
           >
             <CloudCheck className="w-3.5 h-3.5" />
             <span>Drive</span>
-          </a>
+          </button>
 
           {/* Login / Logout Button */}
           {isAuthenticated ? (

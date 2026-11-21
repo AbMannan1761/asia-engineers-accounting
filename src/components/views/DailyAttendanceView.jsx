@@ -310,18 +310,6 @@ export const DailyAttendanceView = () => {
             <Printer className="w-4 h-4 text-amber-400" />
             <span>{language === 'bn' ? 'প্রিন্ট' : 'Print'}</span>
           </button>
-
-          <a
-            href={GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing"}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="গুগল শীটে সরাসরি দেখুন (Asia engineers, Accounts)"
-            className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3 py-2 rounded-xl transition"
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'শীট লাইভ সিংক' : 'Live Sheet'}</span>
-          </a>
         </div>
       </div>
 

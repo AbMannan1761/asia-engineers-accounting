@@ -203,17 +203,6 @@ export const AccountingView = () => {
             <span>{language === 'bn' ? 'শীট থেকে আপডেট' : 'Pull Sheet'}</span>
           </button>
 
-          <a
-            href={GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold px-3 py-2 rounded-xl transition"
-            title="গুগল শীট খুলুন"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'গুগল শীট' : 'Sheet'}</span>
-          </a>
-
           <button
             onClick={() => {
               setFormData(prev => ({ ...prev, type: 'income', category: incomeCategories[0] || 'Client Milestone Bill' }));
