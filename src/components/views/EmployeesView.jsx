@@ -33,6 +33,8 @@ export const EmployeesView = () => {
     updateEmployee,
     deleteEmployee,
     payEmployeeSalary,
+    updateSalarySheet,
+    deleteSalarySheet,
     addDailyLabor,
     updateDailyLabor,
     deleteDailyLabor,
@@ -57,6 +59,7 @@ export const EmployeesView = () => {
   const [editingEmp, setEditingEmp] = useState(null);
   const [showPaySalaryModal, setShowPaySalaryModal] = useState(false);
   const [selectedSalaryRecord, setSelectedSalaryRecord] = useState(null);
+  const [editingSalarySheet, setEditingSalarySheet] = useState(null);
 
   // Daily Labor Modals
   const [showAddDailyLaborModal, setShowAddDailyLaborModal] = useState(false);
@@ -673,13 +676,13 @@ export const EmployeesView = () => {
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex items-center justify-center gap-1.5">
                               <button
                                 onClick={() => setEditingAttendance(att)}
-                                className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
-                                title="Edit Attendance"
+                                className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
+                                title={language === 'bn' ? 'হাজিরা এডিট করুন' : 'Edit Attendance'}
                               >
-                                <Edit2 className="w-3 h-3" />
+                                <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => {
@@ -687,10 +690,10 @@ export const EmployeesView = () => {
                                     deleteDailyAttendance(att.id);
                                   }
                                 }}
-                                className="p-1 rounded bg-slate-900 hover:bg-rose-600 hover:text-white text-slate-400 transition"
-                                title="Delete Attendance"
+                                className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                                title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete Attendance'}
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
@@ -769,26 +772,47 @@ export const EmployeesView = () => {
                           </span>
                         </td>
                         <td className="py-3 px-3 text-center">
-                          {isPaid ? (
-                            <span className="text-[11px] text-slate-400 font-mono">
-                              {sheet.voucherNo}
-                            </span>
-                          ) : (
+                          <div className="flex items-center justify-center gap-1.5">
+                            {!isPaid && (
+                              <button
+                                onClick={() => {
+                                  setSelectedSalaryRecord(sheet);
+                                  setPayData({
+                                    accountId: data.accounts[0]?.id || 'acc-cash',
+                                    paidAmount: sheet.netPayable,
+                                    paymentDate: new Date().toISOString().slice(0, 10)
+                                  });
+                                  setShowPaySalaryModal(true);
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow transition"
+                              >
+                                {language === 'bn' ? 'বেতন দিন' : 'Pay Now'}
+                              </button>
+                            )}
+                            {isPaid && (
+                              <span className="text-[11px] text-slate-400 font-mono mr-1">
+                                {sheet.voucherNo}
+                              </span>
+                            )}
+                            <button
+                              onClick={() => setEditingSalarySheet({ ...sheet })}
+                              className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
+                              title={language === 'bn' ? 'বেতন রেকর্ড এডিট করুন' : 'Edit Salary Record'}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               onClick={() => {
-                                setSelectedSalaryRecord(sheet);
-                                setPayData({
-                                  accountId: data.accounts[0]?.id || 'acc-cash',
-                                  paidAmount: sheet.netPayable,
-                                  paymentDate: new Date().toISOString().slice(0, 10)
-                                });
-                                setShowPaySalaryModal(true);
+                                if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${emp?.name || sheet.employeeId}-এর বেতন রেকর্ড মুছে ফেলতে চান?` : `Delete salary record?`)) {
+                                  deleteSalarySheet(sheet.id);
+                                }
                               }}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow transition"
+                              className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                              title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
                             >
-                              {language === 'bn' ? 'বেতন দিন' : 'Pay Now'}
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1984,6 +2008,117 @@ export const EmployeesView = () => {
                 <button type="submit" className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg">
                   {language === 'bn' ? 'আপডেট সেভ করুন' : 'Save Updates'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Salary Sheet Record */}
+      {editingSalarySheet && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'bn' ? 'বেতন রেকর্ড এডিট' : 'Edit Salary Record'}</span>
+              </h3>
+              <button onClick={() => setEditingSalarySheet(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateSalarySheet(editingSalarySheet.id, editingSalarySheet);
+                setEditingSalarySheet(null);
+              }}
+              className="p-5 space-y-3.5 text-xs"
+            >
+              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div className="text-slate-400 font-mono">{editingSalarySheet.employeeId} - {editingSalarySheet.month}</div>
+                <div className="font-bold text-white text-sm">
+                  {data.employees.find(e => e.id === editingSalarySheet.employeeId)?.name || editingSalarySheet.employeeId}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মূল বেতন (৳)' : 'Basic'} *</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={editingSalarySheet.basicSalary}
+                    onChange={(e) => setEditingSalarySheet(p => ({ ...p, basicSalary: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-emerald-400 mb-1 font-medium">{language === 'bn' ? 'বোনাস (৳)' : 'Bonus'}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingSalarySheet.bonus}
+                    onChange={(e) => setEditingSalarySheet(p => ({ ...p, bonus: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-rose-400 mb-1 font-medium">{language === 'bn' ? 'অগ্রিম কর্তন' : 'Advance'}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingSalarySheet.advance}
+                    onChange={(e) => setEditingSalarySheet(p => ({ ...p, advance: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'অবস্থা' : 'Status'}</label>
+                <select
+                  value={editingSalarySheet.status}
+                  onChange={(e) => setEditingSalarySheet(p => ({ ...p, status: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                >
+                  <option value="Due">Due (বকেয়া)</option>
+                  <option value="Paid">Paid (পরিশোধিত)</option>
+                </select>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(language === 'bn' ? 'আপনি কি নিশ্চিত এই বেতন রেকর্ডটি মুছে ফেলতে চান?' : 'Delete salary record?')) {
+                      deleteSalarySheet(editingSalarySheet.id);
+                      setEditingSalarySheet(null);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'মুছে ফেলুন' : 'Delete'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingSalarySheet(null)}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  >
+                    {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
+                  >
+                    {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Record'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

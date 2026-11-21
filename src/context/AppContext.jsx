@@ -394,6 +394,31 @@ export const AppProvider = ({ children }) => {
     return true;
   };
 
+  const updateStockMovement = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      stockMovements: prev.stockMovements.map(m => {
+        if (m.id === id) {
+          return {
+            ...m,
+            ...updatedFields,
+            qty: updatedFields.qty !== undefined ? Number(updatedFields.qty) : m.qty
+          };
+        }
+        return m;
+      })
+    }));
+    logAudit('STOCK_MOVEMENT_UPDATED', `Updated movement ${id}`);
+  };
+
+  const deleteStockMovement = (id) => {
+    setData(prev => ({
+      ...prev,
+      stockMovements: prev.stockMovements.filter(m => m.id !== id)
+    }));
+    logAudit('STOCK_MOVEMENT_DELETED', `Deleted movement ${id}`);
+  };
+
   const addMaterial = (mat) => {
     const newMat = {
       ...mat,
@@ -514,6 +539,38 @@ export const AppProvider = ({ children }) => {
     }));
 
     logAudit('SALARY_PAID', `Disbursed ৳${paidAmount.toLocaleString()} to ${emp.name} via ${acc.name}`);
+  };
+
+  const updateSalarySheet = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      salarySheet: prev.salarySheet.map(s => {
+        if (s.id === id) {
+          const basic = updatedFields.basicSalary !== undefined ? Number(updatedFields.basicSalary) : s.basicSalary;
+          const bonus = updatedFields.bonus !== undefined ? Number(updatedFields.bonus) : s.bonus;
+          const advance = updatedFields.advance !== undefined ? Number(updatedFields.advance) : s.advance;
+          const net = basic + bonus - advance;
+          return {
+            ...s,
+            ...updatedFields,
+            basicSalary: basic,
+            bonus: bonus,
+            advance: advance,
+            netPayable: net
+          };
+        }
+        return s;
+      })
+    }));
+    logAudit('SALARY_RECORD_UPDATED', `Updated salary record ${id}`);
+  };
+
+  const deleteSalarySheet = (id) => {
+    setData(prev => ({
+      ...prev,
+      salarySheet: prev.salarySheet.filter(s => s.id !== id)
+    }));
+    logAudit('SALARY_RECORD_DELETED', `Deleted salary record ${id}`);
   };
 
   // 6. Client / Supplier Ledger additions
@@ -992,6 +1049,8 @@ export const AppProvider = ({ children }) => {
         updateProject,
         deleteProject,
         recordStockMovement,
+        updateStockMovement,
+        deleteStockMovement,
         addMaterial,
         updateMaterial,
         deleteMaterial,
@@ -999,6 +1058,8 @@ export const AppProvider = ({ children }) => {
         updateEmployee,
         deleteEmployee,
         payEmployeeSalary,
+        updateSalarySheet,
+        deleteSalarySheet,
         addDailyLabor,
         updateDailyLabor,
         deleteDailyLabor,

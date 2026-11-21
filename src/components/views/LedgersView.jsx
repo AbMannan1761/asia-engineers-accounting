@@ -210,10 +210,10 @@ export const LedgersView = () => {
                     </td>
 
                     <td className="py-3 px-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => setEditingLedger({ ...party })}
-                          className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                          className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
                           title={language === 'bn' ? 'খাতা এডিট করুন' : 'Edit Ledger'}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -224,8 +224,8 @@ export const LedgersView = () => {
                               deleteLedger(party.id);
                             }
                           }}
-                          className="p-1 rounded bg-slate-900 hover:bg-rose-600 hover:text-white text-slate-400 transition"
-                          title="Delete"
+                          className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                          title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

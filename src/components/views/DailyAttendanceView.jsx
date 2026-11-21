@@ -499,7 +499,7 @@ export const DailyAttendanceView = () => {
                       </td>
                       {/* অ্যাকশন */}
                       <td className="py-2.5 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1.5">
                           {!isPaid && (
                             <button
                               onClick={() => {
@@ -512,7 +512,7 @@ export const DailyAttendanceView = () => {
                                 });
                                 setShowPayModal(true);
                               }}
-                              className="p-1 rounded bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white transition"
+                              className="p-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/30 transition shadow-xs"
                               title={language === 'bn' ? 'মজুরি ভাউচার পে করুন' : 'Pay Wage Voucher'}
                             >
                               <CreditCard className="w-3.5 h-3.5" />
@@ -520,7 +520,7 @@ export const DailyAttendanceView = () => {
                           )}
                           <button
                             onClick={() => setEditingAtt(item)}
-                            className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
                             title={language === 'bn' ? 'এডিট করুন' : 'Edit'}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -531,8 +531,8 @@ export const DailyAttendanceView = () => {
                                 deleteDailyAttendance(item.id);
                               }
                             }}
-                            className="p-1 rounded bg-slate-900 hover:bg-rose-600 hover:text-white text-slate-400 transition"
-                            title="Delete"
+                            className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                            title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

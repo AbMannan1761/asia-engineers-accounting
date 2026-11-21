@@ -198,18 +198,18 @@ export const ProjectsView = () => {
                 </div>
 
                 {/* Edit & Delete Action Buttons */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={(e) => handleOpenEdit(project, e)}
-                    className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-amber-500 hover:text-slate-950 text-slate-300 border border-slate-700/80 transition"
+                    className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
                     title={language === 'bn' ? 'প্রজেক্ট এডিট করুন' : 'Edit Project'}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={(e) => handleDeleteProject(project.id, project.name, e)}
-                    className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-rose-600 hover:text-white text-slate-400 border border-slate-700/80 transition"
-                    title={language === 'bn' ? 'প্রজেক্ট মুছুন' : 'Delete Project'}
+                    className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                    title={language === 'bn' ? 'প্রজেক্ট মুছুন (Delete)' : 'Delete Project'}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

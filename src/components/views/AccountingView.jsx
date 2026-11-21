@@ -266,7 +266,7 @@ export const AccountingView = () => {
                 <th className="py-3 px-3">{language === 'bn' ? 'অ্যাকাউন্ট' : 'Account'}</th>
                 <th className="py-3 px-3">{language === 'bn' ? 'প্রজেক্ট' : 'Project'}</th>
                 <th className="py-3 px-3 text-right">{language === 'bn' ? 'পরিমাণ (৳)' : 'Amount'}</th>
-                <th className="py-3 px-3 text-center">{language === 'bn' ? 'ভাউচার' : 'Print'}</th>
+                <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন ও প্রিন্ট' : 'Actions & Print'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
@@ -327,10 +327,10 @@ export const AccountingView = () => {
                         {isIncome ? '+' : isTransfer ? '⇄ ' : '-'}{formatBDT(txn.amount)}
                       </td>
                       <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => setEditingTxn({ ...txn })}
-                            className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
                             title={language === 'bn' ? 'লেনদেন এডিট করুন' : 'Edit Transaction'}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -340,8 +340,8 @@ export const AccountingView = () => {
                               setSelectedVoucherForPrint(txn);
                               setActiveTab('vouchers');
                             }}
-                            className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition"
-                            title="View / Print A4 Voucher"
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shadow-xs"
+                            title={language === 'bn' ? 'ভাউচার প্রিন্ট করুন' : 'View / Print A4 Voucher'}
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>
@@ -351,8 +351,8 @@ export const AccountingView = () => {
                                 deleteTransaction(txn.id);
                               }
                             }}
-                            className="p-1 hover:bg-rose-600 rounded text-slate-400 hover:text-white transition"
-                            title="Delete"
+                            className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                            title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

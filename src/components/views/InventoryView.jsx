@@ -16,12 +16,15 @@ import {
   Trash2
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
+import { DateInput } from '../common/DateInput';
 
 export const InventoryView = () => {
   const {
     language,
     data,
     recordStockMovement,
+    updateStockMovement,
+    deleteStockMovement,
     addMaterial,
     updateMaterial,
     deleteMaterial
@@ -32,6 +35,7 @@ export const InventoryView = () => {
   const [showOutwardModal, setShowOutwardModal] = useState(false);
   const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState(null);
+  const [editingMovement, setEditingMovement] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Stock Movement Form
@@ -282,10 +286,10 @@ export const InventoryView = () => {
                         )}
                       </td>
                       <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => setEditingMaterial({ ...mat })}
-                            className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
                             title={language === 'bn' ? 'মালামাল এডিট করুন' : 'Edit Material'}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -296,8 +300,8 @@ export const InventoryView = () => {
                                 deleteMaterial(mat.id);
                               }
                             }}
-                            className="p-1 rounded bg-slate-900 hover:bg-rose-600 hover:text-white text-slate-400 transition"
-                            title="Delete"
+                            className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                            title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -324,6 +328,7 @@ export const InventoryView = () => {
                   <th className="py-3 px-3 text-right">{language === 'bn' ? 'পরিমাণ' : 'Quantity'}</th>
                   <th className="py-3 px-3">{language === 'bn' ? 'সাপ্লায়ার / সাইট প্রজেক্ট' : 'Supplier / Project'}</th>
                   <th className="py-3 px-3">{language === 'bn' ? 'নোট' : 'Notes'}</th>
+                  <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
@@ -353,6 +358,28 @@ export const InventoryView = () => {
                         )}
                       </td>
                       <td className="py-3 px-3 text-slate-400 text-[11px]">{mov.note}</td>
+                      <td className="py-3 px-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => setEditingMovement({ ...mov })}
+                            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
+                            title={language === 'bn' ? 'চালান এডিট করুন' : 'Edit Movement'}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত চালান ${mov.voucherNo} মুছে ফেলতে চান?` : `Delete movement ${mov.voucherNo}?`)) {
+                                deleteStockMovement(mov.id);
+                              }
+                            }}
+                            className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                            title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -791,6 +818,119 @@ export const InventoryView = () => {
                     className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
                   >
                     {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Material'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Stock Movement */}
+      {editingMovement && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'bn' ? `চালান এডিট: ${editingMovement.voucherNo}` : `Edit Movement: ${editingMovement.voucherNo}`}</span>
+              </h3>
+              <button onClick={() => setEditingMovement(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateStockMovement(editingMovement.id, editingMovement);
+                setEditingMovement(null);
+              }}
+              className="p-5 space-y-3.5 text-xs"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
+                  <DateInput
+                    required
+                    value={editingMovement.date}
+                    onChange={(e) => setEditingMovement(p => ({ ...p, date: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'পরিমাণ' : 'Quantity'} *</label>
+                  <input
+                    type="number"
+                    required
+                    step="0.01"
+                    min="0.01"
+                    value={editingMovement.qty}
+                    onChange={(e) => setEditingMovement(p => ({ ...p, qty: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">
+                  {editingMovement.type === 'inward' 
+                    ? (language === 'bn' ? 'সাপ্লায়ার / উৎস' : 'Supplier') 
+                    : (language === 'bn' ? 'সাইট / প্রজেক্ট' : 'Site / Project')}
+                </label>
+                <input
+                  type="text"
+                  value={editingMovement.type === 'inward' ? (editingMovement.supplier || '') : (editingMovement.projectId || '')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (editingMovement.type === 'inward') {
+                      setEditingMovement(p => ({ ...p, supplier: val }));
+                    } else {
+                      setEditingMovement(p => ({ ...p, projectId: val }));
+                    }
+                  }}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'নোট / বিবরণ' : 'Note'}</label>
+                <input
+                  type="text"
+                  value={editingMovement.note || ''}
+                  onChange={(e) => setEditingMovement(p => ({ ...p, note: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত চালান ${editingMovement.voucherNo} মুছে ফেলতে চান?` : `Delete movement ${editingMovement.voucherNo}?`)) {
+                      deleteStockMovement(editingMovement.id);
+                      setEditingMovement(null);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'মুছে ফেলুন' : 'Delete'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingMovement(null)}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  >
+                    {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
+                  >
+                    {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Record'}
                   </button>
                 </div>
               </div>
