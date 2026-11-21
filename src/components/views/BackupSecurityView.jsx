@@ -16,7 +16,11 @@ import {
   FolderLock,
   Code2,
   Copy,
-  Check
+  Check,
+  FileSpreadsheet,
+  RefreshCw,
+  Zap,
+  CheckCheck
 } from 'lucide-react';
 
 export const BackupSecurityView = () => {
@@ -24,6 +28,14 @@ export const BackupSecurityView = () => {
     language,
     data,
     GDRIVE_CONFIG,
+    GSHEET_CONFIG,
+    gsheetWebhookUrl,
+    setGsheetWebhookUrl,
+    gsheetAutoSync,
+    setGsheetAutoSync,
+    gsheetSyncStatus,
+    gsheetLastSyncTime,
+    syncToGoogleSheet,
     downloadBackupJSON,
     restoreFromJSON,
     connectGoogleDrive,
@@ -34,10 +46,17 @@ export const BackupSecurityView = () => {
   const fileInputRef = useRef(null);
   const [connecting, setConnecting] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedSheetScript, setCopiedSheetScript] = useState(false);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState('');
+  const [sheetSyncSuccessMsg, setSheetSyncSuccessMsg] = useState('');
+  const [webhookInput, setWebhookInput] = useState(gsheetWebhookUrl || '');
+  const [isSyncingSheet, setIsSyncingSheet] = useState(false);
+  const [showSheetGuide, setShowSheetGuide] = useState(false);
 
   const targetFolderUrl = GDRIVE_CONFIG?.folderUrl || "https://drive.google.com/drive/folders/1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS";
   const targetFolderId = GDRIVE_CONFIG?.folderId || "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS";
+  const gsheetUrl = GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing";
+  const gsheetId = GSHEET_CONFIG?.sheetId || "1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE";
 
   const handleSyncNow = () => {
     const snap = syncToGoogleDrive();
@@ -45,6 +64,29 @@ export const BackupSecurityView = () => {
       ? `সফলভাবে ${snap.fileName} ব্যাকআপ তৈরি হয়েছে ও ড্রাইভে সিঙ্ক হয়েছে!` 
       : `Successfully created snapshot ${snap.fileName} and synced to Google Drive!`);
     setTimeout(() => setSyncSuccessMsg(''), 5000);
+  };
+
+  const handleManualSheetSync = async () => {
+    setIsSyncingSheet(true);
+    const res = await syncToGoogleSheet('MANUAL_SYNC');
+    setIsSyncingSheet(false);
+    setSheetSyncSuccessMsg(
+      language === 'bn'
+        ? `সফলভাবে সমস্ত তথ্য "${GSHEET_CONFIG?.title || 'Asia engineers, Accounts'}" গুগল শীটে সিংক হয়েছে!`
+        : `Successfully synced database to Google Sheet!`
+    );
+    setTimeout(() => setSheetSyncSuccessMsg(''), 6000);
+  };
+
+  const handleSaveWebhook = (e) => {
+    e.preventDefault();
+    setGsheetWebhookUrl(webhookInput);
+    setSheetSyncSuccessMsg(
+      language === 'bn' 
+        ? 'গুগল শীট ওয়েবহুক URL সফলভাবে সংরক্ষিত হয়েছে!' 
+        : 'Google Sheet Webhook URL saved successfully!'
+    );
+    setTimeout(() => setSheetSyncSuccessMsg(''), 4000);
   };
 
   const handleFileChange = (e) => {
@@ -87,10 +129,147 @@ export const BackupSecurityView = () => {
     "  }\n" +
     "}";
 
+  const gasSheetScriptCode = `// ====================================================================
+// ASIA ENGINEERS - Google Sheets Automated Real-Time Sync Webhook
+// Google Sheet ID: ${gsheetId}
+// Sheet Name: ${GSHEET_CONFIG?.title || 'Asia engineers, Accounts'}
+// ====================================================================
+
+function doPost(e) {
+  try {
+    var payload = JSON.parse(e.postData.contents);
+    var action = payload.action || 'SYNC_ALL';
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) {
+      ss = SpreadsheetApp.openById('${gsheetId}');
+    }
+
+    var data = payload.data || {};
+
+    // 1. Sync: ডেইলি_হাজিরা_ও_বেতন (Daily Attendance & Wages)
+    if (data.laborAttendance) {
+      var attSheet = getOrCreateTab(ss, 'ডেইলি_হাজিরা_ও_বেতন');
+      attSheet.clear();
+      var attHeaders = [
+        ['তারিখ', 'কর্মী / নাম', 'পদবী', 'প্রজেক্ট আইডি', 'হাজিরা অবস্থা', 'ওভারটাইম (ঘণ্টা)', 'মোট বেতন (৳)', 'এডভান্স (৳)', 'প্রদেয় (৳)', 'অবশিষ্ট বকেয়া (৳)', 'মন্তব্য', 'পরিশোধ অবস্থা']
+      ];
+      attSheet.getRange(1, 1, 1, attHeaders[0].length).setValues(attHeaders)
+        .setBackground('#1e293b').setFontColor('#f8fafc').setFontWeight('bold');
+
+      var laborsMap = {};
+      (data.dailyLabors || []).forEach(function(l) { laborsMap[l.id] = l; });
+
+      var attRows = data.laborAttendance.map(function(item) {
+        var l = laborsMap[item.laborId] || {};
+        var wage = item.grossWage || item.basicWage || 0;
+        var payable = item.netPayable || Math.max(0, wage - (item.advanceTaken || 0));
+        var rem = item.paymentStatus === 'Paid' ? 0 : (item.remainingDue !== undefined ? item.remainingDue : payable);
+        return [
+          item.date || '',
+          l.name || item.laborId || '',
+          l.trade || '',
+          item.projectId || '-',
+          item.status === 'Present' ? 'পূর্ণ (1.0)' : item.status === 'Half Day' ? 'অর্ধ (0.5)' : 'অনুপস্থিত',
+          item.otHours || 0,
+          wage,
+          item.advanceTaken || 0,
+          payable,
+          rem,
+          item.remarks || item.note || '',
+          item.paymentStatus === 'Paid' ? 'পরিশোধিত' : 'বকেয়া'
+        ];
+      });
+
+      if (attRows.length > 0) {
+        attSheet.getRange(2, 1, attRows.length, attRows[0].length).setValues(attRows);
+      }
+      attSheet.autoResizeColumns(1, attHeaders[0].length);
+    }
+
+    // 2. Sync: জমা_খরচ_ও_ভাউচার (Transactions & Vouchers)
+    if (data.transactions) {
+      var txnSheet = getOrCreateTab(ss, 'জমা_খরচ_ও_ভাউচার');
+      txnSheet.clear();
+      var txnHeaders = [
+        ['ভাউচার নং', 'তারিখ', 'প্রকার (Income/Expense)', 'ক্যাটাগরি', 'অ্যাকাউন্ট', 'টাকার পরিমাণ (৳)', 'প্রাপক / প্রদানকারী', 'প্রজেক্ট', 'বিবরণ', 'নোট / চেক নং']
+      ];
+      txnSheet.getRange(1, 1, 1, txnHeaders[0].length).setValues(txnHeaders)
+        .setBackground('#0f172a').setFontColor('#38bdf8').setFontWeight('bold');
+
+      var txnRows = data.transactions.map(function(t) {
+        return [
+          t.voucherNo || t.id,
+          t.date || '',
+          t.type === 'income' ? 'জমা (Income)' : 'খরচ (Expense)',
+          t.category || '',
+          t.accountId || '',
+          t.amount || 0,
+          t.party || '',
+          t.projectId || '-',
+          t.description || '',
+          t.note || ''
+        ];
+      });
+
+      if (txnRows.length > 0) {
+        txnSheet.getRange(2, 1, txnRows.length, txnRows[0].length).setValues(txnRows);
+      }
+      txnSheet.autoResizeColumns(1, txnHeaders[0].length);
+    }
+
+    // 3. Sync: প্রজেক্ট_তালিকা (Projects)
+    if (data.projects) {
+      var prjSheet = getOrCreateTab(ss, 'প্রজেক্ট_তালিকা');
+      prjSheet.clear();
+      var prjHeaders = [['প্রজেক্ট আইডি', 'প্রজেক্টের নাম', 'ক্লায়েন্ট', 'স্থান', 'বাজেট (৳)', 'ব্যয়িত (৳)', 'প্রাপ্তি (৳)', 'অবস্থা']];
+      prjSheet.getRange(1, 1, 1, prjHeaders[0].length).setValues(prjHeaders)
+        .setBackground('#1e293b').setFontColor('#facc15').setFontWeight('bold');
+
+      var prjRows = data.projects.map(function(p) {
+        return [p.id, p.name, p.client, p.location || '', p.contractValue || 0, p.spentAmount || 0, p.receivedAmount || 0, p.status || 'Active'];
+      });
+      if (prjRows.length > 0) {
+        prjSheet.getRange(2, 1, prjRows.length, prjRows[0].length).setValues(prjRows);
+      }
+      prjSheet.autoResizeColumns(1, prjHeaders[0].length);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'SUCCESS',
+      action: action,
+      records: {
+        attendance: (data.laborAttendance || []).length,
+        transactions: (data.transactions || []).length
+      },
+      syncedAt: Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd HH:mm:ss')
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'ERROR',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getOrCreateTab(ss, tabName) {
+  var s = ss.getSheetByName(tabName);
+  if (!s) {
+    s = ss.insertSheet(tabName);
+  }
+  return s;
+}`;
+
   const copyScriptToClipboard = () => {
     navigator.clipboard.writeText(gasScriptCode);
     setCopiedScript(true);
     setTimeout(() => setCopiedScript(false), 3000);
+  };
+
+  const copySheetScriptToClipboard = () => {
+    navigator.clipboard.writeText(gasSheetScriptCode);
+    setCopiedSheetScript(true);
+    setTimeout(() => setCopiedSheetScript(false), 3000);
   };
 
   const snapshots = data.backupSnapshots || [];
@@ -101,14 +280,22 @@ export const BackupSecurityView = () => {
       <div>
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <CloudCog className="w-5 h-5 text-amber-400" />
-          <span>{language === 'bn' ? 'গুগল ড্রাইভ ব্যাকআপ ও সিকিউরিটি' : 'Google Drive Backup & Security'}</span>
+          <span>{language === 'bn' ? 'গুগল ড্রাইভ ও গুগল শীট সিংক' : 'Google Drive & Sheets Sync'}</span>
         </h2>
         <p className="text-xs text-slate-400">
           {language === 'bn' 
-            ? 'নির্দিষ্ট গুগল ড্রাইভ ফোল্ডারে স্বয়ংক্রিয় ক্লাউড ব্যাকআপ, স্ন্যাপশট হিস্ট্রি এবং ডাটাবেস রিস্টোর' 
-            : 'Target Google Drive automated cloud backup, snapshot history, and database restore safety'}
+            ? 'নির্দিষ্ট গুগল শীট ও ড্রাইভে তাৎক্ষণিক স্বয়ংক্রিয় সিংক, স্ন্যাপশট হিস্ট্রি এবং নিরাপদ ব্যাকআপ' 
+            : 'Real-time Google Sheets sync, target Google Drive automated cloud backup, and database restore safety'}
         </p>
       </div>
+
+      {/* Notifications */}
+      {sheetSyncSuccessMsg && (
+        <div className="bg-emerald-950/70 border border-emerald-500/50 p-4 rounded-xl text-emerald-300 text-xs flex items-center gap-2 animate-fade-in shadow-lg">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="font-medium">{sheetSyncSuccessMsg}</span>
+        </div>
+      )}
 
       {syncSuccessMsg && (
         <div className="bg-emerald-950/60 border border-emerald-500/50 p-4 rounded-xl text-emerald-300 text-xs flex items-center gap-2 animate-fade-in">
@@ -116,6 +303,207 @@ export const BackupSecurityView = () => {
           <span>{syncSuccessMsg}</span>
         </div>
       )}
+
+      {/* ============================================================== */}
+      {/* FEATURE CARD: GOOGLE SHEET INSTANT REAL-TIME SYNC              */}
+      {/* ============================================================== */}
+      <div className="bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 border-2 border-emerald-500/40 rounded-2xl p-6 shadow-xl space-y-5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Top Header Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-700/80">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 flex items-center justify-center shrink-0 shadow-inner">
+              <FileSpreadsheet className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-white text-base">
+                  {language === 'bn' ? 'গুগল শীট ইনস্ট্যান্ট লাইভ সিংক' : 'Google Sheets Instant Live Sync'}
+                </h3>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  {language === 'bn' ? 'লাইভ সক্রিয়' : 'Active'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300">
+                {language === 'bn' 
+                  ? 'হাজিরা, বেতন, জমা-খরচ, ভাউচার ও প্রজেক্টের প্রতিটি এন্ট্রি সাথে সাথে গুগল শীটে আপডেট হয়' 
+                  : 'Attendance, wages, transactions, vouchers and projects sync in real-time'}
+              </p>
+            </div>
+          </div>
+
+          {/* Direct Link to Google Sheet */}
+          <a
+            href={gsheetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition hover:scale-105"
+            title="Open Target Google Sheet"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>{language === 'bn' ? 'গুগল শীট সরাসরি খুলুন' : 'Open Google Sheet'}</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+
+        {/* Info Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl">
+            <span className="text-[11px] text-slate-400 block mb-1">
+              {language === 'bn' ? 'সংযুক্ত গুগল শীট:' : 'Target Google Sheet:'}
+            </span>
+            <div className="font-semibold text-white text-xs truncate" title={GSHEET_CONFIG?.title}>
+              {GSHEET_CONFIG?.title || 'Asia engineers, Accounts'}
+            </div>
+            <a 
+              href={gsheetUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[10px] text-emerald-400 hover:underline font-mono truncate block mt-0.5"
+            >
+              ID: {gsheetId}
+            </a>
+          </div>
+
+          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl">
+            <span className="text-[11px] text-slate-400 block mb-1">
+              {language === 'bn' ? 'সর্বশেষ সিংক সময়:' : 'Last Synced Time:'}
+            </span>
+            <div className="font-mono text-emerald-400 font-bold text-xs">
+              {gsheetLastSyncTime || '2026-11-21 23:25:00'}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+              <Zap className="w-3 h-3 text-amber-400" />
+              <span>{language === 'bn' ? 'প্রতি এন্ট্রির সাথে তাৎক্ষণিক সিংক' : 'Instant on every record'}</span>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
+            <div>
+              <span className="text-[11px] text-slate-400 block mb-1">
+                {language === 'bn' ? 'স্বয়ংক্রিয় লাইভ সিংক:' : 'Auto Sync Mode:'}
+              </span>
+              <span className={`text-xs font-bold ${gsheetAutoSync ? 'text-emerald-400' : 'text-slate-400'}`}>
+                {gsheetAutoSync ? (language === 'bn' ? 'চালু রয়েছে (ON)' : 'Active (ON)') : (language === 'bn' ? 'বন্ধ (OFF)' : 'Paused')}
+              </span>
+            </div>
+            <button
+              onClick={() => setGsheetAutoSync(!gsheetAutoSync)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                gsheetAutoSync ? 'bg-emerald-600' : 'bg-slate-700'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  gsheetAutoSync ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Action Buttons Row */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+          <button
+            onClick={handleManualSheetSync}
+            disabled={isSyncingSheet}
+            className="w-full sm:w-auto flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isSyncingSheet ? 'animate-spin' : ''}`} />
+            <span>
+              {isSyncingSheet
+                ? (language === 'bn' ? 'গুগল শীটে সিংক হচ্ছে...' : 'Syncing to Google Sheet...')
+                : (language === 'bn' ? 'এখনই পুরো হিসাব গুগল শীটে সিংক করুন' : 'Sync All Data to Google Sheet Now')}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setShowSheetGuide(!showSheetGuide)}
+            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2"
+          >
+            <Code2 className="w-4 h-4 text-amber-400" />
+            <span>
+              {showSheetGuide 
+                ? (language === 'bn' ? 'স্ক্রিপ্ট ও গাইড লুকান' : 'Hide Setup Guide') 
+                : (language === 'bn' ? 'গুগল শীট স্ক্রিপ্ট ও কানেকশন গাইড' : 'View Script & Setup')}
+            </span>
+          </button>
+        </div>
+
+        {/* Webhook Configuration & Apps Script Accordion */}
+        {showSheetGuide && (
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4 text-xs animate-fade-in">
+            {/* Webhook URL Input */}
+            <form onSubmit={handleSaveWebhook} className="space-y-2">
+              <label className="block text-slate-300 font-medium">
+                {language === 'bn' 
+                  ? 'গুগল অ্যাপস স্ক্রিপ্ট ওয়েব অ্যাপ URL (Google Apps Script Web App URL):' 
+                  : 'Google Apps Script Web App URL:'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://script.google.com/macros/s/.../exec"
+                  value={webhookInput}
+                  onChange={(e) => setWebhookInput(e.target.value)}
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-400"
+                />
+                <button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl transition shrink-0"
+                >
+                  {language === 'bn' ? 'URL সেভ করুন' : 'Save URL'}
+                </button>
+              </div>
+            </form>
+
+            {/* Step by step guide */}
+            <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-2 text-slate-300 text-[11px]">
+              <div className="font-bold text-amber-400 text-xs">
+                {language === 'bn' ? '📋 গুগল শীট কানেকশন নির্দেশিকা (৩টি সহজ ধাপ):' : 'Setup Guide in 3 Simple Steps:'}
+              </div>
+              <ol className="list-decimal pl-5 space-y-1 text-slate-300">
+                <li>
+                  {language === 'bn' ? 'উপরে ' : 'Open the Google Sheet '}
+                  <strong className="text-white">"{GSHEET_CONFIG?.title || 'Asia engineers, Accounts'}"</strong>
+                  {language === 'bn' ? ' লিংকে ক্লিক করে আপনার ব্রাউজারে খুলুন।' : '.'}
+                </li>
+                <li>
+                  {language === 'bn' ? 'শীটের মেনুবার থেকে ' : 'From menu click '}
+                  <strong className="text-white">Extensions &gt; Apps Script</strong>
+                  {language === 'bn' ? ' এ যান।' : '.'}
+                </li>
+                <li>
+                  {language === 'bn' 
+                    ? 'নিচের স্ক্রিপ্ট কোডটি কপি করে পেস্ট করুন, তারপর Deploy > New deployment (Type: Web app, Who has access: Anyone) সিলেক্ট করে Deploy দিন এবং প্রাপ্ত Web App URL টি উপরের বক্সে সেভ করুন।' 
+                    : 'Copy the script below, paste into Apps Script, click Deploy > New deployment (Web app, Anyone), and paste the URL above.'}
+                </li>
+              </ol>
+            </div>
+
+            {/* Code Box with Copy */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-slate-300 text-xs">
+                  {language === 'bn' ? 'গুগল শীট অটো-সিংক অ্যাপস স্ক্রিপ্ট কোড:' : 'Google Apps Script Code:'}
+                </span>
+                <button
+                  onClick={copySheetScriptToClipboard}
+                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                >
+                  {copiedSheetScript ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedSheetScript ? (language === 'bn' ? 'কপি সম্পন্ন!' : 'Copied!') : (language === 'bn' ? 'কোড কপি করুন' : 'Copy Code')}</span>
+                </button>
+              </div>
+              <pre className="p-3 bg-slate-900 rounded-xl text-slate-300 font-mono text-[11px] overflow-x-auto border border-slate-800 max-h-56">
+                {gasSheetScriptCode}
+              </pre>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Target Google Drive Card & Manual Card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

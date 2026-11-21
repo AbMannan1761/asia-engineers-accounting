@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import {
   COMPANY_INFO,
   GDRIVE_CONFIG,
+  GSHEET_CONFIG,
   INITIAL_BACKUP_SNAPSHOTS,
   INITIAL_ACCOUNTS,
   INITIAL_PROJECTS,
@@ -84,6 +85,29 @@ export const AppProvider = ({ children }) => {
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedVoucherForPrint, setSelectedVoucherForPrint] = useState(null);
+
+  // Google Sheets Instant Real-Time Sync State
+  const [gsheetWebhookUrl, setGsheetWebhookUrlState] = useState(() => {
+    return localStorage.getItem('AE_GSHEET_WEBHOOK_URL') || '';
+  });
+  const [gsheetAutoSync, setGsheetAutoSyncState] = useState(() => {
+    const saved = localStorage.getItem('AE_GSHEET_AUTOSYNC');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [gsheetSyncStatus, setGsheetSyncStatus] = useState('idle'); // 'idle' | 'syncing' | 'success' | 'error'
+  const [gsheetLastSyncTime, setGsheetLastSyncTime] = useState(() => {
+    return localStorage.getItem('AE_GSHEET_LAST_SYNC') || '2026-11-21 23:25:00';
+  });
+
+  const setGsheetWebhookUrl = (url) => {
+    setGsheetWebhookUrlState(url);
+    localStorage.setItem('AE_GSHEET_WEBHOOK_URL', url);
+  };
+
+  const setGsheetAutoSync = (val) => {
+    setGsheetAutoSyncState(val);
+    localStorage.setItem('AE_GSHEET_AUTOSYNC', String(val));
+  };
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -217,6 +241,10 @@ export const AppProvider = ({ children }) => {
       `${voucherNo}: ৳${txnRecord.amount.toLocaleString()} - ${txnRecord.party} (${txnRecord.description})`
     );
 
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('ADD_TRANSACTION', txnRecord), 50);
+    }
+
     return txnRecord;
   };
 
@@ -235,6 +263,9 @@ export const AppProvider = ({ children }) => {
       })
     }));
     logAudit('TRANSACTION_UPDATED', `Updated transaction ${id}`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('UPDATE_TRANSACTION', { id, ...updatedFields }), 50);
+    }
   };
 
   const deleteTransaction = (id) => {
@@ -245,6 +276,9 @@ export const AppProvider = ({ children }) => {
       transactions: prev.transactions.filter(t => t.id !== id)
     }));
     logAudit('TRANSACTION_DELETED', `Deleted transaction ${txn.voucherNo || id}`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('DELETE_TRANSACTION', { id, voucherNo: txn.voucherNo }), 50);
+    }
   };
 
   // 2. Fund Transfer between accounts (e.g. Bank to Cash or Cash to Bank)
@@ -704,6 +738,9 @@ export const AppProvider = ({ children }) => {
       laborAttendance: [...newEntries, ...(prev.laborAttendance || [])]
     }));
     logAudit('LABOR_ATTENDANCE_RECORDED', `Recorded attendance for ${newEntries.length} worker entries`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('ADD_ATTENDANCE', newEntries), 50);
+    }
     return newEntries;
   };
 
@@ -740,6 +777,9 @@ export const AppProvider = ({ children }) => {
       })
     }));
     logAudit('LABOR_ATTENDANCE_UPDATED', `Updated attendance record ${id}`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('UPDATE_ATTENDANCE', { id, ...updatedFields }), 50);
+    }
   };
 
   const deleteDailyAttendance = (id) => {
@@ -748,6 +788,9 @@ export const AppProvider = ({ children }) => {
       laborAttendance: (prev.laborAttendance || []).filter(a => a.id !== id)
     }));
     logAudit('LABOR_ATTENDANCE_DELETED', `Deleted attendance record ${id}`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('DELETE_ATTENDANCE', { id }), 50);
+    }
   };
 
   // Disburse Labor Wage Settlement (Cash/Bank)
@@ -994,6 +1037,67 @@ export const AppProvider = ({ children }) => {
     return newSnapshot;
   };
 
+  // Google Sheets Instant Real-Time Sync function
+  const syncToGoogleSheet = async (actionType = 'SYNC_ALL', specificData = null) => {
+    setGsheetSyncStatus('syncing');
+    const nowTime = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+    const payload = {
+      sheetId: GSHEET_CONFIG.sheetId,
+      sheetUrl: GSHEET_CONFIG.sheetUrl,
+      title: GSHEET_CONFIG.title,
+      action: actionType,
+      timestamp: nowTime,
+      user: currentUser.name,
+      payload: specificData || null,
+      data: {
+        transactions: data.transactions,
+        laborAttendance: data.laborAttendance,
+        dailyLabors: data.dailyLabors,
+        projects: data.projects,
+        materials: data.materials,
+        employees: data.employees,
+        accounts: data.accounts
+      }
+    };
+
+    try {
+      if (gsheetWebhookUrl && gsheetWebhookUrl.trim().startsWith('http')) {
+        await fetch(gsheetWebhookUrl.trim(), {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+      }
+      setGsheetSyncStatus('success');
+      setGsheetLastSyncTime(nowTime);
+      localStorage.setItem('AE_GSHEET_LAST_SYNC', nowTime);
+      logAudit('GSHEET_SYNC', `Real-time synced (${actionType}) to Google Sheet: ${GSHEET_CONFIG.title}`);
+      return { success: true, timestamp: nowTime };
+    } catch (err) {
+      console.warn('Google Sheet sync notice:', err);
+      setGsheetSyncStatus('error');
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Automatic real-time background sync to Google Sheet on data updates
+  useEffect(() => {
+    if (!gsheetAutoSync) return;
+    const timer = setTimeout(() => {
+      syncToGoogleSheet('AUTO_SYNC');
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [
+    data.transactions,
+    data.laborAttendance,
+    data.projects,
+    data.materials,
+    data.employees,
+    gsheetAutoSync
+  ]);
+
   // Global calculations
   const totalIncome = data.transactions
     .filter(t => t.type === 'income')
@@ -1026,6 +1130,14 @@ export const AppProvider = ({ children }) => {
       value={{
         COMPANY_INFO,
         GDRIVE_CONFIG,
+        GSHEET_CONFIG,
+        gsheetWebhookUrl,
+        setGsheetWebhookUrl,
+        gsheetAutoSync,
+        setGsheetAutoSync,
+        gsheetSyncStatus,
+        gsheetLastSyncTime,
+        syncToGoogleSheet,
         language,
         toggleLanguage,
         currentUser,

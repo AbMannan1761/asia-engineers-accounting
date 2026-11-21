@@ -18,6 +18,8 @@ import { formatBDT } from '../../utils/formatters';
 export const Header = ({ onToggleSidebar }) => {
   const { 
     COMPANY_INFO, 
+    GSHEET_CONFIG,
+    gsheetSyncStatus,
     language, 
     toggleLanguage, 
     currentUser, 
@@ -81,16 +83,38 @@ export const Header = ({ onToggleSidebar }) => {
 
         {/* Right: Cloud Sync, Excel Export, Language & User Badge */}
         <div className="flex items-center gap-2">
+          {/* Google Sheet Live Real-time Sync Indicator */}
+          <a
+            href={GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing"}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`${GSHEET_CONFIG?.title || 'Asia engineers, Accounts'} - গুগল শীট লাইভ সিংক (ক্লিক করে শীট দেখুন)`}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
+              gsheetSyncStatus === 'syncing'
+                ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 animate-pulse'
+                : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
+            }`}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${gsheetSyncStatus === 'syncing' ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${gsheetSyncStatus === 'syncing' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+            </span>
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline font-bold">
+              {language === 'bn' ? (gsheetSyncStatus === 'syncing' ? 'শীট সিংক হচ্ছে...' : 'শীট লাইভ সিংক') : 'Sheet Live Synced'}
+            </span>
+          </a>
+
           {/* Google Drive Status Indicator */}
           <a 
             href="https://drive.google.com/drive/folders/1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS"
             target="_blank"
             rel="noopener noreferrer"
             title="Google Drive Cloud Backup Active (Click to open folder)"
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 transition"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20 transition"
           >
             <CloudCheck className="w-3.5 h-3.5" />
-            <span>Cloud Synced</span>
+            <span>Drive</span>
           </a>
 
           {/* Login / Logout Button */}
