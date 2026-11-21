@@ -17,7 +17,8 @@ import {
   INITIAL_LEDGERS,
   INITIAL_AUDIT_LOGS,
   INITIAL_INCOME_CATEGORIES,
-  INITIAL_EXPENSE_CATEGORIES
+  INITIAL_EXPENSE_CATEGORIES,
+  INITIAL_DEVELOPER_PROFILE
 } from '../data/initialData';
 
 const AppContext = createContext();
@@ -55,6 +56,7 @@ export const AppProvider = ({ children }) => {
           auditLogs: parsed.auditLogs || INITIAL_AUDIT_LOGS,
           incomeCategories: parsed.incomeCategories || INITIAL_INCOME_CATEGORIES,
           expenseCategories: parsed.expenseCategories || INITIAL_EXPENSE_CATEGORIES,
+          developerProfile: parsed.developerProfile || INITIAL_DEVELOPER_PROFILE,
           gdriveConnected: parsed.gdriveConnected ?? true,
           gdriveFolderId: parsed.gdriveFolderId || GDRIVE_CONFIG.folderId,
           gdriveFolderUrl: parsed.gdriveFolderUrl || GDRIVE_CONFIG.folderUrl,
@@ -80,6 +82,7 @@ export const AppProvider = ({ children }) => {
       auditLogs: INITIAL_AUDIT_LOGS,
       incomeCategories: INITIAL_INCOME_CATEGORIES,
       expenseCategories: INITIAL_EXPENSE_CATEGORIES,
+      developerProfile: INITIAL_DEVELOPER_PROFILE,
       gdriveConnected: true,
       gdriveFolderId: GDRIVE_CONFIG.folderId,
       gdriveFolderUrl: GDRIVE_CONFIG.folderUrl,
@@ -1198,12 +1201,24 @@ export const AppProvider = ({ children }) => {
 
   const lowStockItems = data.materials.filter(m => m.currentStock <= m.minStockAlert);
 
+  const updateDeveloperProfile = (updatedProfile) => {
+    setData(prev => ({
+      ...prev,
+      developerProfile: {
+        ...(prev.developerProfile || INITIAL_DEVELOPER_PROFILE),
+        ...updatedProfile
+      }
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
         COMPANY_INFO,
         GDRIVE_CONFIG,
         GSHEET_CONFIG,
+        developerProfile: data.developerProfile || INITIAL_DEVELOPER_PROFILE,
+        updateDeveloperProfile,
         gsheetWebhookUrl,
         setGsheetWebhookUrl,
         gsheetAutoSync,

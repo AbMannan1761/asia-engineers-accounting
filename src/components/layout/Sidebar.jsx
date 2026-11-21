@@ -13,6 +13,7 @@ import {
   BarChart3,
   CloudCog,
   Settings,
+  Code2,
   X,
   PlusCircle
 } from 'lucide-react';
@@ -92,6 +93,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
       icon: Settings,
       labelBn: 'কোম্পানি সেটিংস ও হেল্প',
       labelEn: 'Settings & PWA'
+    },
+    {
+      id: 'developer',
+      icon: Code2,
+      labelBn: 'ডেভেলপার পরিচিতি',
+      labelEn: 'Developer Profile'
     }
   ];
 

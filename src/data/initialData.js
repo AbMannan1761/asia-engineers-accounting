@@ -847,3 +847,41 @@ export const INITIAL_AUDIT_LOGS = [
     details: "Recorded inward movement of 4.5 Ton I-Beam from BSRM"
   }
 ];
+
+export const INITIAL_DEVELOPER_PROFILE = {
+  name: "আব্দুল মান্নান (ABM) / Engr. Masum",
+  englishName: "Abdul Mannan (ABM) / Engr. Masum Billah",
+  title: "চিফ সিস্টেম আর্কিটেক্ট ও সিনিয়র ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার",
+  englishTitle: "Lead Software Architect & Full-Stack Solutions Engineer",
+  organization: "বাংলাদেশ টেলিযোগাযোগ নিয়ন্ত্রণ কমিশন (BTRC) / ফ্রিল্যান্স সফটওয়্যার সলিউশনস",
+  englishOrg: "BTRC / Freelance Engineering & Enterprise Systems",
+  phone: "01830002040",
+  altPhone: "+880 1830-002040",
+  email: "abmannan1761@gmail.com",
+  github: "https://github.com/AbMannan1761",
+  portfolio: "https://abmannan1761.github.io/asia-engineers-accounting/",
+  location: "ঢাকা ও চট্টগ্রাম, বাংলাদেশ",
+  experienceYears: "৮+ বছর",
+  bio: "স্ট্রাকচারাল ইঞ্জিনিয়ারিং ও এন্টারপ্রাইজ অ্যাকাউন্টিং সলিউশন ডিজাইন ও ডেভেলপমেন্ট বিশেষজ্ঞ। আধুনিক ওয়েব আর্কিটেকচার, রিয়েল-টাইম গুগল ক্লাউড ডাটাবেজ অটোমেশন এবং প্রফেশনাল ইআরপি সিস্টেম ডেভেলপমেন্টে অভিজ্ঞ।",
+  skills: [
+    "React.js & Modern Web Architecture",
+    "Tailwind CSS & Responsive UI/UX",
+    "Google Apps Script & Real-Time Cloud Sync",
+    "Accounting & ERP Business Logic",
+    "Database Architecture & API Integration",
+    "Offline-first PWA & Local Storage Optimization",
+    "Production Deployment & Automation"
+  ],
+  projectContribution: {
+    system: "ASIA ENGINEERS Cloud Accounting & ERP Software",
+    version: "v2.5 Professional Enterprise Edition",
+    keyModules: [
+      "রিয়েল-টাইম ২-ওয়ে গুগল শীট লাইভ ডাটাবেজ সিংক",
+      "অটোমেটেড লেজার, ডাবল এন্ট্রি ব্যালেন্স শীট ও পি&এল রিপোর্ট",
+      "প্রজেক্ট ম্যানেজমেন্ট, ইনভেন্টরি স্টক নিয়ন্ত্রণ ও আরএফকিউ ট্র্যাকিং",
+      "সাইট ডেইলি লেবার হাজিরা, ওভারটাইম হিসাব ও সাপ্তাহিক পে-রোল",
+      "A4 ও A5 অফিসিয়াল মানি রিসিট ও ডেবিট/ক্রেডিট ভাউচার জেনারেশন",
+      "নিরাপদ পিন/পাসওয়ার্ড ভিত্তিক ডিরেক্টর এক্সেস কন্ট্রোল ও অডিট লগ"
+    ]
+  }
+};

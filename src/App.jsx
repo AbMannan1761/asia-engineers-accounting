@@ -14,6 +14,7 @@ import { VouchersView } from './components/views/VouchersView';
 import { ReportsView } from './components/views/ReportsView';
 import { BackupSecurityView } from './components/views/BackupSecurityView';
 import { SettingsView } from './components/views/SettingsView';
+import { DeveloperView } from './components/views/DeveloperView';
 import { LoginModal } from './components/layout/LoginModal';
 
 const MainLayout = () => {
@@ -46,6 +47,8 @@ const MainLayout = () => {
         return <BackupSecurityView />;
       case 'settings':
         return <SettingsView />;
+      case 'developer':
+        return <DeveloperView />;
       default:
         return <DashboardView />;
     }
