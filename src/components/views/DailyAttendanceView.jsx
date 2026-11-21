@@ -409,7 +409,8 @@ export const DailyAttendanceView = () => {
             <thead>
               <tr className="bg-slate-900/90 border-b border-slate-700/80 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
                 <th className="py-3 px-3">{language === 'bn' ? 'তারিখ' : 'Date'}</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'কর্মী ও পদবি' : 'Worker & Trade'}</th>
+                <th className="py-3 px-3">{language === 'bn' ? 'কর্মী / নাম' : 'Worker Name'}</th>
+                <th className="py-3 px-3">{language === 'bn' ? 'পদবী' : 'Designation'}</th>
                 <th className="py-3 px-3">{language === 'bn' ? 'প্রজেক্ট' : 'Project'}</th>
                 <th className="py-3 px-3 text-center">{language === 'bn' ? 'হাজিরা' : 'Attendance'}</th>
                 <th className="py-3 px-3 text-right">{language === 'bn' ? 'ওভারটাইম' : 'Overtime'}</th>
@@ -417,7 +418,7 @@ export const DailyAttendanceView = () => {
                 <th className="py-3 px-3 text-right text-rose-400">{language === 'bn' ? 'এডভান্স' : 'Advance'}</th>
                 <th className="py-3 px-3 text-right text-emerald-400 font-bold">{language === 'bn' ? 'প্রদেয় (৳)' : 'Payable (BDT)'}</th>
                 <th className="py-3 px-3 text-right text-amber-400 font-bold">{language === 'bn' ? 'অবশিষ্ট (৳)' : 'Remaining (BDT)'}</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'মন্তব্য' : 'Remarks'}</th>
+                <th className="py-3 px-3 max-w-[140px]">{language === 'bn' ? 'মন্তব্য' : 'Remarks'}</th>
                 <th className="py-3 px-3 text-center">{language === 'bn' ? 'অবস্থা' : 'Status'}</th>
                 <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</th>
               </tr>
@@ -425,7 +426,7 @@ export const DailyAttendanceView = () => {
             <tbody className="divide-y divide-slate-800">
               {list.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="py-8 text-center text-slate-400">
+                  <td colSpan={13} className="py-8 text-center text-slate-400">
                     {language === 'bn' ? 'কোনো হাজিরা ও বেতন এন্ট্রি পাওয়া যায়নি।' : 'No records found.'}
                   </td>
                 </tr>
@@ -444,9 +445,11 @@ export const DailyAttendanceView = () => {
                       <td className="py-2.5 px-3 text-slate-300 font-mono">
                         {formatDate(item.date)}
                       </td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-semibold text-white">{labor?.name || item.laborId}</div>
-                        <div className="text-[10px] text-amber-400">{labor?.trade || '-'}</div>
+                      <td className="py-2.5 px-3 font-semibold text-white whitespace-nowrap">
+                        {labor?.name || item.laborId}
+                      </td>
+                      <td className="py-2.5 px-3 text-amber-400 text-[11px] font-medium whitespace-nowrap">
+                        {labor?.trade || '-'}
                       </td>
                       <td className="py-2.5 px-3 text-slate-300 font-mono text-[11px]">
                         {prj ? prj.id : '-'}
@@ -486,7 +489,7 @@ export const DailyAttendanceView = () => {
                         {formatBDT(remainingAmt)}
                       </td>
                       {/* মন্তব্য */}
-                      <td className="py-2.5 px-3 text-slate-300 text-[11px] max-w-xs truncate" title={remarksText}>
+                      <td className="py-2.5 px-3 text-slate-300 text-[11px] max-w-[140px] whitespace-normal break-words leading-tight" title={remarksText}>
                         {remarksText}
                       </td>
                       {/* অবস্থা */}
@@ -997,7 +1000,8 @@ export const DailyAttendanceView = () => {
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="bg-slate-950 text-slate-400 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-800">
-                      <th className="py-2.5 px-3">লেবার ও পদবি</th>
+                      <th className="py-2.5 px-3">কর্মী / নাম</th>
+                      <th className="py-2.5 px-3">পদবী</th>
                       <th className="py-2.5 px-3">হাজিরা</th>
                       <th className="py-2.5 px-3">দৈনিক রেট</th>
                       <th className="py-2.5 px-3">ওটি ঘণ্টা</th>
@@ -1008,9 +1012,11 @@ export const DailyAttendanceView = () => {
                   <tbody className="divide-y divide-slate-800">
                     {batchRows.map((row, idx) => (
                       <tr key={row.laborId} className="hover:bg-slate-800/40">
-                        <td className="py-2.5 px-3 font-semibold text-white">
-                          <div>{row.name}</div>
-                          <div className="text-[10px] text-amber-400">{row.trade}</div>
+                        <td className="py-2.5 px-3 font-semibold text-white whitespace-nowrap">
+                          {row.name}
+                        </td>
+                        <td className="py-2.5 px-3 text-[11px] text-amber-400 font-medium whitespace-nowrap">
+                          {row.trade}
                         </td>
                         <td className="py-2.5 px-3">
                           <select
