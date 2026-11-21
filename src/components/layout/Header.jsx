@@ -1,47 +1,79 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  Building2, 
-  Globe2, 
-  ShieldCheck, 
-  CloudCheck, 
-  CloudOff, 
-  FileSpreadsheet, 
-  DownloadCloud, 
+import {
+  Building2,
+  Globe2,
+  ShieldCheck,
+  CloudCheck,
+  CloudOff,
+  FileSpreadsheet,
+  DownloadCloud,
   Menu,
   Phone,
   LogIn,
-  LogOut
+  LogOut,
+  RefreshCw,
+  CheckCircle2,
+  Check
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
 export const Header = ({ onToggleSidebar }) => {
-  const { 
-    COMPANY_INFO, 
+  const {
+    COMPANY_INFO,
     GSHEET_CONFIG,
     gsheetSyncStatus,
     syncToGoogleSheet,
     setActiveTab,
-    language, 
-    toggleLanguage, 
-    currentUser, 
+    language,
+    toggleLanguage,
+    currentUser,
     isAuthenticated,
     setShowLoginModal,
     logout,
-    data, 
-    totalCashBalance, 
+    data,
+    totalCashBalance,
     totalBankBalance,
     exportAllToExcel,
     downloadBackupJSON
   } = useApp();
+
+  // Local animated sync state: 'idle' | 'syncing' | 'completed'
+  const [syncAnimState, setSyncAnimState] = useState('idle');
+
+  const handleSyncClick = async () => {
+    if (syncAnimState === 'syncing') return;
+    setSyncAnimState('syncing');
+
+    const startTime = Date.now();
+    try {
+      await syncToGoogleSheet('MANUAL_SYNC');
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Keep spinning animated movement for at least 900ms for clear visual feedback
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 900) {
+      await new Promise(res => setTimeout(res, 900 - elapsed));
+    }
+
+    // Transition to completed state with animated checkmark
+    setSyncAnimState('completed');
+
+    // Keep the animated checkmark for 2.5 seconds, then return smoothly to idle
+    setTimeout(() => {
+      setSyncAnimState('idle');
+    }, 2500);
+  };
 
   return (
     <header className="sticky top-0 z-40 shrink-0 bg-slate-900 border-b border-slate-800 px-4 lg:px-6 py-2.5 shadow-md">
       <div className="flex items-center justify-between gap-4">
         {/* Left: Mobile hamburger + Company Brand */}
         <div className="flex items-center gap-3">
-          <button 
-            onClick={onToggleSidebar} 
+          <button
+            onClick={onToggleSidebar}
             className="lg:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg focus:outline-none"
             aria-label="Toggle Navigation"
           >
@@ -49,9 +81,9 @@ export const Header = ({ onToggleSidebar }) => {
           </button>
 
           <div className="flex items-center gap-3">
-            <img 
-              src="./images/asia_engineers_logo.png" 
-              alt="ASIA ENGINEERS STEEL STRUCTURE" 
+            <img
+              src="./images/asia_engineers_logo.png"
+              alt="ASIA ENGINEERS STEEL STRUCTURE"
               className="h-8 sm:h-9 max-w-[180px] sm:max-w-[210px] object-contain"
             />
             <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] uppercase font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded">
@@ -85,25 +117,49 @@ export const Header = ({ onToggleSidebar }) => {
 
         {/* Right: Cloud Sync, Excel Export, Language & User Badge */}
         <div className="flex items-center gap-2">
-          {/* Google Sheet Live Real-time Sync Indicator Button (Syncs internally, does not open external link) */}
+          {/* Google Sheet Live Real-time Sync Button with Animation & Tick Mark */}
           <button
-            onClick={() => syncToGoogleSheet('MANUAL_SYNC')}
+            onClick={handleSyncClick}
             type="button"
-            title={language === 'bn' ? 'গুগল শীট লাইভ সিংক সক্রিয় (ক্লিক করলে এখনই সিংক হবে)' : 'Google Sheet Live Sync Active (Click to sync now)'}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
-              gsheetSyncStatus === 'syncing'
-                ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 animate-pulse'
-                : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
+            disabled={syncAnimState === 'syncing'}
+            title={language === 'bn' ? 'গুগল শীট সিংক (ক্লিক করলে এখনই সিংক হবে)' : 'Google Sheet Sync'}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-300 shadow-sm ${
+              syncAnimState === 'syncing'
+                ? 'bg-amber-500/20 text-amber-300 border-amber-400 ring-2 ring-amber-400/40 shadow-amber-500/20 scale-105'
+                : syncAnimState === 'completed'
+                ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400 ring-2 ring-emerald-400/40 shadow-emerald-500/20 scale-105'
+                : 'bg-slate-800/90 hover:bg-slate-700/90 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60 hover:scale-102'
             }`}
           >
-            <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${gsheetSyncStatus === 'syncing' ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${gsheetSyncStatus === 'syncing' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
-            </span>
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden sm:inline font-bold">
-              {language === 'bn' ? (gsheetSyncStatus === 'syncing' ? 'সিংক হচ্ছে...' : 'শীট সিংক') : 'Sheet Sync'}
-            </span>
+            {syncAnimState === 'syncing' ? (
+              <>
+                <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
+                <span className="font-bold text-amber-300 animate-pulse">
+                  {language === 'bn' ? 'সিংক হচ্ছে...' : 'Syncing...'}
+                </span>
+              </>
+            ) : syncAnimState === 'completed' ? (
+              <>
+                <div className="relative flex items-center justify-center">
+                  <span className="w-4 h-4 rounded-full bg-emerald-400/40 animate-ping absolute" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-bounce" />
+                </div>
+                <span className="font-bold text-emerald-300 animate-fade-in">
+                  {language === 'bn' ? 'সিংক সম্পন্ন ✓' : 'Synced ✓'}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden sm:inline font-bold">
+                  {language === 'bn' ? 'শীট সিংক' : 'Sheet Sync'}
+                </span>
+              </>
+            )}
           </button>
 
           {/* Google Drive Status Indicator (Navigates to internal backup tab) */}

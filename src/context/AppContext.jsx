@@ -391,7 +391,7 @@ export const AppProvider = ({ children }) => {
     }
 
     const year = new Date().getFullYear();
-    const voucherNo = type === 'inward' 
+    const voucherNo = type === 'inward'
       ? `AE-MAT-IN-${year}-${String(Date.now()).slice(-4)}`
       : `AE-MAT-OUT-${year}-${String(Date.now()).slice(-4)}`;
 
@@ -988,10 +988,10 @@ export const AppProvider = ({ children }) => {
       if (!parsed.accounts || !parsed.transactions || !parsed.projects) {
         throw new Error('Invalid backup file structure.');
       }
-      if (window.confirm(language === 'bn' 
-        ? 'সতর্কতা! বর্তমান ডেটা প্রতিস্থাপিত হবে। আপনি কি নিশ্চিত ব্যাকআপ রিস্টোর করতে চান?' 
+      if (window.confirm(language === 'bn'
+        ? 'সতর্কতা! বর্তমান ডেটা প্রতিস্থাপিত হবে। আপনি কি নিশ্চিত ব্যাকআপ রিস্টোর করতে চান?'
         : 'Warning! Current data will be replaced. Are you sure you want to restore this backup?')) {
-        
+
         setData(parsed);
         alert(language === 'bn' ? 'সফলভাবে ডেটা রিস্টোর সম্পন্ন হয়েছে!' : 'Data restored successfully!');
         logAudit('DATABASE_RESTORE', 'Database restored from backup archive');
