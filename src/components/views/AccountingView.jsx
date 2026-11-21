@@ -501,7 +501,7 @@ export const AccountingView = () => {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট (ঐচ্ছিক)' : 'Project (Optional)'}</label>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্ট' : 'Project'}</label>
                 <select
                   value={formData.projectId}
                   onChange={(e) => setFormData(p => ({ ...p, projectId: e.target.value }))}
@@ -743,7 +743,7 @@ export const AccountingView = () => {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট' : 'Project'}</label>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্ট' : 'Project'}</label>
                 <select
                   value={editingTxn.projectId || ''}
                   onChange={(e) => setEditingTxn(p => ({ ...p, projectId: e.target.value }))}
