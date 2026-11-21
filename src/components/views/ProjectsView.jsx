@@ -18,6 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
+import { DateInput } from '../common/DateInput';
 
 export const ProjectsView = () => {
   const {
@@ -486,8 +487,7 @@ export const ProjectsView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'শুরুর তারিখ' : 'Start Date'}</label>
-                  <input
-                    type="date"
+                  <DateInput
                     value={formData.startDate}
                     onChange={(e) => setFormData(p => ({ ...p, startDate: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
@@ -632,8 +632,7 @@ export const ProjectsView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'শুরুর তারিখ' : 'Start Date'}</label>
-                  <input
-                    type="date"
+                  <DateInput
                     value={editFormData.startDate}
                     onChange={(e) => setEditFormData(p => ({ ...p, startDate: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
@@ -641,8 +640,7 @@ export const ProjectsView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সম্ভাব্য সমাপ্তি তারিখ' : 'Expected Completion'}</label>
-                  <input
-                    type="date"
+                  <DateInput
                     value={editFormData.expectedCompletion}
                     onChange={(e) => setEditFormData(p => ({ ...p, expectedCompletion: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"

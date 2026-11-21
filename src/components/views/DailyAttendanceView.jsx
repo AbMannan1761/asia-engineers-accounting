@@ -21,6 +21,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
+import { DateInput } from '../common/DateInput';
 
 export const DailyAttendanceView = () => {
   const {
@@ -566,8 +567,7 @@ export const DailyAttendanceView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={form.date}
                     onChange={(e) => setForm(p => ({ ...p, date: e.target.value }))}
@@ -761,8 +761,7 @@ export const DailyAttendanceView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'}</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={editingAtt.date}
                     onChange={(e) => setEditingAtt(p => ({ ...p, date: e.target.value }))}
@@ -912,8 +911,7 @@ export const DailyAttendanceView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={payoutData.date}
                     onChange={(e) => setPayoutData(p => ({ ...p, date: e.target.value }))}
@@ -974,8 +972,7 @@ export const DailyAttendanceView = () => {
               <div className="grid grid-cols-2 gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={batchDate}
                     onChange={(e) => setBatchDate(e.target.value)}

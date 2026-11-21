@@ -23,6 +23,7 @@ import {
   FileCheck2
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
+import { DateInput } from '../common/DateInput';
 
 export const EmployeesView = () => {
   const {
@@ -920,8 +921,7 @@ export const EmployeesView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'হাজিরার তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={attForm.date}
                     onChange={(e) => setAttForm(p => ({ ...p, date: e.target.value }))}
@@ -1103,8 +1103,7 @@ export const EmployeesView = () => {
               <div className="grid grid-cols-2 gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={batchDate}
                     onChange={(e) => setBatchDate(e.target.value)}
@@ -1258,8 +1257,7 @@ export const EmployeesView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'}</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={editingAttendance.date}
                     onChange={(e) => setEditingAttendance(p => ({ ...p, date: e.target.value }))}
@@ -1420,8 +1418,7 @@ export const EmployeesView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'পরিশোধের তারিখ' : 'Payment Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={wagePayoutData.paymentDate}
                     onChange={(e) => setWagePayoutData(p => ({ ...p, paymentDate: e.target.value }))}
@@ -1769,8 +1766,7 @@ export const EmployeesView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'পরিশোধের তারিখ' : 'Payment Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={payData.paymentDate}
                     onChange={(e) => setPayData(p => ({ ...p, paymentDate: e.target.value }))}
@@ -1877,8 +1873,7 @@ export const EmployeesView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'যোগদানের তারিখ' : 'Joining Date'}</label>
-                  <input
-                    type="date"
+                  <DateInput
                     value={newEmpData.joiningDate}
                     onChange={(e) => setNewEmpData(p => ({ ...p, joiningDate: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"

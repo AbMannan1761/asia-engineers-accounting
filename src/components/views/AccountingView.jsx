@@ -18,6 +18,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
+import { DateInput } from '../common/DateInput';
 
 export const AccountingView = () => {
   const {
@@ -417,8 +418,7 @@ export const AccountingView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={formData.date}
                     onChange={(e) => setFormData(p => ({ ...p, date: e.target.value }))}
@@ -618,8 +618,7 @@ export const AccountingView = () => {
                 </div>
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={transferData.date}
                     onChange={(e) => setTransferData(p => ({ ...p, date: e.target.value }))}
@@ -686,8 +685,7 @@ export const AccountingView = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
-                  <input
-                    type="date"
+                  <DateInput
                     required
                     value={editingTxn.date}
                     onChange={(e) => setEditingTxn(p => ({ ...p, date: e.target.value }))}

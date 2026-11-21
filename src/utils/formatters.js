@@ -43,9 +43,19 @@ export const numberToWords = (num) => {
   return inWords(Math.floor(num)) + ' Taka Only';
 };
 
-// Format Date YYYY-MM-DD
+// Format Date to DD-MM-YYYY (e.g. 21-11-2026)
 export const formatDate = (dateStr) => {
   if (!dateStr) return "-";
+  const clean = String(dateStr).split('T')[0].trim();
+  const parts = clean.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    const [y, m, d] = parts;
+    return `${d.padStart(2, '0')}-${m.padStart(2, '0')}-${y}`;
+  }
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  if (isNaN(d.getTime())) return String(dateStr);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
 };
