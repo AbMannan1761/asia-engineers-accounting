@@ -364,7 +364,7 @@ export const ProjectsView = () => {
                                 setActiveTab('vouchers');
                               }}
                               className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white"
-                              title="Print A4 Voucher"
+                              title="Print A5 Voucher"
                             >
                               <FileText className="w-3.5 h-3.5" />
                             </button>

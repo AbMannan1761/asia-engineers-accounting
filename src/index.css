@@ -35,12 +35,27 @@
   background: rgba(148, 163, 184, 0.6);
 }
 
-/* Dedicated Print Styles for Vouchers and Receipts */
+/* Dedicated Print Styles for Vouchers and Receipts (A5 Paper Format) */
 @media print {
-  body, table, th, td, div, span, p {
+  @page {
+    size: A5 landscape;
+    margin: 6mm 8mm;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body, table, th, td, div, span, p {
+    background: transparent !important;
     color: black !important;
-    font-size: 11pt;
+    font-size: 10pt;
     font-family: 'Nikosh', 'NikoshBAN', serif, sans-serif !important;
   }
   .no-print {
@@ -51,11 +66,12 @@
   }
   .printable-voucher-card {
     box-shadow: none !important;
-    border: 1px solid #1e293b !important;
-    margin: 0 !important;
-    padding: 24px !important;
+    border: 1.5px solid #0f172a !important;
+    margin: 0 auto !important;
+    padding: 16px 20px !important;
     page-break-inside: avoid;
     width: 100% !important;
+    max-width: 100% !important;
     font-family: 'Nikosh', 'NikoshBAN', serif, sans-serif !important;
   }
 }

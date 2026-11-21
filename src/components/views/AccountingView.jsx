@@ -341,7 +341,7 @@ export const AccountingView = () => {
                               setActiveTab('vouchers');
                             }}
                             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shadow-xs"
-                            title={language === 'bn' ? 'ভাউচার প্রিন্ট করুন' : 'View / Print A4 Voucher'}
+                            title={language === 'bn' ? 'ভাউচার প্রিন্ট করুন (A5)' : 'View / Print A5 Voucher'}
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>

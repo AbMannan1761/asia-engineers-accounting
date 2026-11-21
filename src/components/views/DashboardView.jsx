@@ -398,7 +398,7 @@ export const DashboardView = () => {
                           setActiveTab('vouchers');
                         }}
                         className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white"
-                        title="Print / View A4 Voucher"
+                        title="Print / View A5 Voucher"
                       >
                         <Printer className="w-3.5 h-3.5" />
                       </button>
