@@ -178,26 +178,21 @@ export const VouchersView = () => {
         </div>
 
         {/* Official 3-Part Signature Blocks */}
-        <div className="pt-16 mt-8 grid grid-cols-3 gap-6 text-center text-xs">
+        <div className="pt-20 mt-8 grid grid-cols-3 gap-6 text-center text-xs">
           <div>
-            <div className="border-t border-slate-700 pt-2 font-bold text-slate-900">
-              {activeTxn?.preparedBy || 'Accounts Officer'}
+            <div className="border-t border-slate-700 pt-2 font-semibold text-slate-800">
+              Prepared By
             </div>
-            <div className="text-[11px] text-slate-500">Prepared By</div>
           </div>
 
           <div>
-            <div className="border-t border-slate-700 pt-2 font-bold text-slate-900">
-              Engr. Masum Billah
+            <div className="border-t border-slate-700 pt-2 font-semibold text-slate-800">
+              Checked By (Engineer)
             </div>
-            <div className="text-[11px] text-slate-500">Checked By (Engineer)</div>
           </div>
 
           <div>
-            <div className="border-t border-slate-700 pt-2 font-bold text-slate-950">
-              {COMPANY_INFO.director}
-            </div>
-            <div className="text-[11px] font-bold text-amber-700 uppercase">
+            <div className="border-t border-slate-700 pt-2 font-bold text-slate-900 uppercase">
               Managing Director (Approved)
             </div>
           </div>
