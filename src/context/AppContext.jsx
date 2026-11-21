@@ -56,7 +56,18 @@ export const AppProvider = ({ children }) => {
           auditLogs: parsed.auditLogs || INITIAL_AUDIT_LOGS,
           incomeCategories: parsed.incomeCategories || INITIAL_INCOME_CATEGORIES,
           expenseCategories: parsed.expenseCategories || INITIAL_EXPENSE_CATEGORIES,
-          developerProfile: parsed.developerProfile || INITIAL_DEVELOPER_PROFILE,
+          developerProfile: (() => {
+            const dp = parsed.developerProfile || INITIAL_DEVELOPER_PROFILE;
+            if (!dp.name || dp.name.includes("Masum") || dp.phone === "01830002040" || !dp.phone) {
+              return {
+                ...dp,
+                name: "ইঞ্জি. মোহাম্মদ আব্দুল মান্নান",
+                englishName: "Engr. Md. Abdul Mannan",
+                phone: "01928571761"
+              };
+            }
+            return dp;
+          })(),
           gdriveConnected: parsed.gdriveConnected ?? true,
           gdriveFolderId: parsed.gdriveFolderId || GDRIVE_CONFIG.folderId,
           gdriveFolderUrl: parsed.gdriveFolderUrl || GDRIVE_CONFIG.folderUrl,

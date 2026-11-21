@@ -484,7 +484,7 @@ GitHub: ${developerProfile?.github}`;
                     value={editForm.name}
                     onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-amber-500"
-                    placeholder="আব্দুল মান্নান (ABM) / Engr. Masum"
+                    placeholder="ইঞ্জি. মোহাম্মদ আব্দুল মান্নান"
                   />
                 </div>
 
@@ -497,7 +497,7 @@ GitHub: ${developerProfile?.github}`;
                     value={editForm.englishName}
                     onChange={(e) => setEditForm(prev => ({ ...prev, englishName: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-amber-500"
-                    placeholder="Abdul Mannan / Engr. Masum Billah"
+                    placeholder="Engr. Md. Abdul Mannan"
                   />
                 </div>
               </div>
@@ -540,7 +540,7 @@ GitHub: ${developerProfile?.github}`;
                     value={editForm.phone}
                     onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-hidden focus:border-amber-500"
-                    placeholder="01830002040"
+                    placeholder="01928571761"
                   />
                 </div>
 

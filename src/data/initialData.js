@@ -849,14 +849,14 @@ export const INITIAL_AUDIT_LOGS = [
 ];
 
 export const INITIAL_DEVELOPER_PROFILE = {
-  name: "আব্দুল মান্নান (ABM) / Engr. Masum",
-  englishName: "Abdul Mannan (ABM) / Engr. Masum Billah",
+  name: "ইঞ্জি. মোহাম্মদ আব্দুল মান্নান",
+  englishName: "Engr. Md. Abdul Mannan",
   title: "চিফ সিস্টেম আর্কিটেক্ট ও সিনিয়র ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার",
   englishTitle: "Lead Software Architect & Full-Stack Solutions Engineer",
   organization: "বাংলাদেশ টেলিযোগাযোগ নিয়ন্ত্রণ কমিশন (BTRC) / ফ্রিল্যান্স সফটওয়্যার সলিউশনস",
   englishOrg: "BTRC / Freelance Engineering & Enterprise Systems",
-  phone: "01830002040",
-  altPhone: "+880 1830-002040",
+  phone: "01928571761",
+  altPhone: "+880 1928-571761",
   email: "abmannan1761@gmail.com",
   github: "https://github.com/AbMannan1761",
   portfolio: "https://abmannan1761.github.io/asia-engineers-accounting/",
