@@ -355,11 +355,10 @@ export const DailyAttendanceView = () => {
               <button
                 key={tab.id}
                 onClick={() => setSelectedStatusFilter(tab.id)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
-                  selectedStatusFilter === tab.id
-                    ? 'bg-amber-500 text-slate-950 font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${selectedStatusFilter === tab.id
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 {tab.label}
               </button>
@@ -457,13 +456,12 @@ export const DailyAttendanceView = () => {
                         {prj ? prj.id : '-'}
                       </td>
                       <td className="py-2.5 px-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          item.status === 'Present'
-                            ? 'bg-emerald-500/15 text-emerald-400'
-                            : item.status === 'Half Day'
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.status === 'Present'
+                          ? 'bg-emerald-500/15 text-emerald-400'
+                          : item.status === 'Half Day'
                             ? 'bg-amber-500/15 text-amber-400'
                             : 'bg-rose-500/15 text-rose-400'
-                        }`}>
+                          }`}>
                           {item.status === 'Present' ? 'পূর্ণ (1.0)' : item.status === 'Half Day' ? 'অর্ধ (0.5)' : 'অনুপস্থিত'}
                         </span>
                       </td>
@@ -496,9 +494,8 @@ export const DailyAttendanceView = () => {
                       </td>
                       {/* অবস্থা */}
                       <td className="py-2.5 px-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          isPaid ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
+                          }`}>
                           {isPaid ? (language === 'bn' ? 'পরিশোধিত' : 'Paid') : (language === 'bn' ? 'বকেয়া' : 'Due')}
                         </span>
                       </td>

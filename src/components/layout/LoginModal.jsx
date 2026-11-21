@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Lock, User, Key, X, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Lock, User, Key, X, CheckCircle2, ShieldCheck, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export const LoginModal = () => {
   const { 
@@ -14,6 +14,7 @@ export const LoginModal = () => {
 
   const [username, setUsername] = useState('01830002040');
   const [password, setPassword] = useState('ae2026');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   if (!showLoginModal && isAuthenticated) return null;
@@ -105,13 +106,25 @@ export const LoginModal = () => {
             <div className="relative">
               <Key className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="ae2026 বা admin"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-xs focus:outline-none focus:border-amber-400"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-white text-xs focus:outline-none focus:border-amber-400 font-mono tracking-wide"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 transition p-1 focus:outline-none"
+                title={showPassword ? (language === 'bn' ? 'পাসওয়ার্ড লুকান' : 'Hide password') : (language === 'bn' ? 'পাসওয়ার্ড দেখুন' : 'Show password')}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Eye className="w-4 h-4 text-slate-400 hover:text-white" />
+                )}
+              </button>
             </div>
           </div>
 
