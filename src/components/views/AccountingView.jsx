@@ -15,7 +15,12 @@ import {
   FileCheck2,
   Paperclip,
   Edit2,
-  Trash2
+  Trash2,
+  Tag,
+  Plus,
+  RefreshCw,
+  FileSpreadsheet,
+  CheckCircle2
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 import { DateInput } from '../common/DateInput';
@@ -24,6 +29,13 @@ export const AccountingView = () => {
   const {
     language,
     data,
+    incomeCategories,
+    expenseCategories,
+    addCategory,
+    deleteCategory,
+    pullFromGoogleSheet,
+    syncToGoogleSheet,
+    GSHEET_CONFIG,
     addTransaction,
     updateTransaction,
     deleteTransaction,
@@ -41,6 +53,13 @@ export const AccountingView = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [editingTxn, setEditingTxn] = useState(null);
+
+  // Dynamic Category Modal State
+  const [showCatModal, setShowCatModal] = useState(false);
+  const [catModalType, setCatModalType] = useState('income'); // 'income' | 'expense'
+  const [newCatInput, setNewCatInput] = useState('');
+  const [isPulling, setIsPulling] = useState(false);
+  const [pullMsg, setPullMsg] = useState('');
 
   // New Transaction Form State
   const [formData, setFormData] = useState({
@@ -149,10 +168,55 @@ export const AccountingView = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Manage Categories Button */}
           <button
             onClick={() => {
-              setFormData(prev => ({ ...prev, type: 'income', category: 'Client Milestone Bill' }));
+              setCatModalType('expense');
+              setShowCatModal(true);
+            }}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-xs font-semibold px-3 py-2 rounded-xl shadow transition"
+            title="জমা ও খরচের ক্যাটাগরি তালিকা বৃদ্ধি ও এডিট করুন"
+          >
+            <Tag className="w-3.5 h-3.5" />
+            <span>{language === 'bn' ? 'ক্যাটাগরি তালিকা' : 'Categories'}</span>
+          </button>
+
+          {/* Pull from Google Sheet */}
+          <button
+            onClick={async () => {
+              setIsPulling(true);
+              const res = await pullFromGoogleSheet();
+              setIsPulling(false);
+              if (res?.success) {
+                setPullMsg(language === 'bn' ? `সফলভাবে গুগল শীট থেকে আপডেট নেওয়া হয়েছে!` : 'Updated from Google Sheet!');
+              } else {
+                setPullMsg(language === 'bn' ? (res?.error || 'শীট থেকে আপডেট আনা সম্ভব হয়নি') : (res?.error || 'Failed to pull'));
+              }
+              setTimeout(() => setPullMsg(''), 5000);
+            }}
+            disabled={isPulling}
+            className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3 py-2 rounded-xl shadow transition disabled:opacity-50"
+            title="গুগল শীটের যেকোনো পরিবর্তন সরাসরি সফটওয়্যারে আপডেট করুন"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isPulling ? 'animate-spin' : ''}`} />
+            <span>{language === 'bn' ? 'শীট থেকে আপডেট' : 'Pull Sheet'}</span>
+          </button>
+
+          <a
+            href={GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold px-3 py-2 rounded-xl transition"
+            title="গুগল শীট খুলুন"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>{language === 'bn' ? 'গুগল শীট' : 'Sheet'}</span>
+          </a>
+
+          <button
+            onClick={() => {
+              setFormData(prev => ({ ...prev, type: 'income', category: incomeCategories[0] || 'Client Milestone Bill' }));
               setShowAddModal(true);
             }}
             className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
@@ -163,7 +227,7 @@ export const AccountingView = () => {
 
           <button
             onClick={() => {
-              setFormData(prev => ({ ...prev, type: 'expense', category: 'Material Purchase' }));
+              setFormData(prev => ({ ...prev, type: 'expense', category: expenseCategories[0] || 'Material Purchase' }));
               setShowAddModal(true);
             }}
             className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
@@ -181,6 +245,13 @@ export const AccountingView = () => {
           </button>
         </div>
       </div>
+
+      {pullMsg && (
+        <div className="bg-emerald-950/70 border border-emerald-500/50 p-3 rounded-xl text-emerald-300 text-xs flex items-center gap-2 animate-fade-in shadow-md">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{pullMsg}</span>
+        </div>
+      )}
 
       {/* Account Balances Cards Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -452,32 +523,42 @@ export const AccountingView = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'} *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-400 font-medium">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'} *</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCatModalType(formData.type);
+                        setShowCatModal(true);
+                      }}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline"
+                      title={language === 'bn' ? 'ক্যাটাগরি তালিকা বৃদ্ধি বা এডিট করুন' : 'Add/Manage Categories'}
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? '+ নতুন ক্যাটাগরি' : '+ Add'}</span>
+                    </button>
+                  </div>
                   <select
                     value={formData.category}
-                    onChange={(e) => setFormData(p => ({ ...p, category: e.target.value }))}
+                    onChange={(e) => {
+                      if (e.target.value === '__NEW__') {
+                        setCatModalType(formData.type);
+                        setShowCatModal(true);
+                      } else {
+                        setFormData(p => ({ ...p, category: e.target.value }));
+                      }
+                    }}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
                   >
-                    {formData.type === 'income' ? (
-                      <>
-                        <option value="Client Milestone Bill">Client Milestone Bill</option>
-                        <option value="Advance Payment">Advance Payment</option>
-                        <option value="Retention Money Release">Retention Money Release</option>
-                        <option value="Scrap Steel Sales">Scrap Steel Sales</option>
-                        <option value="Other Income">Other Income</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="Material Purchase">Material Purchase (Steel/Plate/Beam)</option>
-                        <option value="Labor & Fabrication">Labor & Fabrication Wage</option>
-                        <option value="Erection & Crane Rent">Erection & Crane/Equipment</option>
-                        <option value="Consumables & Hardware">Consumables & Bolts/Paints</option>
-                        <option value="Employee Salary">Employee Salary</option>
-                        <option value="Site Transport & Carrying">Transport & Carrying</option>
-                        <option value="Office Rent & Utilities">Office Rent & Utilities</option>
-                        <option value="Miscellaneous">Miscellaneous</option>
-                      </>
+                    {(formData.type === 'income' ? incomeCategories : expenseCategories).map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    {!((formData.type === 'income' ? incomeCategories : expenseCategories).includes(formData.category)) && (
+                      <option value={formData.category}>{formData.category}</option>
                     )}
+                    <option value="__NEW__" className="text-amber-400 font-bold">
+                      ➕ {language === 'bn' ? 'নতুন ক্যাটাগরি যুক্ত করুন...' : 'Add New Category...'}
+                    </option>
                   </select>
                 </div>
 
@@ -712,14 +793,42 @@ export const AccountingView = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'} *</label>
-                  <input
-                    type="text"
-                    required
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-400 font-medium">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'} *</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCatModalType(editingTxn.type);
+                        setShowCatModal(true);
+                      }}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline"
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? '+ নতুন' : '+ Add'}</span>
+                    </button>
+                  </div>
+                  <select
                     value={editingTxn.category}
-                    onChange={(e) => setEditingTxn(p => ({ ...p, category: e.target.value }))}
+                    onChange={(e) => {
+                      if (e.target.value === '__NEW__') {
+                        setCatModalType(editingTxn.type);
+                        setShowCatModal(true);
+                      } else {
+                        setEditingTxn(p => ({ ...p, category: e.target.value }));
+                      }
+                    }}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
-                  />
+                  >
+                    {(editingTxn.type === 'income' ? incomeCategories : expenseCategories).map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    {!((editingTxn.type === 'income' ? incomeCategories : expenseCategories).includes(editingTxn.category)) && (
+                      <option value={editingTxn.category}>{editingTxn.category}</option>
+                    )}
+                    <option value="__NEW__" className="text-amber-400 font-bold">
+                      ➕ {language === 'bn' ? 'নতুন ক্যাটাগরি তৈরি করুন...' : 'Add New Category...'}
+                    </option>
+                  </select>
                 </div>
 
                 <div>
@@ -803,6 +912,133 @@ export const AccountingView = () => {
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL: CATEGORY MANAGEMENT (ক্যাটাগরি তালিকা বৃদ্ধি ও এডিট) */}
+      {/* ============================================================== */}
+      {showCatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-amber-400" />
+                <h3 className="font-bold text-white text-sm">
+                  {language === 'bn' ? 'ক্যাটাগরি তালিকা বৃদ্ধি ও ব্যবস্থাপনা' : 'Manage Categories'}
+                </h3>
+              </div>
+              <button onClick={() => setShowCatModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              {/* Type Switcher: Income / Expense */}
+              <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setCatModalType('income')}
+                  className={`flex-1 py-1.5 rounded-lg font-bold text-xs transition ${
+                    catModalType === 'income'
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {language === 'bn' ? 'জমা (Income) ক্যাটাগরি' : 'Income Categories'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCatModalType('expense')}
+                  className={`flex-1 py-1.5 rounded-lg font-bold text-xs transition ${
+                    catModalType === 'expense'
+                      ? 'bg-rose-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {language === 'bn' ? 'খরচ (Expense) ক্যাটাগরি' : 'Expense Categories'}
+                </button>
+              </div>
+
+              {/* Add New Category Input */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!newCatInput.trim()) return;
+                  addCategory(catModalType, newCatInput.trim());
+                  if (showAddModal) {
+                    setFormData(prev => ({ ...prev, category: newCatInput.trim() }));
+                  }
+                  if (editingTxn) {
+                    setEditingTxn(prev => ({ ...prev, category: newCatInput.trim() }));
+                  }
+                  setNewCatInput('');
+                }}
+                className="space-y-1.5"
+              >
+                <label className="block text-slate-400 font-medium">
+                  {language === 'bn' ? '+ নতুন ক্যাটাগরি যোগ করুন:' : '+ Add New Category:'}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    required
+                    placeholder={language === 'bn' ? 'যেমন: Subcontract Bill, Crane Fuel...' : 'e.g. Subcontract Bill...'}
+                    value={newCatInput}
+                    onChange={(e) => setNewCatInput(e.target.value)}
+                    className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-semibold focus:outline-none focus:border-amber-400"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl shadow transition shrink-0"
+                  >
+                    {language === 'bn' ? 'যোগ করুন' : 'Add'}
+                  </button>
+                </div>
+              </form>
+
+              {/* Current Categories List */}
+              <div className="space-y-2 pt-2 border-t border-slate-800">
+                <span className="text-slate-400 font-medium block">
+                  {language === 'bn' 
+                    ? `বর্তমান ${catModalType === 'income' ? 'জমা' : 'খরচ'} ক্যাটাগরি তালিকা (${(catModalType === 'income' ? incomeCategories : expenseCategories).length} টি):` 
+                    : `Active ${catModalType} Categories:`}
+                </span>
+                <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                  {(catModalType === 'income' ? incomeCategories : expenseCategories).map((cat) => (
+                    <div
+                      key={cat}
+                      className="flex items-center justify-between p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 hover:border-slate-600 transition"
+                    >
+                      <span className="font-semibold text-slate-200">{cat}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(language === 'bn' ? `"${cat}" ক্যাটাগরিটি মুছে ফেলতে চান?` : `Delete category "${cat}"?`)) {
+                            deleteCategory(catModalType, cat);
+                          }
+                        }}
+                        className="text-slate-500 hover:text-rose-400 p-1 transition"
+                        title={language === 'bn' ? 'ক্যাটাগরি মুছুন' : 'Delete'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCatModal(false)}
+                  className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold"
+                >
+                  {language === 'bn' ? 'সম্পন্ন (Done)' : 'Close'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

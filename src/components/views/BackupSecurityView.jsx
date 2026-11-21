@@ -36,6 +36,7 @@ export const BackupSecurityView = () => {
     gsheetSyncStatus,
     gsheetLastSyncTime,
     syncToGoogleSheet,
+    pullFromGoogleSheet,
     downloadBackupJSON,
     restoreFromJSON,
     connectGoogleDrive,
@@ -129,11 +130,9 @@ export const BackupSecurityView = () => {
     "  }\n" +
     "}";
 
-  const gasSheetScriptCode = `// ====================================================================
+  const gasSheetScriptCode = // ====================================================================
 // ASIA ENGINEERS - Google Sheets Automated Real-Time Sync Webhook
-// Google Sheet ID: ${gsheetId}
-// Sheet Name: ${GSHEET_CONFIG?.title || 'Asia engineers, Accounts'}
-// ====================================================================
+// Google Sheet ID: // Sheet Name: // ====================================================================
 
 function doPost(e) {
   try {
@@ -141,17 +140,101 @@ function doPost(e) {
     var action = payload.action || 'SYNC_ALL';
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     if (!ss) {
-      ss = SpreadsheetApp.openById('${gsheetId}');
+      ss = SpreadsheetApp.openById('');
     }
 
     var data = payload.data || {};
 
-    // 1. Sync: ডেইলি_হাজিরা_ও_বেতন (Daily Attendance & Wages)
+    // 1. Convert Form Image into: জমা_রিসিট_ফরম_ও_হিসাব (Credit / Income Receipts)
+    if (data.transactions) {
+      var incSheet = getOrCreateTab(ss, 'জমা_রিসিট_ফরম_ও_হিসাব');
+      incSheet.clear();
+      var incHeaders = [
+        ['তারিখ', 'ভাউচার নং', 'কার কাছ থেকে গ্রহণ (Received From)', 'ক্যাটাগরি', 'অ্যাকাউন্ট / পেমেন্ট মেথড', 'প্রজেক্ট', 'টাকার পরিমাণ (৳)', 'বিবরণ / উদ্দেশ্য', 'নোট / চেক নং / চালান বিবরণ']
+      ];
+      incSheet.getRange(1, 1, 1, incHeaders[0].length).setValues(incHeaders)
+        .setBackground('#064e3b').setFontColor('#34d399').setFontWeight('bold');
+
+      var incRows = data.transactions
+        .filter(function(t) { return t.type === 'income'; })
+        .map(function(t) {
+          return [
+            t.date || '',
+            t.voucherNo || t.id,
+            t.party || '',
+            t.category || '',
+            t.accountId || '',
+            t.projectId || 'সাধারণ অফিস',
+            t.amount || 0,
+            t.description || '',
+            t.note || ''
+          ];
+        });
+
+      if (incRows.length > 0) {
+        incSheet.getRange(2, 1, incRows.length, incHeaders[0].length).setValues(incRows);
+      }
+      incSheet.autoResizeColumns(1, incHeaders[0].length);
+
+      // 2. Convert Form Image into: খরচ_ভাউচার_ফরম_ও_হিসাব (Debit / Expense Vouchers)
+      var expSheet = getOrCreateTab(ss, 'খরচ_ভাউচার_ফরম_ও_হিসাব');
+      expSheet.clear();
+      var expHeaders = [
+        ['তারিখ', 'ভাউচার নং', 'কাকে প্রদান (Paid To / Payee)', 'ক্যাটাগরি', 'অ্যাকাউন্ট / পেমেন্ট মেথড', 'প্রজেক্ট', 'টাকার পরিমাণ (৳)', 'বিবরণ / উদ্দেশ্য', 'নোট / চেক নং / চালান বিবরণ']
+      ];
+      expSheet.getRange(1, 1, 1, expHeaders[0].length).setValues(expHeaders)
+        .setBackground('#881337').setFontColor('#fda4af').setFontWeight('bold');
+
+      var expRows = data.transactions
+        .filter(function(t) { return t.type === 'expense'; })
+        .map(function(t) {
+          return [
+            t.date || '',
+            t.voucherNo || t.id,
+            t.party || '',
+            t.category || '',
+            t.accountId || '',
+            t.projectId || 'সাধারণ অফিস',
+            t.amount || 0,
+            t.description || '',
+            t.note || ''
+          ];
+        });
+
+      if (expRows.length > 0) {
+        expSheet.getRange(2, 1, expRows.length, expHeaders[0].length).setValues(expRows);
+      }
+      expSheet.autoResizeColumns(1, expHeaders[0].length);
+    }
+
+    // 3. Dynamic Categories: ক্যাটাগরি_তালিকা
+    if (data.incomeCategories || data.expenseCategories) {
+      var catSheet = getOrCreateTab(ss, 'ক্যাটাগরি_তালিকা');
+      catSheet.clear();
+      var catHeaders = [['ক্যাটাগরি ধরন', 'ক্যাটাগরির নাম']];
+      catSheet.getRange(1, 1, 1, 2).setValues(catHeaders)
+        .setBackground('#1e293b').setFontColor('#facc15').setFontWeight('bold');
+
+      var catRows = [];
+      (data.incomeCategories || []).forEach(function(c) {
+        catRows.push(['জমা (Income)', c]);
+      });
+      (data.expenseCategories || []).forEach(function(c) {
+        catRows.push(['খরচ (Expense)', c]);
+      });
+
+      if (catRows.length > 0) {
+        catSheet.getRange(2, 1, catRows.length, 2).setValues(catRows);
+      }
+      catSheet.autoResizeColumns(1, 2);
+    }
+
+    // 4. Sync: ডেইলি_হাজিরা_ও_বেতন (Daily Attendance & Wages)
     if (data.laborAttendance) {
       var attSheet = getOrCreateTab(ss, 'ডেইলি_হাজিরা_ও_বেতন');
       attSheet.clear();
       var attHeaders = [
-        ['তারিখ', 'কর্মী / নাম', 'পদবী', 'প্রজেক্ট আইডি', 'হাজিরা অবস্থা', 'ওভারটাইম (ঘণ্টা)', 'মোট বেতন (৳)', 'এডভান্স (৳)', 'প্রদেয় (৳)', 'অবশিষ্ট বকেয়া (৳)', 'মন্তব্য', 'পরিশোধ অবস্থা']
+        ['তারিখ', 'কর্মী / নাম', 'পদবী', 'প্রজেক্ট আইডি', 'হাজিরা অবস্থা', 'ওভারটাইম (ঘণ্টা)', 'মোট বেতন (৳)', 'এডভান্স (৳)', 'প্রদেয় (৳)', 'অবশিষ্ট বকেয়া (৳)', 'মন্তব্য', 'পরিশোধ অবস্থা']
       ];
       attSheet.getRange(1, 1, 1, attHeaders[0].length).setValues(attHeaders)
         .setBackground('#1e293b').setFontColor('#f8fafc').setFontWeight('bold');
@@ -176,7 +259,7 @@ function doPost(e) {
           payable,
           rem,
           item.remarks || item.note || '',
-          item.paymentStatus === 'Paid' ? 'পরিশোধিত' : 'বকেয়া'
+          item.paymentStatus === 'Paid' ? 'পরিশোধিত' : 'বকেয়া'
         ];
       });
 
@@ -186,38 +269,7 @@ function doPost(e) {
       attSheet.autoResizeColumns(1, attHeaders[0].length);
     }
 
-    // 2. Sync: জমা_খরচ_ও_ভাউচার (Transactions & Vouchers)
-    if (data.transactions) {
-      var txnSheet = getOrCreateTab(ss, 'জমা_খরচ_ও_ভাউচার');
-      txnSheet.clear();
-      var txnHeaders = [
-        ['ভাউচার নং', 'তারিখ', 'প্রকার (Income/Expense)', 'ক্যাটাগরি', 'অ্যাকাউন্ট', 'টাকার পরিমাণ (৳)', 'প্রাপক / প্রদানকারী', 'প্রজেক্ট', 'বিবরণ', 'নোট / চেক নং']
-      ];
-      txnSheet.getRange(1, 1, 1, txnHeaders[0].length).setValues(txnHeaders)
-        .setBackground('#0f172a').setFontColor('#38bdf8').setFontWeight('bold');
-
-      var txnRows = data.transactions.map(function(t) {
-        return [
-          t.voucherNo || t.id,
-          t.date || '',
-          t.type === 'income' ? 'জমা (Income)' : 'খরচ (Expense)',
-          t.category || '',
-          t.accountId || '',
-          t.amount || 0,
-          t.party || '',
-          t.projectId || '-',
-          t.description || '',
-          t.note || ''
-        ];
-      });
-
-      if (txnRows.length > 0) {
-        txnSheet.getRange(2, 1, txnRows.length, txnRows[0].length).setValues(txnRows);
-      }
-      txnSheet.autoResizeColumns(1, txnHeaders[0].length);
-    }
-
-    // 3. Sync: প্রজেক্ট_তালিকা (Projects)
+    // 5. Sync: প্রজেক্ট_তালিকা (Projects)
     if (data.projects) {
       var prjSheet = getOrCreateTab(ss, 'প্রজেক্ট_তালিকা');
       prjSheet.clear();
@@ -252,13 +304,100 @@ function doPost(e) {
   }
 }
 
+// GET Webhook: Allows Software to pull updated data from Google Sheet
+function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) {
+      ss = SpreadsheetApp.openById('');
+    }
+
+    var resultData = {
+      transactions: [],
+      incomeCategories: [],
+      expenseCategories: []
+    };
+
+    var incSheet = ss.getSheetByName('জমা_রিসিট_ফরম_ও_হিসাব');
+    if (incSheet && incSheet.getLastRow() > 1) {
+      var incValues = incSheet.getRange(2, 1, incSheet.getLastRow() - 1, 9).getValues();
+      incValues.forEach(function(row) {
+        if (row[0] || row[1]) {
+          resultData.transactions.push({
+            id: 'TXN-' + (row[1] || Date.now()),
+            voucherNo: String(row[1] || ''),
+            date: Utilities.formatDate(new Date(row[0]), 'GMT+6', 'yyyy-MM-dd'),
+            type: 'income',
+            party: String(row[2] || ''),
+            category: String(row[3] || 'Other Income'),
+            accountId: String(row[4] || 'acc-cash'),
+            projectId: String(row[5] || ''),
+            amount: Number(row[6] || 0),
+            description: String(row[7] || ''),
+            note: String(row[8] || '')
+          });
+        }
+      });
+    }
+
+    var expSheet = ss.getSheetByName('খরচ_ভাউচার_ফরম_ও_হিসাব');
+    if (expSheet && expSheet.getLastRow() > 1) {
+      var expValues = expSheet.getRange(2, 1, expSheet.getLastRow() - 1, 9).getValues();
+      expValues.forEach(function(row) {
+        if (row[0] || row[1]) {
+          resultData.transactions.push({
+            id: 'TXN-' + (row[1] || Date.now()),
+            voucherNo: String(row[1] || ''),
+            date: Utilities.formatDate(new Date(row[0]), 'GMT+6', 'yyyy-MM-dd'),
+            type: 'expense',
+            party: String(row[2] || ''),
+            category: String(row[3] || 'Miscellaneous'),
+            accountId: String(row[4] || 'acc-cash'),
+            projectId: String(row[5] || ''),
+            amount: Number(row[6] || 0),
+            description: String(row[7] || ''),
+            note: String(row[8] || '')
+          });
+        }
+      });
+    }
+
+    var catSheet = ss.getSheetByName('ক্যাটাগরি_তালিকা');
+    if (catSheet && catSheet.getLastRow() > 1) {
+      var catValues = catSheet.getRange(2, 1, catSheet.getLastRow() - 1, 2).getValues();
+      catValues.forEach(function(r) {
+        var type = String(r[0] || '');
+        var catName = String(r[1] || '').trim();
+        if (catName) {
+          if (type.indexOf('Income') !== -1 || type.indexOf('জমা') !== -1) {
+            resultData.incomeCategories.push(catName);
+          } else {
+            resultData.expenseCategories.push(catName);
+          }
+        }
+      });
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'SUCCESS',
+      data: resultData
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'ERROR',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 function getOrCreateTab(ss, tabName) {
   var s = ss.getSheetByName(tabName);
   if (!s) {
     s = ss.insertSheet(tabName);
   }
   return s;
-}`;
+};
 
   const copyScriptToClipboard = () => {
     navigator.clipboard.writeText(gasScriptCode);
@@ -409,14 +548,33 @@ function getOrCreateTab(ss, tabName) {
           <button
             onClick={handleManualSheetSync}
             disabled={isSyncingSheet}
-            className="w-full sm:w-auto flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+            className="w-full sm:w-auto flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${isSyncingSheet ? 'animate-spin' : ''}`} />
             <span>
               {isSyncingSheet
                 ? (language === 'bn' ? 'গুগল শীটে সিংক হচ্ছে...' : 'Syncing to Google Sheet...')
-                : (language === 'bn' ? 'এখনই পুরো হিসাব গুগল শীটে সিংক করুন' : 'Sync All Data to Google Sheet Now')}
+                : (language === 'bn' ? 'শীটে পুরো হিসাব পুশ করুন' : 'Push All to Sheet')}
             </span>
+          </button>
+
+          <button
+            onClick={async () => {
+              setIsSyncingSheet(true);
+              const res = await pullFromGoogleSheet();
+              setIsSyncingSheet(false);
+              if (res?.success) {
+                setSheetSyncSuccessMsg(language === 'bn' ? 'সফলভাবে গুগল শীট থেকে হিসাব আপডেট হয়েছে!' : 'Updated from Google Sheet!');
+              } else {
+                setSheetSyncSuccessMsg(language === 'bn' ? (res?.error || 'শীট থেকে আপডেট নেওয়া সম্ভব হয়নি') : (res?.error || 'Failed to pull'));
+              }
+              setTimeout(() => setSheetSyncSuccessMsg(''), 5000);
+            }}
+            disabled={isSyncingSheet}
+            className="w-full sm:w-auto flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+          >
+            <DownloadCloud className="w-4 h-4" />
+            <span>{language === 'bn' ? 'শীট থেকে আপডেট আনুন' : 'Pull from Sheet'}</span>
           </button>
 
           <button

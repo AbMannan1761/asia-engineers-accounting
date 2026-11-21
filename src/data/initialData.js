@@ -26,6 +26,31 @@ export const GSHEET_CONFIG = {
   connected: true
 };
 
+export const INITIAL_INCOME_CATEGORIES = [
+  "Client Milestone Bill",
+  "Advance Payment",
+  "Retention Money Release",
+  "Scrap Steel Sales",
+  "Subcontracting Income",
+  "Consultancy & Design Fee",
+  "Other Income"
+];
+
+export const INITIAL_EXPENSE_CATEGORIES = [
+  "Material Purchase",
+  "Labor & Fabrication",
+  "Erection & Crane Rent",
+  "Consumables & Hardware",
+  "Employee Salary",
+  "Site Transport & Carrying",
+  "Office Rent & Utilities",
+  "Equipment Maintenance",
+  "Fuel & Generator",
+  "Printing, Stationery & Courier",
+  "Food & Entertainment",
+  "Miscellaneous"
+];
+
 export const INITIAL_BACKUP_SNAPSHOTS = [
   {
     id: "SNAP-001",

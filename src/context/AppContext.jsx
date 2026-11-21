@@ -15,7 +15,9 @@ import {
   INITIAL_DAILY_LABORS,
   INITIAL_LABOR_ATTENDANCE,
   INITIAL_LEDGERS,
-  INITIAL_AUDIT_LOGS
+  INITIAL_AUDIT_LOGS,
+  INITIAL_INCOME_CATEGORIES,
+  INITIAL_EXPENSE_CATEGORIES
 } from '../data/initialData';
 
 const AppContext = createContext();
@@ -51,6 +53,8 @@ export const AppProvider = ({ children }) => {
           laborAttendance: parsed.laborAttendance || INITIAL_LABOR_ATTENDANCE,
           ledgers: parsed.ledgers || INITIAL_LEDGERS,
           auditLogs: parsed.auditLogs || INITIAL_AUDIT_LOGS,
+          incomeCategories: parsed.incomeCategories || INITIAL_INCOME_CATEGORIES,
+          expenseCategories: parsed.expenseCategories || INITIAL_EXPENSE_CATEGORIES,
           gdriveConnected: parsed.gdriveConnected ?? true,
           gdriveFolderId: parsed.gdriveFolderId || GDRIVE_CONFIG.folderId,
           gdriveFolderUrl: parsed.gdriveFolderUrl || GDRIVE_CONFIG.folderUrl,
@@ -74,6 +78,8 @@ export const AppProvider = ({ children }) => {
       laborAttendance: INITIAL_LABOR_ATTENDANCE,
       ledgers: INITIAL_LEDGERS,
       auditLogs: INITIAL_AUDIT_LOGS,
+      incomeCategories: INITIAL_INCOME_CATEGORIES,
+      expenseCategories: INITIAL_EXPENSE_CATEGORIES,
       gdriveConnected: true,
       gdriveFolderId: GDRIVE_CONFIG.folderId,
       gdriveFolderUrl: GDRIVE_CONFIG.folderUrl,
@@ -1057,7 +1063,9 @@ export const AppProvider = ({ children }) => {
         projects: data.projects,
         materials: data.materials,
         employees: data.employees,
-        accounts: data.accounts
+        accounts: data.accounts,
+        incomeCategories: data.incomeCategories || INITIAL_INCOME_CATEGORIES,
+        expenseCategories: data.expenseCategories || INITIAL_EXPENSE_CATEGORIES
       }
     };
 
@@ -1079,6 +1087,71 @@ export const AppProvider = ({ children }) => {
       console.warn('Google Sheet sync notice:', err);
       setGsheetSyncStatus('error');
       return { success: false, error: err.message };
+    }
+  };
+
+  // Pull / Fetch changes from Google Sheet into local software
+  const pullFromGoogleSheet = async () => {
+    setGsheetSyncStatus('syncing');
+    try {
+      if (!gsheetWebhookUrl || !gsheetWebhookUrl.trim().startsWith('http')) {
+        throw new Error('Please configure a valid Google Apps Script Web App URL first.');
+      }
+      const fetchUrl = `${gsheetWebhookUrl.trim()}?action=GET_ALL&sheetId=${GSHEET_CONFIG.sheetId}`;
+      const res = await fetch(fetchUrl);
+      const json = await res.json();
+      if (json && json.status === 'SUCCESS' && json.data) {
+        setData(prev => ({
+          ...prev,
+          transactions: json.data.transactions || prev.transactions,
+          laborAttendance: json.data.laborAttendance || prev.laborAttendance,
+          incomeCategories: json.data.incomeCategories || prev.incomeCategories,
+          expenseCategories: json.data.expenseCategories || prev.expenseCategories
+        }));
+        setGsheetSyncStatus('success');
+        logAudit('GSHEET_PULL', 'Successfully pulled latest data from Google Sheet');
+        return { success: true, count: (json.data.transactions || []).length };
+      } else {
+        throw new Error(json?.message || 'Invalid response from Google Sheet Webhook');
+      }
+    } catch (err) {
+      console.warn('Pull from Google Sheet notice:', err);
+      setGsheetSyncStatus('idle');
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Dynamic Transaction Categories Management (Add / Delete)
+  const addCategory = (type, categoryName) => {
+    const trimmed = (categoryName || '').trim();
+    if (!trimmed) return;
+    const key = type === 'income' ? 'incomeCategories' : 'expenseCategories';
+    setData(prev => {
+      const existing = prev[key] || (type === 'income' ? INITIAL_INCOME_CATEGORIES : INITIAL_EXPENSE_CATEGORIES);
+      if (existing.includes(trimmed)) return prev;
+      return {
+        ...prev,
+        [key]: [...existing, trimmed]
+      };
+    });
+    logAudit('CATEGORY_ADDED', `Added new ${type} category: ${trimmed}`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('UPDATE_CATEGORIES'), 100);
+    }
+  };
+
+  const deleteCategory = (type, categoryName) => {
+    const key = type === 'income' ? 'incomeCategories' : 'expenseCategories';
+    setData(prev => {
+      const existing = prev[key] || (type === 'income' ? INITIAL_INCOME_CATEGORIES : INITIAL_EXPENSE_CATEGORIES);
+      return {
+        ...prev,
+        [key]: existing.filter(c => c !== categoryName)
+      };
+    });
+    logAudit('CATEGORY_DELETED', `Deleted ${type} category: ${categoryName}`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('UPDATE_CATEGORIES'), 100);
     }
   };
 
@@ -1138,6 +1211,11 @@ export const AppProvider = ({ children }) => {
         gsheetSyncStatus,
         gsheetLastSyncTime,
         syncToGoogleSheet,
+        pullFromGoogleSheet,
+        addCategory,
+        deleteCategory,
+        incomeCategories: data.incomeCategories || INITIAL_INCOME_CATEGORIES,
+        expenseCategories: data.expenseCategories || INITIAL_EXPENSE_CATEGORIES,
         language,
         toggleLanguage,
         currentUser,
