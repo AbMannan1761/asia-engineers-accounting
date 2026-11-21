@@ -613,6 +613,192 @@ export const INITIAL_LEDGERS = [
   }
 ];
 
+export const INITIAL_DAILY_LABORS = [
+  {
+    id: "DL-001",
+    name: "কামাল উদ্দিন (Kamal)",
+    trade: "Master Fitter & Fabricator",
+    dailyRate: 1100,
+    overtimeRate: 150,
+    phone: "01811223344",
+    nid: "1987159203941",
+    assignedProjectId: "PRJ-2026-01",
+    status: "Active"
+  },
+  {
+    id: "DL-002",
+    name: "জাহাঙ্গীর আলম (Jahangir)",
+    trade: "Certified 6G Welder",
+    dailyRate: 1200,
+    overtimeRate: 160,
+    phone: "01722334455",
+    nid: "1990159203942",
+    assignedProjectId: "PRJ-2026-03",
+    status: "Active"
+  },
+  {
+    id: "DL-003",
+    name: "আবুল হোসেন (Abul)",
+    trade: "Rigging & Truss Erector",
+    dailyRate: 950,
+    overtimeRate: 130,
+    phone: "01633445566",
+    nid: "1992159203943",
+    assignedProjectId: "PRJ-2026-01",
+    status: "Active"
+  },
+  {
+    id: "DL-004",
+    name: "সোহেল রানা (Sohel)",
+    trade: "Gas Cutter & Grinder",
+    dailyRate: 850,
+    overtimeRate: 110,
+    phone: "01944556677",
+    nid: "1995159203944",
+    assignedProjectId: "PRJ-2026-02",
+    status: "Active"
+  },
+  {
+    id: "DL-005",
+    name: "নুরুল ইসলাম (Nurul)",
+    trade: "Fabrication Helper",
+    dailyRate: 700,
+    overtimeRate: 90,
+    phone: "01555667788",
+    nid: "1998159203945",
+    assignedProjectId: "PRJ-2026-01",
+    status: "Active"
+  },
+  {
+    id: "DL-006",
+    name: "রুবেল মিয়া (Rubel)",
+    trade: "Site Helper",
+    dailyRate: 650,
+    overtimeRate: 85,
+    phone: "01866778899",
+    nid: "2000159203946",
+    assignedProjectId: "PRJ-2026-02",
+    status: "Active"
+  }
+];
+
+export const INITIAL_LABOR_ATTENDANCE = [
+  {
+    id: "ATT-20260301-01",
+    date: "2026-03-01",
+    laborId: "DL-001",
+    projectId: "PRJ-2026-01",
+    status: "Present",
+    attendanceDays: 1.0,
+    dailyRate: 1100,
+    basicWage: 1100,
+    otHours: 3,
+    otRate: 150,
+    otWage: 450,
+    grossWage: 1550,
+    advanceTaken: 500,
+    netPayable: 1050,
+    paymentStatus: "Paid",
+    paidVoucherNo: "AE-PV-2026-0003",
+    note: "PHP Motors assembly shed column erection"
+  },
+  {
+    id: "ATT-20260301-02",
+    date: "2026-03-01",
+    laborId: "DL-002",
+    projectId: "PRJ-2026-03",
+    status: "Present",
+    attendanceDays: 1.0,
+    dailyRate: 1200,
+    basicWage: 1200,
+    otHours: 2,
+    otRate: 160,
+    otWage: 320,
+    grossWage: 1520,
+    advanceTaken: 0,
+    netPayable: 1520,
+    paymentStatus: "Paid",
+    paidVoucherNo: "AE-PV-2026-0003",
+    note: "Navy gun workshop truss 6G welding"
+  },
+  {
+    id: "ATT-20260302-01",
+    date: "2026-03-02",
+    laborId: "DL-001",
+    projectId: "PRJ-2026-01",
+    status: "Present",
+    attendanceDays: 1.0,
+    dailyRate: 1100,
+    basicWage: 1100,
+    otHours: 4,
+    otRate: 150,
+    otWage: 600,
+    grossWage: 1700,
+    advanceTaken: 300,
+    netPayable: 1400,
+    paymentStatus: "Due",
+    paidVoucherNo: "-",
+    note: "Rafter alignment & torque tightening"
+  },
+  {
+    id: "ATT-20260302-02",
+    date: "2026-03-02",
+    laborId: "DL-003",
+    projectId: "PRJ-2026-01",
+    status: "Present",
+    attendanceDays: 1.0,
+    dailyRate: 950,
+    basicWage: 950,
+    otHours: 2,
+    otRate: 130,
+    otWage: 260,
+    grossWage: 1210,
+    advanceTaken: 200,
+    netPayable: 1010,
+    paymentStatus: "Due",
+    paidVoucherNo: "-",
+    note: "Crane heavy lifting assistance"
+  },
+  {
+    id: "ATT-20260303-01",
+    date: "2026-03-03",
+    laborId: "DL-004",
+    projectId: "PRJ-2026-02",
+    status: "Present",
+    attendanceDays: 1.0,
+    dailyRate: 850,
+    basicWage: 850,
+    otHours: 3,
+    otRate: 110,
+    otWage: 330,
+    grossWage: 1180,
+    advanceTaken: 0,
+    netPayable: 1180,
+    paymentStatus: "Due",
+    paidVoucherNo: "-",
+    note: "Carton Craft PEB purlin cutting & fit-up"
+  },
+  {
+    id: "ATT-20260303-02",
+    date: "2026-03-03",
+    laborId: "DL-005",
+    projectId: "PRJ-2026-01",
+    status: "Half Day",
+    attendanceDays: 0.5,
+    dailyRate: 700,
+    basicWage: 350,
+    otHours: 0,
+    otRate: 90,
+    otWage: 0,
+    grossWage: 350,
+    advanceTaken: 100,
+    netPayable: 250,
+    paymentStatus: "Due",
+    paidVoucherNo: "-",
+    note: "Morning session site helper"
+  }
+];
+
 export const INITIAL_AUDIT_LOGS = [
   {
     id: "LOG-001",

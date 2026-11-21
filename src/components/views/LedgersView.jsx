@@ -8,15 +8,18 @@ import {
   Search,
   ArrowDownRight,
   ArrowUpRight,
-  X
+  X,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
 export const LedgersView = () => {
-  const { language, data, addLedger } = useApp();
+  const { language, data, addLedger, updateLedger, deleteLedger } = useApp();
 
   const [activeTab, setActiveTab] = useState('clients'); // clients | suppliers
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingLedger, setEditingLedger] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
@@ -151,6 +154,7 @@ export const LedgersView = () => {
                   </>
                 )}
                 <th className="py-3 px-3 text-center">{language === 'bn' ? 'তাকাদা / রিমাইন্ডার' : 'Reminder'}</th>
+                <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
@@ -203,6 +207,29 @@ export const LedgersView = () => {
                       ) : (
                         <span className="text-[10px] text-slate-500 font-medium">Cleared</span>
                       )}
+                    </td>
+
+                    <td className="py-3 px-3 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => setEditingLedger({ ...party })}
+                          className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                          title={language === 'bn' ? 'খাতা এডিট করুন' : 'Edit Ledger'}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত "${party.name}" খাতাটি মুছে ফেলতে চান?` : `Delete ledger "${party.name}"?`)) {
+                              deleteLedger(party.id);
+                            }
+                          }}
+                          className="p-1 rounded bg-slate-900 hover:bg-rose-600 hover:text-white text-slate-400 transition"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -301,6 +328,149 @@ export const LedgersView = () => {
                 <button type="submit" className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg">
                   {language === 'bn' ? 'খাতা তৈরি করুন' : 'Create Ledger'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal: Edit Party Ledger */}
+      {editingLedger && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'bn' ? `খাতা এডিট ও আপডেট (${editingLedger.name})` : `Edit Ledger (${editingLedger.name})`}</span>
+              </h3>
+              <button onClick={() => setEditingLedger(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateLedger(editingLedger.id, editingLedger);
+                setEditingLedger(null);
+              }}
+              className="p-5 space-y-3.5 text-xs"
+            >
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Company Name'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingLedger.name}
+                  onChange={(e) => setEditingLedger(p => ({ ...p, name: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোবাইল / হোয়াটসঅ্যাপ' : 'Phone / WhatsApp'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingLedger.phone || ''}
+                  onChange={(e) => setEditingLedger(p => ({ ...p, phone: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ঠিকানা' : 'Address'}</label>
+                <input
+                  type="text"
+                  value={editingLedger.address || ''}
+                  onChange={(e) => setEditingLedger(p => ({ ...p, address: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                />
+              </div>
+
+              {editingLedger.type === 'client' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোট বিল (Billed)' : 'Total Billed'}</label>
+                    <input
+                      type="number"
+                      value={editingLedger.totalBilled || 0}
+                      onChange={(e) => setEditingLedger(p => ({ ...p, totalBilled: e.target.value }))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোট প্রাপ্তি (Received)' : 'Total Received'}</label>
+                    <input
+                      type="number"
+                      value={editingLedger.totalReceived || 0}
+                      onChange={(e) => setEditingLedger(p => ({ ...p, totalReceived: e.target.value }))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোট ক্রয় (Purchased)' : 'Total Purchased'}</label>
+                    <input
+                      type="number"
+                      value={editingLedger.totalPurchased || 0}
+                      onChange={(e) => setEditingLedger(p => ({ ...p, totalPurchased: e.target.value }))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোট পরিশোধ (Paid)' : 'Total Paid'}</label>
+                    <input
+                      type="number"
+                      value={editingLedger.totalPaid || 0}
+                      onChange={(e) => setEditingLedger(p => ({ ...p, totalPaid: e.target.value }))}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'বর্তমান বকেয়া ব্যালেন্স (৳)' : 'Due Balance'}</label>
+                <input
+                  type="number"
+                  value={editingLedger.dueBalance || 0}
+                  onChange={(e) => setEditingLedger(p => ({ ...p, dueBalance: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold font-mono text-amber-400"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত "${editingLedger.name}" খাতাটি মুছে ফেলতে চান?` : `Delete ledger "${editingLedger.name}"?`)) {
+                      deleteLedger(editingLedger.id);
+                      setEditingLedger(null);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'মুছে ফেলুন' : 'Delete'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingLedger(null)}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  >
+                    {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
+                  >
+                    {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Ledger'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

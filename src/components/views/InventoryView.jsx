@@ -11,17 +11,27 @@ import {
   Layers,
   X,
   FileCheck2,
-  Calendar
+  Calendar,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 
 export const InventoryView = () => {
-  const { language, data, recordStockMovement, addMaterial } = useApp();
+  const {
+    language,
+    data,
+    recordStockMovement,
+    addMaterial,
+    updateMaterial,
+    deleteMaterial
+  } = useApp();
 
   const [activeTab, setActiveTab] = useState('stock'); // stock | movements
   const [showInwardModal, setShowInwardModal] = useState(false);
   const [showOutwardModal, setShowOutwardModal] = useState(false);
   const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Stock Movement Form
@@ -228,6 +238,7 @@ export const InventoryView = () => {
                   <th className="py-3 px-3 text-right">{language === 'bn' ? 'গড় দর (৳)' : 'Avg Rate'}</th>
                   <th className="py-3 px-3 text-right">{language === 'bn' ? 'মোট মূল্য (৳)' : 'Total Value'}</th>
                   <th className="py-3 px-3 text-center">{language === 'bn' ? 'অবস্থা' : 'Status'}</th>
+                  <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
@@ -269,6 +280,28 @@ export const InventoryView = () => {
                             Available
                           </span>
                         )}
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => setEditingMaterial({ ...mat })}
+                            className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                            title={language === 'bn' ? 'মালামাল এডিট করুন' : 'Edit Material'}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${mat.name} মুছে ফেলতে চান?` : `Delete ${mat.name}?`)) {
+                                deleteMaterial(mat.id);
+                              }
+                            }}
+                            className="p-1 rounded bg-slate-900 hover:bg-rose-600 hover:text-white text-slate-400 transition"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -618,6 +651,148 @@ export const InventoryView = () => {
                 <button type="submit" className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg">
                   {language === 'bn' ? 'সংরক্ষণ করুন' : 'Save Material'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal: Edit Material */}
+      {editingMaterial && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'bn' ? `মালামাল তথ্য এডিট (${editingMaterial.code})` : `Edit Material (${editingMaterial.code})`}</span>
+              </h3>
+              <button onClick={() => setEditingMaterial(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateMaterial(editingMaterial.id, editingMaterial);
+                setEditingMaterial(null);
+              }}
+              className="p-5 space-y-3.5 text-xs"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'আইটেম কোড' : 'Item Code'} *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingMaterial.code}
+                    onChange={(e) => setEditingMaterial(p => ({ ...p, code: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</label>
+                  <input
+                    type="text"
+                    value={editingMaterial.category}
+                    onChange={(e) => setEditingMaterial(p => ({ ...p, category: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মালামালের নাম' : 'Name'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingMaterial.name}
+                  onChange={(e) => setEditingMaterial(p => ({ ...p, name: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'স্পেসিফিকেশন' : 'Specification'}</label>
+                <input
+                  type="text"
+                  value={editingMaterial.specification || ''}
+                  onChange={(e) => setEditingMaterial(p => ({ ...p, specification: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'একক' : 'Unit'}</label>
+                  <input
+                    type="text"
+                    value={editingMaterial.unit}
+                    onChange={(e) => setEditingMaterial(p => ({ ...p, unit: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'বর্তমান স্টক' : 'Stock'}</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={editingMaterial.currentStock}
+                    onChange={(e) => setEditingMaterial(p => ({ ...p, currentStock: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'অ্যালার্ট লিমিট' : 'Min Alert'}</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={editingMaterial.minStockAlert}
+                    onChange={(e) => setEditingMaterial(p => ({ ...p, minStockAlert: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'গড় দর (৳)' : 'Avg Unit Price'}</label>
+                <input
+                  type="number"
+                  value={editingMaterial.unitPriceAvg}
+                  onChange={(e) => setEditingMaterial(p => ({ ...p, unitPriceAvg: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono font-bold"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${editingMaterial.name} মুছে ফেলতে চান?` : `Delete ${editingMaterial.name}?`)) {
+                      deleteMaterial(editingMaterial.id);
+                      setEditingMaterial(null);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'মুছে ফেলুন' : 'Delete'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingMaterial(null)}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  >
+                    {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
+                  >
+                    {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Material'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

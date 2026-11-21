@@ -11,6 +11,8 @@ import {
   INITIAL_TRANSACTIONS,
   INITIAL_STOCK_MOVEMENTS,
   INITIAL_SALARY_SHEET,
+  INITIAL_DAILY_LABORS,
+  INITIAL_LABOR_ATTENDANCE,
   INITIAL_LEDGERS,
   INITIAL_AUDIT_LOGS
 } from '../data/initialData';
@@ -35,7 +37,26 @@ export const AppProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return {
+          accounts: parsed.accounts || INITIAL_ACCOUNTS,
+          projects: parsed.projects || INITIAL_PROJECTS,
+          materials: parsed.materials || INITIAL_MATERIALS,
+          employees: parsed.employees || INITIAL_EMPLOYEES,
+          transactions: parsed.transactions || INITIAL_TRANSACTIONS,
+          stockMovements: parsed.stockMovements || INITIAL_STOCK_MOVEMENTS,
+          salarySheet: parsed.salarySheet || INITIAL_SALARY_SHEET,
+          dailyLabors: parsed.dailyLabors || INITIAL_DAILY_LABORS,
+          laborAttendance: parsed.laborAttendance || INITIAL_LABOR_ATTENDANCE,
+          ledgers: parsed.ledgers || INITIAL_LEDGERS,
+          auditLogs: parsed.auditLogs || INITIAL_AUDIT_LOGS,
+          gdriveConnected: parsed.gdriveConnected ?? true,
+          gdriveFolderId: parsed.gdriveFolderId || GDRIVE_CONFIG.folderId,
+          gdriveFolderUrl: parsed.gdriveFolderUrl || GDRIVE_CONFIG.folderUrl,
+          backupSnapshots: parsed.backupSnapshots || INITIAL_BACKUP_SNAPSHOTS,
+          lastBackupTime: parsed.lastBackupTime || '2026-11-21 00:30:00',
+          activeTab: parsed.activeTab || 'dashboard'
+        };
       }
     } catch (e) {
       console.error('Error loading stored data:', e);
@@ -48,6 +69,8 @@ export const AppProvider = ({ children }) => {
       transactions: INITIAL_TRANSACTIONS,
       stockMovements: INITIAL_STOCK_MOVEMENTS,
       salarySheet: INITIAL_SALARY_SHEET,
+      dailyLabors: INITIAL_DAILY_LABORS,
+      laborAttendance: INITIAL_LABOR_ATTENDANCE,
       ledgers: INITIAL_LEDGERS,
       auditLogs: INITIAL_AUDIT_LOGS,
       gdriveConnected: true,
@@ -197,6 +220,33 @@ export const AppProvider = ({ children }) => {
     return txnRecord;
   };
 
+  const updateTransaction = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      transactions: prev.transactions.map(t => {
+        if (t.id === id) {
+          return {
+            ...t,
+            ...updatedFields,
+            amount: updatedFields.amount !== undefined ? Number(updatedFields.amount) : t.amount
+          };
+        }
+        return t;
+      })
+    }));
+    logAudit('TRANSACTION_UPDATED', `Updated transaction ${id}`);
+  };
+
+  const deleteTransaction = (id) => {
+    const txn = data.transactions.find(t => t.id === id);
+    if (!txn) return;
+    setData(prev => ({
+      ...prev,
+      transactions: prev.transactions.filter(t => t.id !== id)
+    }));
+    logAudit('TRANSACTION_DELETED', `Deleted transaction ${txn.voucherNo || id}`);
+  };
+
   // 2. Fund Transfer between accounts (e.g. Bank to Cash or Cash to Bank)
   const transferFunds = ({ fromAccountId, toAccountId, amount, description, date }) => {
     const numAmount = Number(amount);
@@ -257,6 +307,34 @@ export const AppProvider = ({ children }) => {
       projects: [...prev.projects, newPrj]
     }));
     logAudit('PROJECT_CREATED', `Project ${newPrj.id}: ${newPrj.name} (${newPrj.client})`);
+  };
+
+  const updateProject = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      projects: prev.projects.map(p => {
+        if (p.id === id) {
+          return {
+            ...p,
+            ...updatedFields,
+            contractValue: updatedFields.contractValue !== undefined ? Number(updatedFields.contractValue) : p.contractValue,
+            budget: updatedFields.budget !== undefined ? Number(updatedFields.budget) : p.budget,
+            receivedAmount: updatedFields.receivedAmount !== undefined ? Number(updatedFields.receivedAmount) : p.receivedAmount,
+            spentAmount: updatedFields.spentAmount !== undefined ? Number(updatedFields.spentAmount) : p.spentAmount
+          };
+        }
+        return p;
+      })
+    }));
+    logAudit('PROJECT_UPDATED', `Updated project ${id}`);
+  };
+
+  const deleteProject = (id) => {
+    setData(prev => ({
+      ...prev,
+      projects: prev.projects.filter(p => p.id !== id)
+    }));
+    logAudit('PROJECT_DELETED', `Deleted project ${id}`);
   };
 
   // 4. Material Inward (Purchase) & Outward (Issue to Site)
@@ -331,6 +409,33 @@ export const AppProvider = ({ children }) => {
     logAudit('MATERIAL_CATALOG_ADDED', `${newMat.code} - ${newMat.name}`);
   };
 
+  const updateMaterial = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      materials: prev.materials.map(m => {
+        if (m.id === id) {
+          return {
+            ...m,
+            ...updatedFields,
+            currentStock: updatedFields.currentStock !== undefined ? Number(updatedFields.currentStock) : m.currentStock,
+            minStockAlert: updatedFields.minStockAlert !== undefined ? Number(updatedFields.minStockAlert) : m.minStockAlert,
+            unitPriceAvg: updatedFields.unitPriceAvg !== undefined ? Number(updatedFields.unitPriceAvg) : m.unitPriceAvg
+          };
+        }
+        return m;
+      })
+    }));
+    logAudit('MATERIAL_UPDATED', `Updated material ${id}`);
+  };
+
+  const deleteMaterial = (id) => {
+    setData(prev => ({
+      ...prev,
+      materials: prev.materials.filter(m => m.id !== id)
+    }));
+    logAudit('MATERIAL_DELETED', `Deleted material ${id}`);
+  };
+
   // 5. Employee & Salary Processing
   const addEmployee = (emp) => {
     const newEmp = {
@@ -344,6 +449,31 @@ export const AppProvider = ({ children }) => {
       employees: [...prev.employees, newEmp]
     }));
     logAudit('EMPLOYEE_ADDED', `${newEmp.id}: ${newEmp.name} (${newEmp.designation})`);
+  };
+
+  const updateEmployee = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      employees: prev.employees.map(e => {
+        if (e.id === id) {
+          return {
+            ...e,
+            ...updatedFields,
+            monthlySalary: updatedFields.monthlySalary !== undefined ? Number(updatedFields.monthlySalary) : e.monthlySalary
+          };
+        }
+        return e;
+      })
+    }));
+    logAudit('EMPLOYEE_UPDATED', `Updated employee ${id}`);
+  };
+
+  const deleteEmployee = (id) => {
+    setData(prev => ({
+      ...prev,
+      employees: prev.employees.filter(e => e.id !== id)
+    }));
+    logAudit('EMPLOYEE_DELETED', `Deleted employee ${id}`);
   };
 
   const payEmployeeSalary = ({ salaryId, employeeId, accountId, paidAmount, paymentDate }) => {
@@ -403,6 +533,207 @@ export const AppProvider = ({ children }) => {
       ledgers: [...prev.ledgers, newLedger]
     }));
     logAudit('LEDGER_CREATED', `${newLedger.name} (${newLedger.type})`);
+  };
+
+  const updateLedger = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      ledgers: prev.ledgers.map(l => {
+        if (l.id === id) {
+          return {
+            ...l,
+            ...updatedFields,
+            totalBilled: updatedFields.totalBilled !== undefined ? Number(updatedFields.totalBilled) : l.totalBilled,
+            totalReceived: updatedFields.totalReceived !== undefined ? Number(updatedFields.totalReceived) : l.totalReceived,
+            totalPurchased: updatedFields.totalPurchased !== undefined ? Number(updatedFields.totalPurchased) : l.totalPurchased,
+            totalPaid: updatedFields.totalPaid !== undefined ? Number(updatedFields.totalPaid) : l.totalPaid,
+            dueBalance: updatedFields.dueBalance !== undefined ? Number(updatedFields.dueBalance) : l.dueBalance
+          };
+        }
+        return l;
+      })
+    }));
+    logAudit('LEDGER_UPDATED', `Updated ledger ${id}`);
+  };
+
+  const deleteLedger = (id) => {
+    setData(prev => ({
+      ...prev,
+      ledgers: prev.ledgers.filter(l => l.id !== id)
+    }));
+    logAudit('LEDGER_DELETED', `Deleted ledger ${id}`);
+  };
+
+  // 7. Daily Labor Roster & Master Attendance Management
+  const addDailyLabor = (labor) => {
+    const newLabor = {
+      ...labor,
+      id: `DL-${String((data.dailyLabors || []).length + 1).padStart(3, '0')}`,
+      dailyRate: Number(labor.dailyRate || 0),
+      overtimeRate: Number(labor.overtimeRate || 0),
+      status: labor.status || 'Active'
+    };
+    setData(prev => ({
+      ...prev,
+      dailyLabors: [...(prev.dailyLabors || []), newLabor]
+    }));
+    logAudit('DAILY_LABOR_ADDED', `Added daily worker ${newLabor.id}: ${newLabor.name} (${newLabor.trade})`);
+    return newLabor;
+  };
+
+  const updateDailyLabor = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      dailyLabors: (prev.dailyLabors || []).map(l => {
+        if (l.id === id) {
+          return {
+            ...l,
+            ...updatedFields,
+            dailyRate: updatedFields.dailyRate !== undefined ? Number(updatedFields.dailyRate) : l.dailyRate,
+            overtimeRate: updatedFields.overtimeRate !== undefined ? Number(updatedFields.overtimeRate) : l.overtimeRate
+          };
+        }
+        return l;
+      })
+    }));
+    logAudit('DAILY_LABOR_UPDATED', `Updated daily worker ${id}`);
+  };
+
+  const deleteDailyLabor = (id) => {
+    setData(prev => ({
+      ...prev,
+      dailyLabors: (prev.dailyLabors || []).filter(l => l.id !== id)
+    }));
+    logAudit('DAILY_LABOR_DELETED', `Deleted daily worker ${id}`);
+  };
+
+  // Record Attendance (Single or Batch)
+  const recordDailyAttendance = (records) => {
+    const list = Array.isArray(records) ? records : [records];
+    const newEntries = list.map((rec, idx) => {
+      const attendanceDays = rec.status === 'Present' ? 1.0 : rec.status === 'Half Day' ? 0.5 : 0;
+      const dailyRate = Number(rec.dailyRate || 0);
+      const otHours = Number(rec.otHours || 0);
+      const otRate = Number(rec.otRate || 0);
+      const advanceTaken = Number(rec.advanceTaken || 0);
+      const basicWage = Math.round(attendanceDays * dailyRate);
+      const otWage = Math.round(otHours * otRate);
+      const grossWage = basicWage + otWage;
+      const netPayable = Math.max(0, grossWage - advanceTaken);
+
+      return {
+        id: rec.id || `ATT-${Date.now()}-${idx}`,
+        date: rec.date || new Date().toISOString().slice(0, 10),
+        laborId: rec.laborId,
+        projectId: rec.projectId || null,
+        status: rec.status || 'Present',
+        attendanceDays,
+        dailyRate,
+        basicWage,
+        otHours,
+        otRate,
+        otWage,
+        grossWage,
+        advanceTaken,
+        netPayable,
+        paymentStatus: rec.paymentStatus || 'Due',
+        paidVoucherNo: rec.paidVoucherNo || '-',
+        note: rec.note || ''
+      };
+    });
+
+    setData(prev => ({
+      ...prev,
+      laborAttendance: [...newEntries, ...(prev.laborAttendance || [])]
+    }));
+    logAudit('LABOR_ATTENDANCE_RECORDED', `Recorded attendance for ${newEntries.length} worker entries`);
+    return newEntries;
+  };
+
+  const updateDailyAttendance = (id, updatedFields) => {
+    setData(prev => ({
+      ...prev,
+      laborAttendance: (prev.laborAttendance || []).map(att => {
+        if (att.id === id) {
+          const merged = { ...att, ...updatedFields };
+          const attendanceDays = merged.status === 'Present' ? 1.0 : merged.status === 'Half Day' ? 0.5 : 0;
+          const dailyRate = Number(merged.dailyRate || 0);
+          const otHours = Number(merged.otHours || 0);
+          const otRate = Number(merged.otRate || 0);
+          const advanceTaken = Number(merged.advanceTaken || 0);
+          const basicWage = Math.round(attendanceDays * dailyRate);
+          const otWage = Math.round(otHours * otRate);
+          const grossWage = basicWage + otWage;
+          const netPayable = Math.max(0, grossWage - advanceTaken);
+
+          return {
+            ...merged,
+            attendanceDays,
+            dailyRate,
+            otHours,
+            otRate,
+            advanceTaken,
+            basicWage,
+            otWage,
+            grossWage,
+            netPayable
+          };
+        }
+        return att;
+      })
+    }));
+    logAudit('LABOR_ATTENDANCE_UPDATED', `Updated attendance record ${id}`);
+  };
+
+  const deleteDailyAttendance = (id) => {
+    setData(prev => ({
+      ...prev,
+      laborAttendance: (prev.laborAttendance || []).filter(a => a.id !== id)
+    }));
+    logAudit('LABOR_ATTENDANCE_DELETED', `Deleted attendance record ${id}`);
+  };
+
+  // Disburse Labor Wage Settlement (Cash/Bank)
+  const disburseLaborWage = ({ laborId, accountId, paidAmount, paymentDate, attendanceIds = [], note = '' }) => {
+    const labor = (data.dailyLabors || []).find(l => l.id === laborId);
+    const acc = data.accounts.find(a => a.id === accountId);
+    if (!labor || !acc || Number(paidAmount) <= 0) return false;
+
+    const voucherNo = generateVoucherNumber('expense');
+
+    // 1. Create expense transaction
+    addTransaction({
+      voucherNo,
+      type: 'expense',
+      date: paymentDate || new Date().toISOString().slice(0, 10),
+      party: `${labor.name} (${labor.trade})`,
+      category: 'Labor & Fabrication',
+      amount: Number(paidAmount),
+      accountId: accountId,
+      projectId: labor.assignedProjectId || null,
+      description: `Daily labor wage disbursement for ${labor.name} (${labor.trade})`,
+      note: note || `Disbursed from ${acc.name}. Voucher #${voucherNo}`
+    });
+
+    // 2. Mark attendance records as Paid
+    if (attendanceIds.length > 0) {
+      setData(prev => ({
+        ...prev,
+        laborAttendance: (prev.laborAttendance || []).map(att => {
+          if (attendanceIds.includes(att.id)) {
+            return {
+              ...att,
+              paymentStatus: 'Paid',
+              paidVoucherNo: voucherNo
+            };
+          }
+          return att;
+        })
+      }));
+    }
+
+    logAudit('LABOR_WAGE_DISBURSED', `Paid ৳${Number(paidAmount).toLocaleString()} wage to ${labor.name} via ${acc.name} (${voucherNo})`);
+    return voucherNo;
   };
 
   // 7. Export to Excel (.xlsx) using xlsx library
@@ -481,6 +812,34 @@ export const AppProvider = ({ children }) => {
       });
       const wsSalary = XLSX.utils.json_to_sheet(salaryData);
       XLSX.utils.book_append_sheet(wb, wsSalary, "Salary Register");
+
+      // Daily Labor Attendance & Wages Sheet
+      const laborAttendanceData = (data.laborAttendance || []).map(att => {
+        const labor = (data.dailyLabors || []).find(l => l.id === att.laborId);
+        const prj = data.projects.find(p => p.id === att.projectId);
+        return {
+          "Record ID": att.id,
+          "Date": att.date,
+          "Worker Name": labor?.name || att.laborId,
+          "Trade": labor?.trade || "-",
+          "Project": prj?.name || att.projectId || "General Site",
+          "Status": att.status,
+          "Days": att.attendanceDays,
+          "Daily Rate (BDT)": att.dailyRate,
+          "Basic Wage (BDT)": att.basicWage,
+          "OT Hours": att.otHours,
+          "OT Rate (BDT)": att.otRate,
+          "OT Wage (BDT)": att.otWage,
+          "Gross Wage (BDT)": att.grossWage,
+          "Advance Taken (BDT)": att.advanceTaken,
+          "Net Payable (BDT)": att.netPayable,
+          "Payment Status": att.paymentStatus,
+          "Voucher No": att.paidVoucherNo || "-",
+          "Notes": att.note || ""
+        };
+      });
+      const wsLabor = XLSX.utils.json_to_sheet(laborAttendanceData);
+      XLSX.utils.book_append_sheet(wb, wsLabor, "Daily Labor & Wages");
 
       // Write and trigger download
       const fileName = `ASIA_ENGINEERS_Financial_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
@@ -626,13 +985,30 @@ export const AppProvider = ({ children }) => {
         setSelectedVoucherForPrint,
         // Actions
         addTransaction,
+        updateTransaction,
+        deleteTransaction,
         transferFunds,
         addProject,
+        updateProject,
+        deleteProject,
         recordStockMovement,
         addMaterial,
+        updateMaterial,
+        deleteMaterial,
         addEmployee,
+        updateEmployee,
+        deleteEmployee,
         payEmployeeSalary,
+        addDailyLabor,
+        updateDailyLabor,
+        deleteDailyLabor,
+        recordDailyAttendance,
+        updateDailyAttendance,
+        deleteDailyAttendance,
+        disburseLaborWage,
         addLedger,
+        updateLedger,
+        deleteLedger,
         exportAllToExcel,
         downloadBackupJSON,
         restoreFromJSON,

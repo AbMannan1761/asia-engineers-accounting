@@ -12,15 +12,29 @@ import {
   CheckCircle2,
   Clock,
   X,
-  FileText
+  FileText,
+  Edit2,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 
 export const ProjectsView = () => {
-  const { language, data, addProject, setActiveTab, setSelectedVoucherForPrint } = useApp();
+  const {
+    language,
+    data,
+    addProject,
+    updateProject,
+    deleteProject,
+    setActiveTab,
+    setSelectedVoucherForPrint
+  } = useApp();
+
   const [selectedProject, setSelectedProject] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
 
+  // New Project Form Data
   const [formData, setFormData] = useState({
     name: '',
     client: '',
@@ -29,6 +43,23 @@ export const ProjectsView = () => {
     contractValue: '',
     budget: '',
     startDate: new Date().toISOString().slice(0, 10),
+    expectedCompletion: '',
+    category: 'Industrial Shed',
+    status: 'In Progress'
+  });
+
+  // Edit Project Form Data
+  const [editFormData, setEditFormData] = useState({
+    id: '',
+    name: '',
+    client: '',
+    clientPhone: '',
+    site: '',
+    contractValue: '',
+    budget: '',
+    receivedAmount: '',
+    spentAmount: '',
+    startDate: '',
     expectedCompletion: '',
     category: 'Industrial Shed',
     status: 'In Progress'
@@ -56,6 +87,52 @@ export const ProjectsView = () => {
     });
   };
 
+  const handleOpenEdit = (project, e) => {
+    if (e) e.stopPropagation();
+    setEditingProject(project);
+    setEditFormData({
+      id: project.id,
+      name: project.name || '',
+      client: project.client || '',
+      clientPhone: project.clientPhone || '',
+      site: project.site || '',
+      contractValue: project.contractValue || '',
+      budget: project.budget || '',
+      receivedAmount: project.receivedAmount || 0,
+      spentAmount: project.spentAmount || 0,
+      startDate: project.startDate || '',
+      expectedCompletion: project.expectedCompletion || '',
+      category: project.category || 'Industrial Shed',
+      status: project.status || 'In Progress'
+    });
+  };
+
+  const handleUpdateProjectSubmit = (e) => {
+    e.preventDefault();
+    if (!editFormData.name.trim() || !editFormData.client.trim()) {
+      alert(language === 'bn' ? 'প্রজেক্ট ও ক্লায়েন্টের নাম আবশ্যক!' : 'Project and client names are required!');
+      return;
+    }
+    updateProject(editFormData.id, editFormData);
+    if (selectedProject && selectedProject.id === editFormData.id) {
+      setSelectedProject(prev => ({ ...prev, ...editFormData }));
+    }
+    setEditingProject(null);
+  };
+
+  const handleDeleteProject = (projectId, projectName, e) => {
+    if (e) e.stopPropagation();
+    const confirmMsg = language === 'bn'
+      ? `আপনি কি নিশ্চিত "${projectName}" (${projectId}) প্রজেক্টটি মুছে ফেলতে চান?`
+      : `Are you sure you want to delete project "${projectName}" (${projectId})?`;
+    if (window.confirm(confirmMsg)) {
+      deleteProject(projectId);
+      if (selectedProject?.id === projectId) {
+        setSelectedProject(null);
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 pb-20 lg:pb-8">
       {/* Header */}
@@ -67,8 +144,8 @@ export const ProjectsView = () => {
           </h2>
           <p className="text-xs text-slate-400">
             {language === 'bn' 
-              ? 'প্রতিটি স্টিল স্ট্রাকচার প্রজেক্টের বাজেট, আয়-ব্যয় এবং লাভ-ক্ষতি হিসাব' 
-              : 'Track contract values, client billing, material/labor costs, and profit margin per project'}
+              ? 'প্রতিটি স্টিল স্ট্রাকচার প্রজেক্টের বাজেট, আয়-ব্যয়, লাভ-ক্ষতি এবং এডিট/আপডেট' 
+              : 'Track contract values, billing, expenses, profit margin and edit/update project info'}
           </p>
         </div>
 
@@ -96,23 +173,46 @@ export const ProjectsView = () => {
             <div
               key={project.id}
               onClick={() => setSelectedProject(isSelected ? null : project)}
-              className={`cursor-pointer rounded-2xl p-5 border transition-all ${
+              className={`relative cursor-pointer rounded-2xl p-5 border transition-all ${
                 isSelected 
                   ? 'bg-slate-800/90 border-amber-500 ring-2 ring-amber-500/20 shadow-xl' 
                   : 'bg-slate-800/70 border-slate-700/80 hover:border-slate-600'
               }`}
             >
+              {/* Header row with Project ID and Action Buttons */}
               <div className="flex items-start justify-between gap-2 mb-2">
-                <span className="font-mono text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                  {project.id}
-                </span>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  project.status === 'Completed' 
-                    ? 'bg-emerald-500/15 text-emerald-400' 
-                    : 'bg-blue-500/15 text-blue-400'
-                }`}>
-                  {project.status}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                    {project.id}
+                  </span>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                    project.status === 'Completed' 
+                      ? 'bg-emerald-500/15 text-emerald-400' 
+                      : project.status === 'On Hold'
+                      ? 'bg-rose-500/15 text-rose-400'
+                      : 'bg-blue-500/15 text-blue-400'
+                  }`}>
+                    {project.status}
+                  </span>
+                </div>
+
+                {/* Edit & Delete Action Buttons */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={(e) => handleOpenEdit(project, e)}
+                    className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-amber-500 hover:text-slate-950 text-slate-300 border border-slate-700/80 transition"
+                    title={language === 'bn' ? 'প্রজেক্ট এডিট করুন' : 'Edit Project'}
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteProject(project.id, project.name, e)}
+                    className="p-1.5 rounded-lg bg-slate-900/80 hover:bg-rose-600 hover:text-white text-slate-400 border border-slate-700/80 transition"
+                    title={language === 'bn' ? 'প্রজেক্ট মুছুন' : 'Delete Project'}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
               <h3 className="font-bold text-white text-base leading-snug line-clamp-1 mb-1">
@@ -120,7 +220,7 @@ export const ProjectsView = () => {
               </h3>
 
               <div className="text-xs text-amber-400 font-medium mb-1">
-                {project.client}
+                {project.client} {project.clientPhone && <span className="text-slate-400 font-normal">({project.clientPhone})</span>}
               </div>
 
               <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mb-4">
@@ -164,11 +264,18 @@ export const ProjectsView = () => {
                 </div>
               </div>
 
-              <div className="mt-3 text-right">
-                <span className="text-[11px] text-amber-400 font-semibold hover:underline">
+              <div className="mt-3 flex items-center justify-between text-[11px]">
+                <button
+                  onClick={(e) => handleOpenEdit(project, e)}
+                  className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold"
+                >
+                  <Edit2 className="w-3 h-3" />
+                  <span>{language === 'bn' ? 'এডিট করুন' : 'Edit'}</span>
+                </button>
+                <span className="text-slate-400 hover:text-white font-semibold">
                   {isSelected 
                     ? (language === 'bn' ? 'লেজার বন্ধ করুন ▲' : 'Close Details ▲') 
-                    : (language === 'bn' ? 'প্রজেক্ট লেজার ও ভাউচার দেখুন ▼' : 'View Project Ledger ▼')}
+                    : (language === 'bn' ? 'লেজার ও ভাউচার দেখুন ▼' : 'View Ledger ▼')}
                 </span>
               </div>
             </div>
@@ -181,14 +288,29 @@ export const ProjectsView = () => {
         <div className="bg-slate-800/90 border border-amber-500/50 rounded-2xl p-5 shadow-2xl animate-fade-in">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-700">
             <div>
-              <div className="text-xs text-amber-400 font-mono font-bold">{selectedProject.id}</div>
-              <h3 className="text-lg font-bold text-white">{selectedProject.name}</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-amber-400 font-mono font-bold">{selectedProject.id}</span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                  selectedProject.status === 'Completed' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-blue-500/15 text-blue-400'
+                }`}>
+                  {selectedProject.status}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-white mt-0.5">{selectedProject.name}</h3>
               <div className="text-xs text-slate-400">
                 Client: {selectedProject.client} | Site: {selectedProject.site}
               </div>
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => handleOpenEdit(selectedProject, e)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-slate-950 font-semibold text-xs border border-amber-500/30 transition"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>{language === 'bn' ? 'প্রজেক্ট এডিট' : 'Edit Project'}</span>
+              </button>
+
               <button
                 onClick={() => setSelectedProject(null)}
                 className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-700"
@@ -387,6 +509,172 @@ export const ProjectsView = () => {
                 >
                   {language === 'bn' ? 'প্রজেক্ট সেভ করুন' : 'Save Project'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Project */}
+      {editingProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'bn' ? `প্রজেক্ট এডিট ও আপডেট (${editFormData.id})` : `Edit Project (${editFormData.id})`}</span>
+              </h3>
+              <button 
+                onClick={() => setEditingProject(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateProjectSubmit} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্টের নাম' : 'Project Name'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData(p => ({ ...p, name: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ক্লায়েন্ট নাম' : 'Client Name'} *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.client}
+                    onChange={(e) => setEditFormData(p => ({ ...p, client: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ক্লায়েন্ট ফোন' : 'Client Phone'}</label>
+                  <input
+                    type="text"
+                    value={editFormData.clientPhone}
+                    onChange={(e) => setEditFormData(p => ({ ...p, clientPhone: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সাইটের ঠিকানা' : 'Site Location'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.site}
+                  onChange={(e) => setEditFormData(p => ({ ...p, site: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'চুক্তি মূল্য (Contract BDT)' : 'Contract Value'} *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={editFormData.contractValue}
+                    onChange={(e) => setEditFormData(p => ({ ...p, contractValue: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'বাজেট (Budget BDT)' : 'Budget'}</label>
+                  <input
+                    type="number"
+                    value={editFormData.budget}
+                    onChange={(e) => setEditFormData(p => ({ ...p, budget: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্ট ধরন / ক্যাটাগরি' : 'Category'}</label>
+                  <select
+                    value={editFormData.category}
+                    onChange={(e) => setEditFormData(p => ({ ...p, category: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="Industrial Shed">Industrial Shed</option>
+                    <option value="Pre-Engineered Building">Pre-Engineered Building (PEB)</option>
+                    <option value="Lift Core Structures">Lift Core Structures</option>
+                    <option value="Specialized & Defense">Specialized & Defense</option>
+                    <option value="Commercial Steel Building">Commercial Steel Building</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'কাজের অবস্থা (Status)' : 'Status'}</label>
+                  <select
+                    value={editFormData.status}
+                    onChange={(e) => setEditFormData(p => ({ ...p, status: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="In Progress">In Progress (চলমান)</option>
+                    <option value="Completed">Completed (সম্পন্ন)</option>
+                    <option value="On Hold">On Hold (স্থগিত)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'শুরুর তারিখ' : 'Start Date'}</label>
+                  <input
+                    type="date"
+                    value={editFormData.startDate}
+                    onChange={(e) => setEditFormData(p => ({ ...p, startDate: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সম্ভাব্য সমাপ্তি তারিখ' : 'Expected Completion'}</label>
+                  <input
+                    type="date"
+                    value={editFormData.expectedCompletion}
+                    onChange={(e) => setEditFormData(p => ({ ...p, expectedCompletion: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteProject(editFormData.id, editFormData.name)}
+                  className="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'প্রজেক্ট ডিলিট' : 'Delete'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingProject(null)}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  >
+                    {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
+                  >
+                    {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Project'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

@@ -46,8 +46,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
     {
       id: 'employees',
       icon: Users2,
-      labelBn: 'কর্মচারী ও বেতন শিট',
-      labelEn: 'Employee & Salary'
+      labelBn: 'কর্মী, লেবার হাজিরা ও বেতন',
+      labelEn: 'Labor Attendance & Salary'
     },
     {
       id: 'ledgers',

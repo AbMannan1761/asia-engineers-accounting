@@ -13,7 +13,9 @@ import {
   Briefcase,
   X,
   FileCheck2,
-  Paperclip
+  Paperclip,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 
@@ -22,6 +24,8 @@ export const AccountingView = () => {
     language,
     data,
     addTransaction,
+    updateTransaction,
+    deleteTransaction,
     transferFunds,
     setActiveTab,
     setSelectedVoucherForPrint
@@ -35,6 +39,7 @@ export const AccountingView = () => {
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [editingTxn, setEditingTxn] = useState(null);
 
   // New Transaction Form State
   const [formData, setFormData] = useState({
@@ -321,16 +326,36 @@ export const AccountingView = () => {
                         {isIncome ? '+' : isTransfer ? '⇄ ' : '-'}{formatBDT(txn.amount)}
                       </td>
                       <td className="py-3 px-3 text-center">
-                        <button
-                          onClick={() => {
-                            setSelectedVoucherForPrint(txn);
-                            setActiveTab('vouchers');
-                          }}
-                          className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white"
-                          title="View / Print A4 Voucher"
-                        >
-                          <Printer className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => setEditingTxn({ ...txn })}
+                            className="p-1 rounded bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-300 transition"
+                            title={language === 'bn' ? 'লেনদেন এডিট করুন' : 'Edit Transaction'}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedVoucherForPrint(txn);
+                              setActiveTab('vouchers');
+                            }}
+                            className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition"
+                            title="View / Print A4 Voucher"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${txn.voucherNo} ভাউচারটি মুছে ফেলতে চান?` : `Delete voucher ${txn.voucherNo}?`)) {
+                                deleteTransaction(txn.id);
+                              }
+                            }}
+                            className="p-1 hover:bg-rose-600 rounded text-slate-400 hover:text-white transition"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -628,6 +653,162 @@ export const AccountingView = () => {
                 >
                   {language === 'bn' ? 'ট্রান্সফার সম্পন্ন করুন' : 'Confirm Transfer'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal: Edit Transaction */}
+      {editingTxn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'bn' ? `লেনদেন এডিট ও আপডেট (${editingTxn.voucherNo})` : `Edit Transaction (${editingTxn.voucherNo})`}</span>
+              </h3>
+              <button 
+                onClick={() => setEditingTxn(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                updateTransaction(editingTxn.id, editingTxn);
+                setEditingTxn(null);
+              }}
+              className="p-5 space-y-3.5 text-xs"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'তারিখ' : 'Date'} *</label>
+                  <input
+                    type="date"
+                    required
+                    value={editingTxn.date}
+                    onChange={(e) => setEditingTxn(p => ({ ...p, date: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'টাকার পরিমাণ (৳)' : 'Amount'} *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={editingTxn.amount}
+                    onChange={(e) => setEditingTxn(p => ({ ...p, amount: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'পক্ষ / গ্রাহক / ভেন্ডার' : 'Party / Client'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingTxn.party}
+                  onChange={(e) => setEditingTxn(p => ({ ...p, party: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'} *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTxn.category}
+                    onChange={(e) => setEditingTxn(p => ({ ...p, category: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'অ্যাকাউন্ট' : 'Account'} *</label>
+                  <select
+                    value={editingTxn.accountId}
+                    onChange={(e) => setEditingTxn(p => ({ ...p, accountId: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  >
+                    {data.accounts.map(a => (
+                      <option key={a.id} value={a.id}>{a.name} ({formatBDT(a.balance)})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট' : 'Project'}</label>
+                <select
+                  value={editingTxn.projectId || ''}
+                  onChange={(e) => setEditingTxn(p => ({ ...p, projectId: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                >
+                  <option value="">{language === 'bn' ? 'কোনো প্রজেক্ট নেই (সাধারণ অফিস)' : 'No Project (General Office)'}</option>
+                  {data.projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.id} - {p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'বিবরণ' : 'Description'} *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingTxn.description}
+                  onChange={(e) => setEditingTxn(p => ({ ...p, description: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'নোট / চেক নং' : 'Note / Cheque #'}</label>
+                <input
+                  type="text"
+                  value={editingTxn.note || ''}
+                  onChange={(e) => setEditingTxn(p => ({ ...p, note: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${editingTxn.voucherNo} মুছে ফেলতে চান?` : `Delete ${editingTxn.voucherNo}?`)) {
+                      deleteTransaction(editingTxn.id);
+                      setEditingTxn(null);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{language === 'bn' ? 'মুছে ফেলুন' : 'Delete'}</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingTxn(null)}
+                    className="px-4 py-2 rounded-xl text-slate-400 hover:text-white"
+                  >
+                    {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 shadow-lg"
+                  >
+                    {language === 'bn' ? 'আপডেট সেভ করুন' : 'Update Transaction'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
