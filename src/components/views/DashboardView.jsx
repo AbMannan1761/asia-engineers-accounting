@@ -38,26 +38,16 @@ export const DashboardView = () => {
 
   return (
     <div className="space-y-6 pb-20 lg:pb-8">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-800/90 via-slate-800 to-amber-950/40 border border-slate-700/80 rounded-2xl p-5 lg:p-6 shadow-xl relative overflow-hidden">
+      {/* Top Action Bar */}
+      <div className="bg-gradient-to-r from-slate-800/90 via-slate-800 to-amber-950/40 border border-slate-700/80 rounded-2xl p-3.5 lg:p-4 shadow-xl relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">
-                {language === 'bn' ? 'অ্যাকাউন্টিং ড্যাশবোর্ড' : 'Executive Dashboard'}
-              </span>
-              <span className="text-xs text-slate-400">
-                {new Date().toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </span>
-            </div>
-            <h2 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
-              {language === 'bn' ? 'স্বাগতম, ইঞ্জি. এম. এ. হান্নান' : 'Welcome back, Engr. M. A. Hannan'}
-            </h2>
-            <p className="text-xs lg:text-sm text-slate-300 mt-0.5">
-              {language === 'bn' 
-                ? 'এশিয়া ইঞ্জিনিয়ার্স স্টিল স্ট্রাকচার প্রকল্প ও আর্থিক হিসাবের সারসংক্ষেপ' 
-                : 'Asia Engineers Steel Structure & Construction Financial Overview'}
-            </p>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">
+              {language === 'bn' ? 'অ্যাকাউন্টিং ড্যাশবোর্ড' : 'Executive Dashboard'}
+            </span>
+            <span className="text-xs text-slate-400">
+              {new Date().toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </span>
           </div>
 
           {/* Quick Action Shortcuts */}
