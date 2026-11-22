@@ -47,6 +47,7 @@ export const AccountingView = () => {
   const [activeFilter, setActiveFilter] = useState('all'); // all | income | expense | transfer
   const [selectedAccountId, setSelectedAccountId] = useState('all');
   const [selectedProjectId, setSelectedProjectId] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modals state
@@ -88,6 +89,7 @@ export const AccountingView = () => {
     if (activeFilter !== 'all' && txn.type !== activeFilter) return false;
     if (selectedAccountId !== 'all' && txn.accountId !== selectedAccountId && txn.toAccountId !== selectedAccountId) return false;
     if (selectedProjectId !== 'all' && txn.projectId !== selectedProjectId) return false;
+    if (selectedCategory !== 'all' && txn.category !== selectedCategory) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const matchVoucher = txn.voucherNo?.toLowerCase().includes(q);
@@ -297,8 +299,20 @@ export const AccountingView = () => {
             ))}
           </select>
 
+          {/* Category / Head Filter */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400 max-w-[170px] truncate"
+          >
+            <option value="all">{language === 'bn' ? 'সকল খরচের হেড / ক্যাটাগরি' : 'All Categories'}</option>
+            {Array.from(new Set([...incomeCategories, ...expenseCategories, ...data.transactions.map(t => t.category).filter(Boolean)])).map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+
           {/* Search Box */}
-          <div className="relative min-w-[200px]">
+          <div className="relative min-w-[180px]">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -308,6 +322,23 @@ export const AccountingView = () => {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
           </div>
+
+          {/* Clear / Reset Filter Button */}
+          {(activeFilter !== 'all' || selectedAccountId !== 'all' || selectedProjectId !== 'all' || selectedCategory !== 'all' || searchQuery) && (
+            <button
+              onClick={() => {
+                setActiveFilter('all');
+                setSelectedAccountId('all');
+                setSelectedProjectId('all');
+                setSelectedCategory('all');
+                setSearchQuery('');
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-semibold transition"
+              title="সকল ফিল্টার রিসেট করুন"
+            >
+              {language === 'bn' ? 'ফিল্টার মুছুন' : 'Reset'}
+            </button>
+          )}
         </div>
       </div>
 
