@@ -46,7 +46,6 @@ export const BackupSecurityView = () => {
 
   const fileInputRef = useRef(null);
   const [connecting, setConnecting] = useState(false);
-  const [copiedScript, setCopiedScript] = useState(false);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState('');
   const [sheetSyncSuccessMsg, setSheetSyncSuccessMsg] = useState('');
   const [isSyncingSheet, setIsSyncingSheet] = useState(false);
@@ -89,37 +88,6 @@ export const BackupSecurityView = () => {
     };
     reader.readAsText(file);
     e.target.value = '';
-  };
-
-  const gasScriptCode = "// ASIA ENGINEERS - Google Drive Automated Cloud Backup Webhook\n" +
-    "// Target Folder ID: " + targetFolderId + "\n\n" +
-    "function doPost(e) {\n" +
-    "  try {\n" +
-    "    var folderId = '" + targetFolderId + "';\n" +
-    "    var folder = DriveApp.getFolderById(folderId);\n" +
-    "    var requestData = JSON.parse(e.postData.contents);\n" +
-    "    var timestamp = Utilities.formatDate(new Date(), 'GMT+6', 'yyyy-MM-dd_HHmmss');\n" +
-    "    var fileName = 'AE_Accounting_Backup_' + timestamp + '.json';\n" +
-    "    var file = folder.createFile(fileName, JSON.stringify(requestData, null, 2), MimeType.PLAIN_TEXT);\n" +
-    "    file.setDescription('Asia Engineers Automatic Accounting Backup');\n" +
-    "    return ContentService.createTextOutput(JSON.stringify({\n" +
-    "      status: 'SUCCESS',\n" +
-    "      fileId: file.getId(),\n" +
-    "      fileName: fileName,\n" +
-    "      folderId: folderId\n" +
-    "    })).setMimeType(ContentService.MimeType.JSON);\n" +
-    "  } catch (err) {\n" +
-    "    return ContentService.createTextOutput(JSON.stringify({\n" +
-    "      status: 'ERROR',\n" +
-    "      message: err.toString()\n" +
-    "    })).setMimeType(ContentService.MimeType.JSON);\n" +
-    "  }\n" +
-    "}";
-
-  const copyScriptToClipboard = () => {
-    navigator.clipboard.writeText(gasScriptCode);
-    setCopiedScript(true);
-    setTimeout(() => setCopiedScript(false), 3000);
   };
 
   const snapshots = data.backupSnapshots || [];
@@ -454,35 +422,6 @@ export const BackupSecurityView = () => {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Google Apps Script Free Automated Webhook Integration Helper */}
-      <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 space-y-3">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-700">
-          <div className="flex items-center gap-2">
-            <Code2 className="w-4 h-4 text-amber-400" />
-            <h3 className="font-bold text-white text-sm">
-              {language === 'bn' ? 'গুগল ড্রাইভ অটোমেশন স্ক্রিপ্ট (Google Apps Script Webhook)' : 'Automated Apps Script Webhook'}
-            </h3>
-          </div>
-          <button
-            onClick={copyScriptToClipboard}
-            className="flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold transition"
-          >
-            {copiedScript ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copiedScript ? (language === 'bn' ? 'কপি হয়েছে!' : 'Copied!') : (language === 'bn' ? 'কোড কপি করুন' : 'Copy Script')}</span>
-          </button>
-        </div>
-
-        <p className="text-xs text-slate-300">
-          {language === 'bn'
-            ? 'আপনার এই নির্দিষ্ট গুগল ড্রাইভ ফোল্ডারে (' + targetFolderId + ') অটোমেটিক ব্যাকআপ ফাইল রাইট করার জন্য প্রস্তুতকৃত গুগল অ্যাপস স্ক্রিপ্ট কোড:'
-            : 'Deploy this Google Apps Script inside your Google account to automatically receive snapshots into folder ' + targetFolderId}
-        </p>
-
-        <pre className="p-3 bg-slate-950 rounded-xl text-slate-300 font-mono text-[11px] overflow-x-auto border border-slate-800">
-          {gasScriptCode}
-        </pre>
       </div>
 
       {/* System Security & Audit Log Table */}
