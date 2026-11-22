@@ -29,11 +29,19 @@ export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => localStorage.getItem('AE_LANG') || 'bn');
   const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('AE_AUTH') !== 'false');
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState({
-    name: 'Engr. M. A. Hannan',
-    role: 'Administrator / Director',
-    phone: '01830002040',
-    email: 'hannan@asiaengineersbd.com'
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('AE_CURRENT_USER');
+      if (savedUser) return JSON.parse(savedUser);
+    } catch (e) {}
+    const savedLoginId = localStorage.getItem('AE_LOGIN_ID') || '01830002040';
+    return {
+      name: 'Engr. M. A. Hannan',
+      role: 'Administrator / Director',
+      phone: '01830002040',
+      email: 'asiaengineersbd@gmail.com',
+      loginId: savedLoginId
+    };
   });
 
   // State initialization with localStorage fallback
@@ -150,18 +158,31 @@ export const AppProvider = ({ children }) => {
   }, [language]);
 
   const login = (username, password) => {
-    // Standard credential check for Director / Administrator
+    // Flexible credential check for Director / Administrator
     const cleanUser = (username || '').trim().toLowerCase();
     const cleanPass = (password || '').trim();
 
     if (
-      (cleanUser === 'admin' || cleanUser === '01830002040' || cleanUser === 'hannan' || cleanUser === 'director') &&
-      (cleanPass === 'ae2026' || cleanPass === 'admin' || cleanPass === '1234' || cleanPass === '01830002040')
+      (cleanUser === 'admin' || cleanUser === '01830002040' || cleanUser === '01928571761' || cleanUser === 'hannan' || cleanUser === 'director' || cleanUser.includes('@')) &&
+      (cleanPass === 'ae2026' || cleanPass === 'admin' || cleanPass === '1234' || cleanPass === '01830002040' || cleanPass === '01928571761')
     ) {
+      const activeId = (username || '').trim();
+      const userObj = {
+        name: activeId.includes('@')
+          ? activeId
+          : (activeId === '01928571761' ? 'ইঞ্জি. মোহাম্মদ আব্দুল মান্নান' : 'Engr. M. A. Hannan'),
+        loginId: activeId,
+        email: activeId.includes('@') ? activeId : (activeId === '01928571761' ? 'abmannan1761@gmail.com' : 'asiaengineersbd@gmail.com'),
+        phone: activeId.startsWith('01') ? activeId : '01830002040',
+        role: 'Administrator / Director'
+      };
+      setCurrentUser(userObj);
+      localStorage.setItem('AE_CURRENT_USER', JSON.stringify(userObj));
+      localStorage.setItem('AE_LOGIN_ID', activeId);
       setIsAuthenticated(true);
       setShowLoginModal(false);
       localStorage.setItem('AE_AUTH', 'true');
-      logAudit('USER_LOGIN', `Director ${currentUser.name} signed in successfully`);
+      logAudit('USER_LOGIN', `Director (${activeId}) signed in successfully`, activeId);
       return { success: true };
     }
     return { success: false, error: language === 'bn' ? 'ইউজারনেম বা পাসওয়ার্ড সঠিক নয়!' : 'Invalid username or password!' };
@@ -170,19 +191,23 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.setItem('AE_AUTH', 'false');
-    logAudit('USER_LOGOUT', `Director ${currentUser.name} logged out`);
+    logAudit('USER_LOGOUT', `Director (${currentUser.loginId || currentUser.email || currentUser.name}) logged out`);
   };
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'bn' ? 'en' : 'bn');
   };
 
-  // Helper to append audit log
-  const logAudit = (action, details) => {
+  // Helper to append audit log with Login ID / Email tracking
+  const logAudit = (action, details, customUser = null) => {
+    const userIdentifier = customUser || currentUser.loginId || currentUser.email || currentUser.phone || currentUser.name;
     const newLog = {
       id: `LOG-${Date.now()}`,
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      user: currentUser.name,
+      user: userIdentifier,
+      loginId: userIdentifier,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
       action,
       details
     };

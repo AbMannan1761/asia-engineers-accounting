@@ -217,14 +217,14 @@ export const Header = ({ onToggleSidebar }) => {
           {/* Current User Pill */}
           <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-bold flex items-center justify-center text-xs shadow">
-              H
+              {(currentUser.loginId || currentUser.name || 'U').charAt(0).toUpperCase()}
             </div>
             <div className="hidden lg:block text-left">
-              <div className="text-xs font-semibold text-slate-200 leading-none">
-                {currentUser.name}
+              <div className="text-xs font-mono font-semibold text-amber-300 leading-none">
+                {currentUser.loginId || currentUser.email || currentUser.name}
               </div>
-              <div className="text-[10px] text-amber-400 font-medium">
-                {language === 'bn' ? 'ডিরেক্টর / অ্যাডমিন' : 'Administrator'}
+              <div className="text-[10px] text-slate-400 font-medium mt-0.5">
+                {currentUser.name && currentUser.name !== currentUser.loginId ? currentUser.name : (language === 'bn' ? 'ডিরেক্টর / অ্যাডমিন' : 'Administrator')}
               </div>
             </div>
           </div>
