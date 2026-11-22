@@ -883,13 +883,16 @@ export const BackupSecurityView = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {data.auditLogs.map((log) => {
-                const userDisplayId = log.loginId || log.userEmail || (log.user && (log.user.includes('@') || log.user.startsWith('01')) ? log.user : (currentUser?.loginId || currentUser?.email || '01830002040'));
-                const userDisplayName = log.userName || (log.user && !log.user.includes('@') && !log.user.startsWith('01') ? log.user : (currentUser?.name || 'Administrator'));
+              {(data.auditLogs || []).map((log, idx) => {
+                const userRaw = log?.loginId || log?.userEmail || log?.user || '';
+                const userStr = typeof userRaw === 'object' ? JSON.stringify(userRaw) : String(userRaw || '');
+                const hasEmailOrPhone = userStr.includes('@') || userStr.startsWith('01');
+                const userDisplayId = userStr || currentUser?.loginId || '01830002040';
+                const userDisplayName = String(log?.userName || (!hasEmailOrPhone && userStr ? userStr : (currentUser?.name || 'Administrator')));
 
                 return (
-                  <tr key={log.id} className="hover:bg-slate-800/40">
-                    <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px]">{log.timestamp}</td>
+                  <tr key={log?.id || idx} className="hover:bg-slate-800/40">
+                    <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px]">{log?.timestamp || '-'}</td>
                     <td className="py-2.5 px-3">
                       <div className="font-mono font-bold text-amber-300 text-xs flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
@@ -901,10 +904,10 @@ export const BackupSecurityView = () => {
                     </td>
                     <td className="py-2.5 px-3">
                       <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700/60 text-slate-300 font-mono text-[10px]">
-                        {log.action}
+                        {log?.action || 'ACTIVITY'}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-200">{log.details}</td>
+                    <td className="py-2.5 px-3 text-slate-200">{log?.details || '-'}</td>
                   </tr>
                 );
               })}

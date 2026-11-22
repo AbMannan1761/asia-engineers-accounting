@@ -29,17 +29,31 @@ export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => localStorage.getItem('AE_LANG') || 'bn');
   const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('AE_AUTH') !== 'false');
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const DEFAULT_USER = {
+    name: 'Engr. M. A. Hannan',
+    role: 'Administrator / Director',
+    phone: '01830002040',
+    email: 'asiaengineersbd@gmail.com',
+    loginId: '01830002040'
+  };
+
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('AE_CURRENT_USER');
-      if (savedUser) return JSON.parse(savedUser);
+      if (savedUser && savedUser !== 'null' && savedUser !== 'undefined') {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            ...DEFAULT_USER,
+            ...parsed,
+            loginId: parsed.loginId || localStorage.getItem('AE_LOGIN_ID') || parsed.phone || parsed.email || DEFAULT_USER.loginId
+          };
+        }
+      }
     } catch (e) {}
     const savedLoginId = localStorage.getItem('AE_LOGIN_ID') || '01830002040';
     return {
-      name: 'Engr. M. A. Hannan',
-      role: 'Administrator / Director',
-      phone: '01830002040',
-      email: 'asiaengineersbd@gmail.com',
+      ...DEFAULT_USER,
       loginId: savedLoginId
     };
   });
