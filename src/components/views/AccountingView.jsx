@@ -20,7 +20,8 @@ import {
   Plus,
   RefreshCw,
   FileSpreadsheet,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 import { DateInput } from '../common/DateInput';
@@ -60,7 +61,7 @@ export const AccountingView = () => {
   const [catModalType, setCatModalType] = useState('income'); // 'income' | 'expense'
   const [newCatInput, setNewCatInput] = useState('');
   const [isPulling, setIsPulling] = useState(false);
-  const [pullMsg, setPullMsg] = useState('');
+  const [pullMsg, setPullMsg] = useState(null);
 
   // New Transaction Form State
   const [formData, setFormData] = useState({
@@ -191,14 +192,22 @@ export const AccountingView = () => {
               const res = await pullFromGoogleSheet();
               setIsPulling(false);
               if (res?.success) {
-                setPullMsg(language === 'bn' ? `সফলভাবে গুগল শীট থেকে আপডেট নেওয়া হয়েছে!` : 'Updated from Google Sheet!');
+                setPullMsg({
+                  type: 'success',
+                  text: language === 'bn' ? 'সফলভাবে গুগল শীট থেকে সমস্ত আপডেট ডেটা সফটওয়্যারে লোড হয়েছে!' : 'Successfully updated data from Google Sheet!'
+                });
               } else {
-                setPullMsg(language === 'bn' ? (res?.error || 'শীট থেকে আপডেট আনা সম্ভব হয়নি') : (res?.error || 'Failed to pull'));
+                setPullMsg({
+                  type: 'warning',
+                  text: language === 'bn' 
+                    ? 'গুগল শীট থেকে সরাসরি ডেটা আনতে প্রথমে "গুগল ড্রাইভ ও শীট সিংক" মেনু থেকে Apps Script Web App URL লিংকটি সেট করতে হবে।' 
+                    : (res?.error || 'Please configure Google Apps Script Web App URL first.')
+                });
               }
-              setTimeout(() => setPullMsg(''), 5000);
+              setTimeout(() => setPullMsg(null), 8000);
             }}
             disabled={isPulling}
-            className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3 py-2 rounded-xl shadow transition disabled:opacity-50"
+            className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3 py-2 rounded-xl shadow transition disabled:opacity-50 cursor-pointer"
             title="গুগল শীটের যেকোনো পরিবর্তন সরাসরি সফটওয়্যারে আপডেট করুন"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isPulling ? 'animate-spin' : ''}`} />
@@ -210,7 +219,7 @@ export const AccountingView = () => {
               setFormData(prev => ({ ...prev, type: 'income', category: incomeCategories[0] || 'Client Milestone Bill' }));
               setShowAddModal(true);
             }}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{language === 'bn' ? '+ ক্রেডিট ভাউচার (জমা)' : '+ Credit Voucher (Income)'}</span>
@@ -221,7 +230,7 @@ export const AccountingView = () => {
               setFormData(prev => ({ ...prev, type: 'expense', category: expenseCategories[0] || 'Material Purchase' }));
               setShowAddModal(true);
             }}
-            className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
+            className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{language === 'bn' ? '+ ডেবিট ভাউচার (খরচ)' : '+ Debit Voucher (Payment)'}</span>
@@ -229,7 +238,7 @@ export const AccountingView = () => {
 
           <button
             onClick={() => setShowTransferModal(true)}
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
+            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition cursor-pointer"
           >
             <ArrowLeftRight className="w-4 h-4" />
             <span>{language === 'bn' ? 'জার্নাল (ট্রান্সফার)' : 'Journal Transfer'}</span>
@@ -238,9 +247,36 @@ export const AccountingView = () => {
       </div>
 
       {pullMsg && (
-        <div className="bg-emerald-950/70 border border-emerald-500/50 p-3 rounded-xl text-emerald-300 text-xs flex items-center gap-2 animate-fade-in shadow-md">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{pullMsg}</span>
+        <div className={`p-3.5 rounded-xl text-xs flex items-center justify-between gap-3 animate-fade-in shadow-md border ${
+          pullMsg.type === 'success'
+            ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-200'
+            : 'bg-amber-950/85 border-amber-500/60 text-amber-200'
+        }`}>
+          <div className="flex items-center gap-2.5">
+            {pullMsg.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+            )}
+            <span>{pullMsg.text}</span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {pullMsg.type !== 'success' && (
+              <button
+                onClick={() => setActiveTab('backup')}
+                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-[11px] transition cursor-pointer"
+              >
+                {language === 'bn' ? 'সিংক পেজে যান' : 'Go to Sync Settings'}
+              </button>
+            )}
+            <button
+              onClick={() => setPullMsg(null)}
+              className="p-1 text-slate-400 hover:text-white rounded cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
