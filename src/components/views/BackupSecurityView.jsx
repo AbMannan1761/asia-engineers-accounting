@@ -98,12 +98,12 @@ export const BackupSecurityView = () => {
       <div>
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <CloudCog className="w-5 h-5 text-amber-400" />
-          <span>{language === 'bn' ? 'গুগল ড্রাইভ ও গুগল শীট সিংক' : 'Google Drive & Sheets Sync'}</span>
+          <span>{language === 'bn' ? 'গুগল শীট সিংক ও ডেটাবেজ ব্যাকআপ' : 'Google Sheets Sync & Database Backup'}</span>
         </h2>
         <p className="text-xs text-slate-400">
           {language === 'bn'
-            ? 'নির্দিষ্ট গুগল শীট ও ড্রাইভে তাৎক্ষণিক স্বয়ংক্রিয় সিংক, স্ন্যাপশট হিস্ট্রি এবং নিরাপদ ব্যাকআপ'
-            : 'Real-time Google Sheets sync, target Google Drive automated cloud backup, and database restore safety'}
+            ? 'নির্দিষ্ট গুগল শীটে তাৎক্ষণিক স্বয়ংক্রিয় ক্লাউড সিংক, অফলাইন JSON ব্যাকআপ ও রিস্টোর এবং সিকিউরিটি অডিট ট্রেইল'
+            : 'Real-time Google Sheets sync, offline database backup & restore, and security audit trail'}
         </p>
       </div>
 
@@ -256,171 +256,51 @@ export const BackupSecurityView = () => {
         </div>
       </div>
 
-      {/* Target Google Drive Card & Manual Card */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Google Drive Target Folder Card */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                <CloudCheck className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-sm">
-                  {language === 'bn' ? 'গুগল ড্রাইভ ক্লাউড ব্যাকআপ' : 'Google Drive Target Cloud'}
-                </h3>
-                <div className="text-[11px] text-emerald-400 font-semibold">
-                  {language === 'bn' ? 'সক্রিয়ভাবে কানেক্টেড' : 'Active Cloud Connection'}
-                </div>
-              </div>
-            </div>
-
-            <a
-              href={targetFolderUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-2.5 py-1 rounded-lg text-xs font-semibold transition"
-              title="Open Google Drive Folder"
-            >
-              <span>{language === 'bn' ? 'ড্রাইভ ফোল্ডার' : 'Open Drive'}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          <div className="text-xs text-slate-300 space-y-2 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
-            <div>
-              <span className="text-slate-400 block text-[11px]">{language === 'bn' ? 'টার্গেট ড্রাইভ ফোল্ডার লিংক:' : 'Target Drive Folder ID:'}</span>
-              <a
-                href={targetFolderUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-amber-400 text-[11px] hover:underline truncate block"
-              >
-                {targetFolderId}
-              </a>
-            </div>
-            <div className="flex justify-between pt-1 border-t border-slate-800">
-              <span className="text-slate-400">{language === 'bn' ? 'সর্বশেষ ক্লাউড ব্যাকআপ:' : 'Last Cloud Snapshot:'}</span>
-              <span className="font-mono text-emerald-400 font-semibold">{data.lastBackupTime || '2026-11-21 00:30:00'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">{language === 'bn' ? 'অটো-সিঙ্ক শিডিউল:' : 'Auto Sync Schedule:'}</span>
-              <span className="text-white font-medium">Daily at 11:59 PM + Instant on save</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">{language === 'bn' ? 'রিটেনশন পলিসি:' : 'Retention:'}</span>
-              <span className="text-slate-300">Last 30 daily snapshots</span>
-            </div>
-          </div>
-
-          <div className="pt-1 flex items-center gap-2">
-            <button
-              onClick={handleSyncNow}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
-            >
-              <CloudCheck className="w-4 h-4" />
-              <span>{language === 'bn' ? 'এখনই ড্রাইভে ব্যাকআপ সিঙ্ক করুন' : 'Sync Backup to Drive Now'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Manual 1-Click Backup & Safe Restore Card */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center">
-              <DownloadCloud className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-sm">
-                {language === 'bn' ? 'ম্যানুয়াল ডেটা ব্যাকআপ ও রিস্টোর' : 'Manual Database Backup & Restore'}
-              </h3>
-              <div className="text-[11px] text-slate-400">
-                JSON Database Standalone Archive
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-300">
-            {language === 'bn'
-              ? 'যেকোনো মুহূর্তে এক ক্লিকে সম্পূর্ণ ডেটাবেস ডাউনলোড করে আপনার পেনড্রাইভ বা কম্পিউটারে সংরক্ষণ করতে পারেন, এবং প্রয়োজন হলে ফাইল সিলেক্ট করে নিরাপদে রিস্টোর করতে পারেন।'
-              : 'Download complete offline snapshot to your PC or pendrive, or restore previous database archives safely.'}
-          </p>
-
-          <div className="pt-2 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={downloadBackupJSON}
-              className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2"
-            >
-              <DownloadCloud className="w-4 h-4" />
-              <span>{language === 'bn' ? 'অফলাইন ব্যাকআপ ডাউনলোড' : 'Download Offline Backup'}</span>
-            </button>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 border border-slate-600"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>{language === 'bn' ? 'ফাইল থেকে রিস্টোর' : 'Restore from JSON'}</span>
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".json"
-              className="hidden"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Cloud Backup Snapshots History in this Folder */}
+      {/* Manual 1-Click Offline Backup & Safe Restore Card */}
       <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-700">
-          <div className="flex items-center gap-2">
-            <FolderLock className="w-4 h-4 text-emerald-400" />
-            <h3 className="font-bold text-white text-sm">
-              {language === 'bn' ? 'গুগল ড্রাইভ ফোল্ডারের ব্যাকআপ হিস্ট্রি' : 'Google Drive Backup Snapshots'}
-            </h3>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <DownloadCloud className="w-6 h-6" />
           </div>
-          <a
-            href={targetFolderUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-amber-400 hover:underline flex items-center gap-1 font-semibold"
-          >
-            <span>{language === 'bn' ? 'গুগল ড্রাইভে সরাসরি দেখুন ↗' : 'View in Google Drive ↗'}</span>
-          </a>
+          <div>
+            <h3 className="font-bold text-white text-sm">
+              {language === 'bn' ? 'অফলাইন ডেটাবেজ ব্যাকআপ ও রিস্টোর (JSON Archive)' : 'Offline Database Backup & Restore'}
+            </h3>
+            <div className="text-[11px] text-slate-400">
+              {language === 'bn' ? 'কম্পিউটার বা পেনড্রাইভে সম্পূর্ণ অফলাইন কপি সংরক্ষণ' : 'Store complete database file offline'}
+            </div>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-700 text-slate-400 font-semibold">
-                <th className="py-2.5 px-3">Snapshot File Name</th>
-                <th className="py-2.5 px-3">{language === 'bn' ? 'তারিখ ও সময়' : 'Timestamp'}</th>
-                <th className="py-2.5 px-3 text-right">{language === 'bn' ? 'সাইজ' : 'Size'}</th>
-                <th className="py-2.5 px-3 text-right">{language === 'bn' ? 'মোট রেকর্ড' : 'Records'}</th>
-                <th className="py-2.5 px-3 text-center">{language === 'bn' ? 'অবস্থা' : 'Status'}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800">
-              {snapshots.map((snap) => (
-                <tr key={snap.id} className="hover:bg-slate-800/40">
-                  <td className="py-2.5 px-3 font-mono text-slate-200 font-medium">
-                    {snap.fileName}
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-400 font-mono text-[11px]">{snap.timestamp}</td>
-                  <td className="py-2.5 px-3 text-right font-mono text-slate-300">{snap.size}</td>
-                  <td className="py-2.5 px-3 text-right font-mono text-amber-400">{snap.recordsCount} items</td>
-                  <td className="py-2.5 px-3 text-center">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                      <CheckCircle2 className="w-3 h-3" /> {snap.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <p className="text-xs text-slate-300">
+          {language === 'bn'
+            ? 'যেকোনো মুহূর্তে এক ক্লিকে সম্পূর্ণ ডেটাবেস ডাউনলোড করে আপনার পেনড্রাইভ বা কম্পিউটারে নিরাপদ ব্যাকআপ ফাইল (.json) সংরক্ষণ করতে পারেন, এবং প্রয়োজন হলে ফাইল সিলেক্ট করে যেকোনো সময় নিরাপদে রিস্টোর করতে পারেন।'
+            : 'Download complete offline snapshot to your PC or pendrive, or restore previous database archives safely.'}
+        </p>
+
+        <div className="pt-2 flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={downloadBackupJSON}
+            className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <DownloadCloud className="w-4 h-4" />
+            <span>{language === 'bn' ? 'অফলাইন ব্যাকআপ ডাউনলোড (.json)' : 'Download Offline Backup'}</span>
+          </button>
+
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 border border-slate-600 cursor-pointer"
+          >
+            <UploadCloud className="w-4 h-4" />
+            <span>{language === 'bn' ? 'ফাইল থেকে রিস্টোর করুন' : 'Restore from JSON'}</span>
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".json"
+            className="hidden"
+          />
         </div>
       </div>
 

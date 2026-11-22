@@ -85,8 +85,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
     {
       id: 'backup',
       icon: CloudCog,
-      labelBn: 'গুগল ড্রাইভ ও শীট সিংক',
-      labelEn: 'Drive & Sheets Sync'
+      labelBn: 'গুগল শীট সিংক ও ব্যাকআপ',
+      labelEn: 'Google Sheets & Backup'
     },
     {
       id: 'settings',
