@@ -58,6 +58,7 @@ export const BackupSecurityView = () => {
   const targetFolderId = GDRIVE_CONFIG?.folderId || "1oIadpc0EjJS1qAD8-YZO08hDfZ1WXFrS";
   const gsheetUrl = GSHEET_CONFIG?.sheetUrl || "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing";
   const gsheetId = GSHEET_CONFIG?.sheetId || "1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE";
+  const targetSheetId = gsheetId;
 
   const handleSyncNow = () => {
     const snap = syncToGoogleDrive();
