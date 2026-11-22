@@ -22,6 +22,7 @@ export const GDRIVE_CONFIG = {
 export const GSHEET_CONFIG = {
   sheetId: "1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE",
   sheetUrl: "https://docs.google.com/spreadsheets/d/1RSGKMQvtyIXb-1iObSpTq9G-ynEFWKA0U2BBunINaWE/edit?usp=sharing",
+  webhookUrl: "https://script.google.com/macros/s/AKfycby3Ef_nuVL-vQogTvAY5HEhqsh91VSnI-7vUX2L6BTAzVvlwarnV3AyFSpgoWGEk40/exec",
   title: "Asia engineers, Accounts",
   connected: true
 };

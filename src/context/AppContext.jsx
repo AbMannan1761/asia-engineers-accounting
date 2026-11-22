@@ -108,7 +108,13 @@ export const AppProvider = ({ children }) => {
 
   // Google Sheets Instant Real-Time Sync State
   const [gsheetWebhookUrl, setGsheetWebhookUrlState] = useState(() => {
-    return localStorage.getItem('AE_GSHEET_WEBHOOK_URL') || '';
+    const saved = localStorage.getItem('AE_GSHEET_WEBHOOK_URL');
+    if (saved && saved.startsWith('http') && !saved.includes('demo') && saved.length > 25) {
+      return saved;
+    }
+    const defaultUrl = GSHEET_CONFIG.webhookUrl || 'https://script.google.com/macros/s/AKfycby3Ef_nuVL-vQogTvAY5HEhqsh91VSnI-7vUX2L6BTAzVvlwarnV3AyFSpgoWGEk40/exec';
+    localStorage.setItem('AE_GSHEET_WEBHOOK_URL', defaultUrl);
+    return defaultUrl;
   });
   const [gsheetAutoSync, setGsheetAutoSyncState] = useState(() => {
     const saved = localStorage.getItem('AE_GSHEET_AUTOSYNC');
