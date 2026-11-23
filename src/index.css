@@ -295,3 +295,45 @@ body.theme-light,
   background-color: #dbeafe !important;
   color: #1e40af !important;
 }
+
+/* Custom DatePicker Popup styling for Light Mode */
+.theme-light .date-picker-popup {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-light .date-picker-popup select {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.theme-light .date-picker-popup .border-slate-800,
+.theme-light .date-picker-popup .border-b {
+  border-color: #e2e8f0 !important;
+}
+
+.theme-light .date-picker-popup button:not(.bg-amber-500):hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.theme-light .date-picker-popup .text-slate-200 {
+  color: #1e293b !important;
+}
+
+.theme-light .date-picker-popup .text-slate-300,
+.theme-light .date-picker-popup .text-slate-400 {
+  color: #475569 !important;
+}
+
+.theme-light .date-picker-popup .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.theme-light .date-picker-popup .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+}
