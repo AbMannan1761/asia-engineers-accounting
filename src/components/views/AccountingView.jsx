@@ -34,6 +34,7 @@ export const AccountingView = () => {
     expenseCategories,
     addCategory,
     deleteCategory,
+    addAccount,
     pullFromGoogleSheet,
     syncToGoogleSheet,
     GSHEET_CONFIG,
@@ -62,6 +63,34 @@ export const AccountingView = () => {
   const [newCatInput, setNewCatInput] = useState('');
   const [isPulling, setIsPulling] = useState(false);
   const [pullMsg, setPullMsg] = useState(null);
+
+  // Dynamic Payment Method / Account Modal State
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [accountFormData, setAccountFormData] = useState({
+    name: '',
+    type: 'bank',
+    accountNumber: '',
+    balance: '',
+    branch: ''
+  });
+
+  const handleAddAccountSubmit = (e) => {
+    e.preventDefault();
+    if (!accountFormData.name.trim()) {
+      alert(language === 'bn' ? 'অ্যাকাউন্টের নাম লিখুন!' : 'Please enter account name!');
+      return;
+    }
+    const newAcc = addAccount(accountFormData);
+    if (newAcc) {
+      if (editingTxn) {
+        setEditingTxn(prev => ({ ...prev, accountId: newAcc.id }));
+      } else {
+        setFormData(prev => ({ ...prev, accountId: newAcc.id }));
+      }
+      setShowAccountModal(false);
+      setAccountFormData({ name: '', type: 'bank', accountNumber: '', balance: '', branch: '' });
+    }
+  };
 
   // New Transaction Form State
   const [formData, setFormData] = useState({
@@ -619,15 +648,35 @@ export const AccountingView = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'অ্যাকাউন্ট / পেমেন্ট মেথড' : 'Account'} *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-400 font-medium">{language === 'bn' ? 'অ্যাকাউন্ট / পেমেন্ট মেথড' : 'Payment Method'} *</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAccountModal(true)}
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                      title={language === 'bn' ? 'নতুন ব্যাংক/ক্যাশ পেমেন্ট মেথড যোগ করুন' : 'Add New Payment Method'}
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? '+ নতুন মেথড' : '+ Add'}</span>
+                    </button>
+                  </div>
                   <select
                     value={formData.accountId}
-                    onChange={(e) => setFormData(p => ({ ...p, accountId: e.target.value }))}
+                    onChange={(e) => {
+                      if (e.target.value === '__NEW_ACC__') {
+                        setShowAccountModal(true);
+                      } else {
+                        setFormData(p => ({ ...p, accountId: e.target.value }));
+                      }
+                    }}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
                   >
                     {data.accounts.map(a => (
                       <option key={a.id} value={a.id}>{a.name} ({formatBDT(a.balance)})</option>
                     ))}
+                    <option value="__NEW_ACC__" className="text-emerald-400 font-bold">
+                      ➕ {language === 'bn' ? 'নতুন পেমেন্ট মেথড যুক্ত করুন...' : 'Add New Payment Method...'}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -888,15 +937,35 @@ export const AccountingView = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'অ্যাকাউন্ট' : 'Account'} *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-slate-400 font-medium">{language === 'bn' ? 'অ্যাকাউন্ট / পেমেন্ট মেথড' : 'Account'} *</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowAccountModal(true)}
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                      title={language === 'bn' ? 'নতুন ব্যাংক/ক্যাশ পেমেন্ট মেথড যোগ করুন' : 'Add New Payment Method'}
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? '+ নতুন' : '+ Add'}</span>
+                    </button>
+                  </div>
                   <select
                     value={editingTxn.accountId}
-                    onChange={(e) => setEditingTxn(p => ({ ...p, accountId: e.target.value }))}
+                    onChange={(e) => {
+                      if (e.target.value === '__NEW_ACC__') {
+                        setShowAccountModal(true);
+                      } else {
+                        setEditingTxn(p => ({ ...p, accountId: e.target.value }));
+                      }
+                    }}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
                   >
                     {data.accounts.map(a => (
                       <option key={a.id} value={a.id}>{a.name} ({formatBDT(a.balance)})</option>
                     ))}
+                    <option value="__NEW_ACC__" className="text-emerald-400 font-bold">
+                      ➕ {language === 'bn' ? 'নতুন পেমেন্ট মেথড যুক্ত করুন...' : 'Add New Payment Method...'}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -1095,6 +1164,104 @@ export const AccountingView = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Add New Payment Method / Bank Account */}
+      {showAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fade-in">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <PlusCircle className="w-4 h-4 text-emerald-400" />
+                <span>{language === 'bn' ? 'নতুন পেমেন্ট মেথড / ব্যাংক অ্যাকাউন্ট' : 'Add New Payment Method'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAccountModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddAccountSubmit} className="p-5 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">
+                  {language === 'bn' ? 'অ্যাকাউন্ট / পেমেন্ট মেথডের নাম *' : 'Method / Bank Name *'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Islami Bank Bangladesh Ltd (IBBL), BRAC Bank, Rocket"
+                  value={accountFormData.name}
+                  onChange={(e) => setAccountFormData(p => ({ ...p, name: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-medium focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">
+                    {language === 'bn' ? 'অ্যাকাউন্ট ধরন *' : 'Account Type *'}
+                  </label>
+                  <select
+                    value={accountFormData.type}
+                    onChange={(e) => setAccountFormData(p => ({ ...p, type: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400"
+                  >
+                    <option value="bank">{language === 'bn' ? 'ব্যাংক অ্যাকাউন্ট (Bank)' : 'Bank Account'}</option>
+                    <option value="mobile_banking">{language === 'bn' ? 'মোবাইল ব্যাংকিং (bKash/Nagad)' : 'Mobile Banking'}</option>
+                    <option value="cash">{language === 'bn' ? 'ক্যাশ ইন হ্যান্ড (Cash)' : 'Cash in Hand'}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">
+                    {language === 'bn' ? 'অ্যাকাউন্ট / রেফারেন্স নম্বর' : 'Account / Ref No.'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. CD-20502130100..."
+                    value={accountFormData.accountNumber}
+                    onChange={(e) => setAccountFormData(p => ({ ...p, accountNumber: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">
+                  {language === 'bn' ? 'প্রারম্ভিক ব্যালেন্স (Opening Balance ৳)' : 'Opening Balance (BDT)'}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  placeholder="0"
+                  value={accountFormData.balance}
+                  onChange={(e) => setAccountFormData(p => ({ ...p, balance: e.target.value }))}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono font-bold focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAccountModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                >
+                  {language === 'bn' ? 'বাতিল' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg transition"
+                >
+                  {language === 'bn' ? 'অ্যাকাউন্ট যুক্ত করুন' : 'Save Account'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

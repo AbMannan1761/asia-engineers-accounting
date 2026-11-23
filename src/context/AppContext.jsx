@@ -27,8 +27,32 @@ const STORAGE_KEY = 'AE_ACCOUNTING_DATA_V1';
 
 export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => localStorage.getItem('AE_LANG') || 'bn');
+  const [theme, setTheme] = useState(() => localStorage.getItem('AE_THEME') || 'light');
   const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('AE_AUTH') !== 'false');
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('AE_THEME', next);
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    localStorage.setItem('AE_THEME', theme);
+    if (theme === 'light') {
+      document.documentElement.classList.add('theme-light');
+      document.documentElement.classList.remove('theme-dark');
+      document.body.classList.add('theme-light');
+      document.body.classList.remove('theme-dark');
+    } else {
+      document.documentElement.classList.remove('theme-light');
+      document.documentElement.classList.add('theme-dark');
+      document.body.classList.remove('theme-light');
+      document.body.classList.add('theme-dark');
+    }
+  }, [theme]);
   const DEFAULT_USER = {
     name: 'Engr. M. A. Hannan',
     role: 'Administrator / Director',
@@ -240,6 +264,29 @@ export const AppProvider = ({ children }) => {
     return `${prefix}${String(nextSeq).padStart(4, '0')}`;
   };
 
+  // Add New Account / Payment Method
+  const addAccount = ({ name, type = 'bank', accountNumber = '', balance = 0, branch = '' }) => {
+    if (!name || !name.trim()) return null;
+    const newId = `acc-${Date.now()}`;
+    const newAcc = {
+      id: newId,
+      name: name.trim(),
+      type: type || 'bank',
+      accountNumber: (accountNumber || '').trim() || (type === 'cash' ? 'Cash in Hand' : 'A/C N/A'),
+      balance: Number(balance) || 0,
+      branch: (branch || '').trim()
+    };
+    setData(prev => ({
+      ...prev,
+      accounts: [...prev.accounts, newAcc]
+    }));
+    logAudit('ACCOUNT_CREATED', `Added new payment method/account: ${newAcc.name} (${newAcc.type})`);
+    if (gsheetAutoSync) {
+      setTimeout(() => syncToGoogleSheet('ADD_ACCOUNT', newAcc), 50);
+    }
+    return newAcc;
+  };
+
   // 1. Add Transaction
   const addTransaction = (newTxn) => {
     const voucherNo = newTxn.voucherNo || generateVoucherNumber(newTxn.type);
@@ -263,14 +310,16 @@ export const AppProvider = ({ children }) => {
       });
 
       // Update project amounts if project assigned
+      let matchedProject = null;
       let updatedProjects = prev.projects;
       if (txnRecord.projectId) {
         updatedProjects = prev.projects.map(p => {
-          if (p.id === txnRecord.projectId) {
+          if (p.id === txnRecord.projectId || p.name === txnRecord.projectId) {
+            matchedProject = p;
             if (txnRecord.type === 'income') {
-              return { ...p, receivedAmount: (p.receivedAmount || 0) + txnRecord.amount };
+              return { ...p, receivedAmount: (Number(p.receivedAmount) || 0) + txnRecord.amount };
             } else {
-              return { ...p, spentAmount: (p.spentAmount || 0) + txnRecord.amount };
+              return { ...p, spentAmount: (Number(p.spentAmount) || 0) + txnRecord.amount };
             }
           }
           return p;
@@ -278,19 +327,45 @@ export const AppProvider = ({ children }) => {
       }
 
       // Update Client or Supplier ledger
-      const updatedLedgers = prev.ledgers.map(l => {
-        if (l.name === txnRecord.party) {
-          if (l.type === 'client' && txnRecord.type === 'income') {
-            const newReceived = (l.totalReceived || 0) + txnRecord.amount;
-            return { ...l, totalReceived: newReceived, dueBalance: Math.max(0, (l.totalBilled || 0) - newReceived) };
-          }
-          if (l.type === 'supplier' && txnRecord.type === 'expense') {
-            const newPaid = (l.totalPaid || 0) + txnRecord.amount;
-            return { ...l, totalPaid: newPaid, dueBalance: Math.max(0, (l.totalPurchased || 0) - newPaid) };
-          }
+      let ledgerFound = false;
+      let updatedLedgers = prev.ledgers.map(l => {
+        const isClientMatch = l.name.toLowerCase() === txnRecord.party.toLowerCase() ||
+          (matchedProject?.client && l.name.toLowerCase() === matchedProject.client.toLowerCase());
+
+        if (isClientMatch && l.type === 'client' && txnRecord.type === 'income') {
+          ledgerFound = true;
+          const newReceived = (Number(l.totalReceived) || 0) + txnRecord.amount;
+          return {
+            ...l,
+            projectId: l.projectId || txnRecord.projectId || matchedProject?.id,
+            totalReceived: newReceived,
+            dueBalance: Math.max(0, (Number(l.totalBilled) || 0) - newReceived)
+          };
+        }
+        if (l.name.toLowerCase() === txnRecord.party.toLowerCase() && l.type === 'supplier' && txnRecord.type === 'expense') {
+          ledgerFound = true;
+          const newPaid = (Number(l.totalPaid) || 0) + txnRecord.amount;
+          return { ...l, totalPaid: newPaid, dueBalance: Math.max(0, (Number(l.totalPurchased) || 0) - newPaid) };
         }
         return l;
       });
+
+      // If this is client income and client wasn't in ledgers yet, auto create client ledger!
+      if (!ledgerFound && txnRecord.type === 'income' && txnRecord.party) {
+        const clientName = matchedProject?.client || txnRecord.party;
+        updatedLedgers.push({
+          id: `LED-${Date.now()}`,
+          name: clientName,
+          type: 'client',
+          phone: matchedProject?.clientPhone || '',
+          address: matchedProject?.site || '',
+          projectId: txnRecord.projectId || matchedProject?.id || '',
+          totalBilled: matchedProject?.contractValue || txnRecord.amount,
+          totalReceived: txnRecord.amount,
+          dueBalance: Math.max(0, (matchedProject?.contractValue || txnRecord.amount) - txnRecord.amount),
+          status: 'Active'
+        });
+      }
 
       return {
         ...prev,
@@ -401,10 +476,29 @@ export const AppProvider = ({ children }) => {
       spentAmount: Number(project.spentAmount || 0),
       status: project.status || 'In Progress'
     };
-    setData(prev => ({
-      ...prev,
-      projects: [...prev.projects, newPrj]
-    }));
+    setData(prev => {
+      let updatedLedgers = [...prev.ledgers];
+      const clientName = (newPrj.client || '').trim();
+      if (clientName && !updatedLedgers.some(l => l.name.toLowerCase() === clientName.toLowerCase())) {
+        updatedLedgers.push({
+          id: `LED-${Date.now()}`,
+          name: clientName,
+          type: 'client',
+          phone: newPrj.clientPhone || '',
+          address: newPrj.site || '',
+          projectId: newPrj.id,
+          totalBilled: newPrj.contractValue || 0,
+          totalReceived: newPrj.receivedAmount || 0,
+          dueBalance: Math.max(0, (newPrj.contractValue || 0) - (newPrj.receivedAmount || 0)),
+          status: 'Active'
+        });
+      }
+      return {
+        ...prev,
+        projects: [...prev.projects, newPrj],
+        ledgers: updatedLedgers
+      };
+    });
     logAudit('PROJECT_CREATED', `Project ${newPrj.id}: ${newPrj.name} (${newPrj.client})`);
   };
 
@@ -1289,6 +1383,9 @@ export const AppProvider = ({ children }) => {
         expenseCategories: data.expenseCategories || INITIAL_EXPENSE_CATEGORIES,
         language,
         toggleLanguage,
+        theme,
+        toggleTheme,
+        setTheme,
         currentUser,
         isAuthenticated,
         setIsAuthenticated,
@@ -1302,6 +1399,7 @@ export const AppProvider = ({ children }) => {
         selectedVoucherForPrint,
         setSelectedVoucherForPrint,
         // Actions
+        addAccount,
         addTransaction,
         updateTransaction,
         deleteTransaction,

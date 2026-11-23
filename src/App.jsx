@@ -80,7 +80,7 @@ class ErrorBoundary extends React.Component {
 }
 
 const MainLayout = () => {
-  const { activeTab } = useApp();
+  const { activeTab, theme } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const renderCurrentView = () => {
@@ -117,7 +117,9 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-slate-950 text-slate-100 flex flex-col font-sans overflow-hidden">
+    <div className={`h-screen w-full flex flex-col font-sans overflow-hidden transition-colors duration-200 ${
+      theme === 'light' ? 'theme-light bg-slate-50 text-slate-900' : 'theme-dark bg-slate-950 text-slate-100'
+    }`}>
       <Header onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
 
       <div className="flex-1 flex overflow-hidden min-h-0">

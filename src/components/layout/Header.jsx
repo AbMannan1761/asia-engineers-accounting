@@ -14,7 +14,9 @@ import {
   LogOut,
   RefreshCw,
   CheckCircle2,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
@@ -27,6 +29,8 @@ export const Header = ({ onToggleSidebar }) => {
     setActiveTab,
     language,
     toggleLanguage,
+    theme,
+    toggleTheme,
     currentUser,
     isAuthenticated,
     setShowLoginModal,
@@ -202,6 +206,25 @@ export const Header = ({ onToggleSidebar }) => {
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Excel</span>
+          </button>
+
+          {/* Theme Mode Toggle (Default: Light Mode) */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-xs"
+            title={theme === 'light' ? (language === 'bn' ? 'ডার্ক মোড চালু করুন' : 'Switch to Dark Mode') : (language === 'bn' ? 'লাইট মোড চালু করুন' : 'Switch to Light Mode')}
+          >
+            {theme === 'light' ? (
+              <>
+                <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden sm:inline font-medium">{language === 'bn' ? 'ডার্ক' : 'Dark'}</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline font-medium">{language === 'bn' ? 'লাইট' : 'Light'}</span>
+              </>
+            )}
           </button>
 
           {/* Language Toggle */}

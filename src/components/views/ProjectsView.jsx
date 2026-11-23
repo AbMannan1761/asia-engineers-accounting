@@ -171,8 +171,38 @@ export const ProjectsView = () => {
     setTxnEndDate('');
   };
 
+  // Dynamic financial calculator for projects from live transactions
+  const getProjectLiveStats = (p) => {
+    if (!p) return { received: 0, spent: 0, profit: 0, due: 0 };
+    const pTxns = (data.transactions || []).filter(t =>
+      t.projectId === p.id ||
+      (t.projectId && t.projectId.toLowerCase() === p.id.toLowerCase()) ||
+      (p.name && t.party && t.party.toLowerCase().includes(p.name.toLowerCase())) ||
+      (p.client && t.party && t.party.toLowerCase().includes(p.client.toLowerCase()))
+    );
+    const txIncome = pTxns.filter(t => t.type === 'income').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    const txExpense = pTxns.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    const received = Math.max(Number(p.receivedAmount) || 0, txIncome);
+    const spent = Math.max(Number(p.spentAmount) || 0, txExpense);
+    const contract = Number(p.contractValue) || 0;
+    const due = Math.max(0, contract - received);
+    const profit = received - spent;
+    return { received, spent, profit, due };
+  };
+
+  const projectsWithLiveStats = data.projects.map(p => {
+    const stats = getProjectLiveStats(p);
+    return {
+      ...p,
+      receivedAmount: stats.received,
+      spentAmount: stats.spent,
+      liveDue: stats.due,
+      liveProfit: stats.profit
+    };
+  });
+
   // Filter & Sort Projects List
-  const filteredProjects = data.projects.filter(p => {
+  const filteredProjects = projectsWithLiveStats.filter(p => {
     if (projectStatusFilter !== 'all' && p.status !== projectStatusFilter) return false;
     if (projectSearchQuery.trim()) {
       const q = projectSearchQuery.toLowerCase().trim();
@@ -205,7 +235,12 @@ export const ProjectsView = () => {
 
   // Selected Project Calculations
   const allProjectTxns = selectedProject
-    ? data.transactions.filter(t => t.projectId === selectedProject.id)
+    ? data.transactions.filter(t =>
+        t.projectId === selectedProject.id ||
+        (t.projectId && t.projectId.toLowerCase() === selectedProject.id.toLowerCase()) ||
+        (selectedProject.name && t.party && t.party.toLowerCase().includes(selectedProject.name.toLowerCase())) ||
+        (selectedProject.client && t.party && t.party.toLowerCase().includes(selectedProject.client.toLowerCase()))
+      )
     : [];
 
   // Group expenses by category for selected project

@@ -55,13 +55,81 @@ export const LedgersView = () => {
     });
   };
 
-  const clients = data.ledgers.filter(l => l.type === 'client');
+  // Combine and synchronize all clients from projects and ledgers
+  const allClientsMap = new Map();
+  // 1. First add existing ledger clients
+  data.ledgers.filter(l => l.type === 'client').forEach(l => {
+    allClientsMap.set(l.name.toLowerCase().trim(), { ...l });
+  });
+  // 2. Add or enrich with all projects from data.projects
+  (data.projects || []).forEach(p => {
+    const cName = (p.client || '').trim();
+    if (cName) {
+      const key = cName.toLowerCase();
+      const existing = allClientsMap.get(key);
+      if (existing) {
+        if (!existing.phone && p.clientPhone) existing.phone = p.clientPhone;
+        if (!existing.address && (p.site || p.location)) existing.address = p.site || p.location;
+        if (!existing.projectId) existing.projectId = p.id;
+      } else {
+        allClientsMap.set(key, {
+          id: `LED-${p.id}`,
+          name: cName,
+          type: 'client',
+          phone: p.clientPhone || '',
+          address: p.site || p.location || '',
+          projectId: p.id,
+          totalBilled: Number(p.contractValue) || 0,
+          totalReceived: Number(p.receivedAmount) || 0,
+          dueBalance: Math.max(0, (Number(p.contractValue) || 0) - (Number(p.receivedAmount) || 0)),
+          status: p.status || 'Active'
+        });
+      }
+    }
+  });
+
+  const clients = Array.from(allClientsMap.values()).map(client => {
+    const linkedProjects = (data.projects || []).filter(p => 
+      (client.projectId && p.id === client.projectId) ||
+      (p.client && p.client.toLowerCase() === client.name.toLowerCase()) ||
+      (p.name && client.name.toLowerCase().includes(p.name.toLowerCase()))
+    );
+
+    const projectBilled = linkedProjects.reduce((sum, p) => sum + (Number(p.contractValue) || 0), 0);
+    const projectReceived = linkedProjects.reduce((sum, p) => sum + (Number(p.receivedAmount) || 0), 0);
+
+    // Also look up transactions matching this client
+    const clientTxns = (data.transactions || []).filter(t => 
+      t.type === 'income' && (
+        (t.party && t.party.toLowerCase().includes(client.name.toLowerCase())) ||
+        (client.name.toLowerCase().includes(t.party?.toLowerCase())) ||
+        linkedProjects.some(lp => lp.id === t.projectId)
+      )
+    );
+    const txnReceived = clientTxns.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+    const effectiveBilled = Math.max(Number(client.totalBilled) || 0, projectBilled);
+    const effectiveReceived = Math.max(Number(client.totalReceived) || 0, projectReceived, txnReceived);
+    const effectiveDue = Math.max(0, effectiveBilled - effectiveReceived);
+
+    return {
+      ...client,
+      linkedProjects,
+      totalBilled: effectiveBilled,
+      totalReceived: effectiveReceived,
+      dueBalance: effectiveDue
+    };
+  });
+
   const suppliers = data.ledgers.filter(l => l.type === 'supplier');
 
   const activeList = (activeTab === 'clients' ? clients : suppliers).filter(item => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return item.name.toLowerCase().includes(q) || item.phone?.toLowerCase().includes(q) || item.address?.toLowerCase().includes(q);
+    const hasProjectMatch = item.linkedProjects && item.linkedProjects.some(p => 
+      p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
+    );
+    return item.name.toLowerCase().includes(q) || item.phone?.toLowerCase().includes(q) || item.address?.toLowerCase().includes(q) || hasProjectMatch;
   });
 
   // Generate WhatsApp reminder link
@@ -140,6 +208,9 @@ export const LedgersView = () => {
               <tr className="bg-slate-900/90 border-b border-slate-700/80 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
                 <th className="py-3 px-3">Party Name</th>
                 <th className="py-3 px-3">{language === 'bn' ? 'যোগাযোগ ও ঠিকানা' : 'Contact & Address'}</th>
+                {activeTab === 'clients' && (
+                  <th className="py-3 px-3">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট' : 'Linked Project'}</th>
+                )}
                 {activeTab === 'clients' ? (
                   <>
                     <th className="py-3 px-3 text-right">{language === 'bn' ? 'মোট বিল (Billed)' : 'Total Billed'}</th>
@@ -173,6 +244,30 @@ export const LedgersView = () => {
                       </div>
                       <div className="text-[11px] text-slate-400 truncate max-w-xs">{party.address}</div>
                     </td>
+
+                    {activeTab === 'clients' && (
+                      <td className="py-3 px-3">
+                        {party.linkedProjects && party.linkedProjects.length > 0 ? (
+                          <div className="space-y-1">
+                            {party.linkedProjects.map(lp => (
+                              <div key={lp.id} className="inline-block max-w-[200px]">
+                                <span className="font-semibold text-amber-400 text-xs flex items-center gap-1" title={`${lp.name} (${lp.id})`}>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                                  <span className="truncate">{lp.name}</span>
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono block">
+                                  {lp.id} {lp.site ? `• ${lp.site}` : ''}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 text-[11px] italic">
+                            {language === 'bn' ? 'কোন প্রজেক্ট লিংক নেই' : 'No project linked'}
+                          </span>
+                        )}
+                      </td>
+                    )}
 
                     {activeTab === 'clients' ? (
                       <>
@@ -275,6 +370,35 @@ export const LedgersView = () => {
                 </button>
               </div>
 
+              {formData.type === 'client' && (
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট (ঐচ্ছিক)' : 'Linked Project (Optional)'}</label>
+                  <select
+                    value={formData.projectId || ''}
+                    onChange={(e) => {
+                      const pId = e.target.value;
+                      const selectedPrj = (data.projects || []).find(p => p.id === pId);
+                      setFormData(prev => ({
+                        ...prev,
+                        projectId: pId,
+                        name: prev.name || selectedPrj?.client || '',
+                        phone: prev.phone || selectedPrj?.clientPhone || '',
+                        address: prev.address || selectedPrj?.site || selectedPrj?.location || '',
+                        totalBilled: selectedPrj?.contractValue || prev.totalBilled || '',
+                        totalReceived: selectedPrj?.receivedAmount || prev.totalReceived || '',
+                        dueBalance: selectedPrj ? Math.max(0, (selectedPrj.contractValue || 0) - (selectedPrj.receivedAmount || 0)) : prev.dueBalance
+                      }));
+                    }}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="">-- {language === 'bn' ? 'প্রজেক্ট নির্বাচন করুন (যদি থাকে)' : 'Select Project (If any)'} --</option>
+                    {(data.projects || []).map(p => (
+                      <option key={p.id} value={p.id}>{p.name} ({p.client}) - {p.id}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Company Name'} *</label>
                 <input
@@ -355,6 +479,22 @@ export const LedgersView = () => {
               }}
               className="p-5 space-y-3.5 text-xs"
             >
+              {editingLedger.type === 'client' && (
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট' : 'Linked Project'}</label>
+                  <select
+                    value={editingLedger.projectId || ''}
+                    onChange={(e) => setEditingLedger(p => ({ ...p, projectId: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="">-- {language === 'bn' ? 'কোন প্রজেক্ট লিংক নেই' : 'None'} --</option>
+                    {(data.projects || []).map(p => (
+                      <option key={p.id} value={p.id}>{p.name} ({p.client}) - {p.id}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Company Name'} *</label>
                 <input
