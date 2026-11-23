@@ -15,10 +15,11 @@ import {
   Settings,
   Code2,
   X,
-  PlusCircle
+  PlusCircle,
+  PanelLeftClose
 } from 'lucide-react';
 
-export const Sidebar = ({ isOpen, onClose }) => {
+export const Sidebar = ({ isOpen, onClose, onToggle }) => {
   const { language, activeTab, setActiveTab } = useApp();
 
   const menuItems = [
@@ -119,20 +120,22 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Main Desktop Sidebar / Mobile Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 h-full shrink-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 ease-in-out lg:static h-full shrink-0 ${
+          isOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:w-0 lg:overflow-hidden lg:border-none'
         }`}
       >
         {/* Navigation List */}
         <div className="flex-1 py-4 px-3 overflow-y-auto space-y-1">
           <div className="px-3 pb-2 flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             <span>{language === 'bn' ? 'মডিউলসমূহ' : 'Software Modules'}</span>
+            
+            {/* The user-requested Collapse Option (Red-boxed in screenshot) */}
             <button 
               onClick={onClose}
-              className="lg:hidden p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800"
-              title="Close Menu"
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-1 cursor-pointer"
+              title={language === 'bn' ? 'সাইড প্যানেল লুকান / বন্ধ করুন' : 'Collapse Side Panel'}
             >
-              <X className="w-4 h-4" />
+              <PanelLeftClose className="w-4 h-4 text-amber-400" />
             </button>
           </div>
 

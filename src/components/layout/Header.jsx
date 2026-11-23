@@ -16,11 +16,12 @@ import {
   CheckCircle2,
   Check,
   Sun,
-  Moon
+  Moon,
+  PanelLeftOpen
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
-export const Header = ({ onToggleSidebar }) => {
+export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
   const {
     COMPANY_INFO,
     GSHEET_CONFIG,
@@ -74,14 +75,19 @@ export const Header = ({ onToggleSidebar }) => {
   return (
     <header className="sticky top-0 z-40 shrink-0 bg-slate-900 border-b border-slate-800 px-4 lg:px-6 py-2.5 shadow-md">
       <div className="flex items-center justify-between gap-4">
-        {/* Left: Mobile hamburger + Company Brand */}
+        {/* Left: Mobile/Desktop Sidebar Toggle + Company Brand */}
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg focus:outline-none"
+            className={`p-2 rounded-lg transition focus:outline-none cursor-pointer flex items-center gap-1.5 ${
+              !isSidebarOpen
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
             aria-label="Toggle Navigation"
+            title={isSidebarOpen ? (language === 'bn' ? 'সাইড প্যানেল লুকান' : 'Hide Side Panel') : (language === 'bn' ? 'সাইড প্যানেল খুলুন' : 'Open Side Panel')}
           >
-            <Menu className="w-5 h-5" />
+            {isSidebarOpen ? <Menu className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5 text-amber-400" />}
           </button>
 
           <div className="flex items-center gap-3">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PanelLeftOpen } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
@@ -81,7 +82,32 @@ class ErrorBoundary extends React.Component {
 
 const MainLayout = () => {
   const { activeTab, theme } = useApp();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('AE_SIDEBAR_OPEN');
+      if (saved !== null) return saved === 'true';
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+
+  const toggleSidebar = () => {
+    setSidebarOpen(prev => {
+      const next = !prev;
+      try { localStorage.setItem('AE_SIDEBAR_OPEN', String(next)); } catch (e) {}
+      return next;
+    });
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+    try { localStorage.setItem('AE_SIDEBAR_OPEN', 'false'); } catch (e) {}
+  };
+
+  const openSidebar = () => {
+    setSidebarOpen(true);
+    try { localStorage.setItem('AE_SIDEBAR_OPEN', 'true'); } catch (e) {}
+  };
 
   const renderCurrentView = () => {
     switch (activeTab) {
@@ -120,12 +146,30 @@ const MainLayout = () => {
     <div className={`h-screen w-full flex flex-col font-sans overflow-hidden transition-colors duration-200 ${
       theme === 'light' ? 'theme-light bg-slate-50 text-slate-900' : 'theme-dark bg-slate-950 text-slate-100'
     }`}>
-      <Header onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
+      <Header onToggleSidebar={toggleSidebar} isSidebarOpen={sidebarOpen} />
 
-      <div className="flex-1 flex overflow-hidden min-h-0">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex overflow-hidden min-h-0 relative">
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          onClose={closeSidebar} 
+          onToggle={toggleSidebar} 
+        />
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 max-w-7xl mx-auto w-full min-h-0">
+        {/* Floating Quick Open Tab when Sidebar is Collapsed on Desktop */}
+        {!sidebarOpen && (
+          <button
+            onClick={openSidebar}
+            className="hidden lg:flex fixed left-0 top-20 z-40 bg-slate-900 border border-slate-700 border-l-0 rounded-r-xl p-2.5 text-amber-400 hover:bg-slate-800 hover:text-amber-300 shadow-2xl transition-all items-center gap-1.5 cursor-pointer group"
+            title="সাইড প্যানেল খুলুন (Open Sidebar)"
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+            <span className="text-xs font-bold pr-1">মেনু</span>
+          </button>
+        )}
+
+        <main className={`flex-1 overflow-y-auto p-4 lg:p-6 w-full min-h-0 transition-all duration-300 ${
+          sidebarOpen ? 'max-w-7xl mx-auto' : 'w-full max-w-[1600px] mx-auto px-4 lg:px-8'
+        }`}>
           <ErrorBoundary>
             {renderCurrentView()}
           </ErrorBoundary>
