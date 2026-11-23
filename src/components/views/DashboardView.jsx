@@ -79,19 +79,19 @@ export const DashboardView = () => {
 
       {/* Critical Alert Bar: Low Material Stock */}
       {lowStockItems.length > 0 && (
-        <div className="bg-amber-950/50 border border-amber-600/40 rounded-xl p-3.5 flex items-start gap-3 text-amber-200">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-900 dark:text-amber-200 stock-alert-banner">
+          <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 text-xs">
-            <div className="font-bold text-amber-300">
+            <div className="font-bold text-amber-800 dark:text-amber-300">
               {language === 'bn' ? 'সতর্কতা: স্টিল মালামাল স্টক অ্যালার্ট!' : 'Warning: Low Material Stock Level!'}
             </div>
-            <div className="text-slate-300 mt-0.5">
+            <div className="text-slate-600 dark:text-slate-300 mt-0.5">
               {lowStockItems.map(m => `${m.name} (${m.currentStock} ${m.unit} অবশিষ্ট)`).join(', ')}
             </div>
           </div>
           <button 
             onClick={() => setActiveTab('inventory')}
-            className="text-xs font-bold text-amber-400 hover:underline shrink-0"
+            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0"
           >
             {language === 'bn' ? 'স্টক দেখুন →' : 'View Stock →'}
           </button>
@@ -176,7 +176,7 @@ export const DashboardView = () => {
       {/* Secondary Row: Bank Accounts Detailed Breakdown & Financial Income/Expense */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Bank & Accounts Breakdown */}
-        <div className="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5">
+        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-sm flex items-center gap-2">
               <Building className="w-4 h-4 text-amber-400" />
@@ -194,7 +194,7 @@ export const DashboardView = () => {
             {data.accounts.map((acc) => (
               <div 
                 key={acc.id}
-                className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 flex items-center justify-between"
+                className="bg-slate-900/40 border border-slate-800 rounded-xl p-3 flex items-center justify-between hover:border-amber-500/30 transition shadow-2xs"
               >
                 <div>
                   <div className="font-semibold text-slate-200 text-xs">{acc.name}</div>
@@ -202,7 +202,7 @@ export const DashboardView = () => {
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-white text-xs">{formatBDT(acc.balance)}</div>
-                  <div className="text-[10px] text-slate-400 uppercase">{acc.type}</div>
+                  <div className="text-[10px] text-slate-400 uppercase font-medium">{acc.type}</div>
                 </div>
               </div>
             ))}
@@ -210,7 +210,7 @@ export const DashboardView = () => {
         </div>
 
         {/* Total Income vs Total Expense Summary Card */}
-        <div className="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 lg:col-span-2">
+        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 lg:col-span-2 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-sm flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -222,29 +222,29 @@ export const DashboardView = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-4">
-              <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold mb-1">
+            <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 income-summary-box">
+              <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-1">
                 <TrendingUp className="w-4 h-4" />
                 <span>{language === 'bn' ? 'সর্বমোট জমা / বিল প্রাপ্তি' : 'Total Income Received'}</span>
               </div>
-              <div className="text-xl lg:text-2xl font-black text-emerald-400">
+              <div className="text-xl lg:text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {formatBDT(totalIncome)}
               </div>
             </div>
 
-            <div className="bg-rose-950/30 border border-rose-500/20 rounded-xl p-4">
-              <div className="flex items-center gap-1.5 text-xs text-rose-400 font-semibold mb-1">
+            <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl p-4 expense-summary-box">
+              <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-semibold mb-1">
                 <TrendingDown className="w-4 h-4" />
                 <span>{language === 'bn' ? 'সর্বমোট খরচ / মালামাল ও শ্রম' : 'Total Expenses Disbursed'}</span>
               </div>
-              <div className="text-xl lg:text-2xl font-black text-rose-400">
+              <div className="text-xl lg:text-2xl font-black text-rose-600 dark:text-rose-400">
                 {formatBDT(totalExpense)}
               </div>
             </div>
           </div>
 
           {/* Quick Stats Bar */}
-          <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-around text-center text-xs">
+          <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800 flex items-center justify-around text-center text-xs">
             <div>
               <div className="text-slate-400">{language === 'bn' ? 'চলমান প্রজেক্ট' : 'Active Projects'}</div>
               <div className="font-bold text-amber-400 text-sm">{activeProjects.length}</div>
