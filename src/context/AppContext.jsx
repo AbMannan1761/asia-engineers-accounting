@@ -768,49 +768,134 @@ export const AppProvider = ({ children }) => {
 
   // 6. Client / Supplier Ledger additions
   const addLedger = (ledger) => {
+    const newId = `LED-${Date.now()}`;
+    const billed = Number(ledger.totalBilled || 0);
+    const received = Number(ledger.totalReceived || 0);
+    const due = ledger.dueBalance !== undefined && ledger.dueBalance !== ''
+      ? Number(ledger.dueBalance)
+      : Math.max(0, billed - received);
+
+    const clientName = (ledger.name || ledger.clientName || '').trim();
+    const projectName = (ledger.projectName || '').trim();
+
     const newLedger = {
       ...ledger,
-      id: `LED-${String(data.ledgers.length + 1).padStart(3, '0')}`,
-      totalBilled: Number(ledger.totalBilled || 0),
-      totalReceived: Number(ledger.totalReceived || 0),
+      id: newId,
+      name: clientName,
+      clientName: clientName,
+      projectName: projectName,
+      phone: ledger.phone || '',
+      address: ledger.address || ledger.site || '',
+      totalBilled: billed,
+      totalReceived: received,
       totalPurchased: Number(ledger.totalPurchased || 0),
       totalPaid: Number(ledger.totalPaid || 0),
-      dueBalance: Number(ledger.dueBalance || 0),
+      dueBalance: due,
       status: 'Active'
     };
-    setData(prev => ({
-      ...prev,
-      ledgers: [...prev.ledgers, newLedger]
-    }));
-    logAudit('LEDGER_CREATED', `${newLedger.name} (${newLedger.type})`);
+
+    setData(prev => {
+      let updatedProjects = [...prev.projects];
+      if (newLedger.type === 'client' && projectName) {
+        const prjId = newLedger.projectId || `PRJ-2026-${String(updatedProjects.length + 1).padStart(2, '0')}`;
+        newLedger.projectId = prjId;
+        const prjExists = updatedProjects.some(p => p.id === prjId || (p.name.toLowerCase() === projectName.toLowerCase() && p.client.toLowerCase() === clientName.toLowerCase()));
+        if (!prjExists) {
+          updatedProjects.push({
+            id: prjId,
+            name: projectName,
+            client: clientName,
+            clientPhone: newLedger.phone || '',
+            site: newLedger.address || '',
+            contractValue: billed,
+            budget: Math.round(billed * 0.8),
+            receivedAmount: received,
+            spentAmount: 0,
+            startDate: new Date().toISOString().slice(0, 10),
+            expectedCompletion: '',
+            status: 'In Progress',
+            category: 'Steel Structure'
+          });
+        }
+      }
+      return {
+        ...prev,
+        ledgers: [...prev.ledgers, newLedger],
+        projects: updatedProjects
+      };
+    });
+    logAudit('LEDGER_CREATED', `${clientName} ${projectName ? `(${projectName})` : ''} - ${newLedger.type}`);
   };
 
   const updateLedger = (id, updatedFields) => {
-    setData(prev => ({
-      ...prev,
-      ledgers: prev.ledgers.map(l => {
+    setData(prev => {
+      let updatedProjects = [...prev.projects];
+      const targetLedger = prev.ledgers.find(l => l.id === id);
+      const prjId = updatedFields.projectId || targetLedger?.projectId;
+
+      const billed = updatedFields.totalBilled !== undefined ? Number(updatedFields.totalBilled) : (targetLedger?.totalBilled || 0);
+      const received = updatedFields.totalReceived !== undefined ? Number(updatedFields.totalReceived) : (targetLedger?.totalReceived || 0);
+      const due = updatedFields.dueBalance !== undefined ? Number(updatedFields.dueBalance) : Math.max(0, billed - received);
+
+      const clientName = updatedFields.name || updatedFields.clientName || targetLedger?.name || '';
+      const projectName = updatedFields.projectName !== undefined ? updatedFields.projectName : targetLedger?.projectName;
+
+      const updatedLedgers = prev.ledgers.map(l => {
         if (l.id === id) {
           return {
             ...l,
             ...updatedFields,
-            totalBilled: updatedFields.totalBilled !== undefined ? Number(updatedFields.totalBilled) : l.totalBilled,
-            totalReceived: updatedFields.totalReceived !== undefined ? Number(updatedFields.totalReceived) : l.totalReceived,
-            totalPurchased: updatedFields.totalPurchased !== undefined ? Number(updatedFields.totalPurchased) : l.totalPurchased,
-            totalPaid: updatedFields.totalPaid !== undefined ? Number(updatedFields.totalPaid) : l.totalPaid,
-            dueBalance: updatedFields.dueBalance !== undefined ? Number(updatedFields.dueBalance) : l.dueBalance
+            name: clientName,
+            clientName: clientName,
+            projectName: projectName,
+            totalBilled: billed,
+            totalReceived: received,
+            dueBalance: due
           };
         }
         return l;
-      })
-    }));
+      });
+
+      if (prjId) {
+        updatedProjects = updatedProjects.map(p => {
+          if (p.id === prjId) {
+            return {
+              ...p,
+              name: projectName || p.name,
+              client: clientName || p.client,
+              clientPhone: updatedFields.phone !== undefined ? updatedFields.phone : p.clientPhone,
+              site: updatedFields.address !== undefined ? updatedFields.address : p.site,
+              contractValue: billed || p.contractValue,
+              receivedAmount: received || p.receivedAmount
+            };
+          }
+          return p;
+        });
+      }
+
+      return {
+        ...prev,
+        ledgers: updatedLedgers,
+        projects: updatedProjects
+      };
+    });
     logAudit('LEDGER_UPDATED', `Updated ledger ${id}`);
   };
 
   const deleteLedger = (id) => {
-    setData(prev => ({
-      ...prev,
-      ledgers: prev.ledgers.filter(l => l.id !== id)
-    }));
+    setData(prev => {
+      const target = prev.ledgers.find(l => l.id === id);
+      const updatedLedgers = prev.ledgers.filter(l => l.id !== id);
+      let updatedProjects = prev.projects;
+      if (target?.projectId) {
+        updatedProjects = prev.projects.filter(p => p.id !== target.projectId);
+      }
+      return {
+        ...prev,
+        ledgers: updatedLedgers,
+        projects: updatedProjects
+      };
+    });
     logAudit('LEDGER_DELETED', `Deleted ledger ${id}`);
   };
 

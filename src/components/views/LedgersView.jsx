@@ -18,12 +18,15 @@ export const LedgersView = () => {
   const { language, data, addLedger, updateLedger, deleteLedger } = useApp();
 
   const [activeTab, setActiveTab] = useState('clients'); // clients | suppliers
+  const [selectedClientFilter, setSelectedClientFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingLedger, setEditingLedger] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
+    projectName: '',
+    projectId: '',
     type: 'client',
     phone: '',
     address: '',
@@ -37,13 +40,15 @@ export const LedgersView = () => {
   const handleAddLedger = (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert(language === 'bn' ? 'নাম লিখুন!' : 'Please enter name!');
+      alert(language === 'bn' ? 'ক্লায়েন্ট বা প্রতিষ্ঠানের নাম লিখুন!' : 'Please enter name!');
       return;
     }
     addLedger(formData);
     setShowAddModal(false);
     setFormData({
       name: '',
+      projectName: '',
+      projectId: '',
       type: 'client',
       phone: '',
       address: '',
@@ -55,89 +60,112 @@ export const LedgersView = () => {
     });
   };
 
-  // Combine and synchronize all clients from projects and ledgers
-  const allClientsMap = new Map();
-  // 1. First add existing ledger clients
-  data.ledgers.filter(l => l.type === 'client').forEach(l => {
-    allClientsMap.set(l.name.toLowerCase().trim(), { ...l });
-  });
-  // 2. Add or enrich with all projects from data.projects
+  // Construct individual Client + Project rows so each project of a client has its own dedicated row
+  const clientProjectRows = [];
+
+  // 1. Projects from data.projects
   (data.projects || []).forEach(p => {
-    const cName = (p.client || '').trim();
-    if (cName) {
-      const key = cName.toLowerCase();
-      const existing = allClientsMap.get(key);
-      if (existing) {
-        if (!existing.phone && p.clientPhone) existing.phone = p.clientPhone;
-        if (!existing.address && (p.site || p.location)) existing.address = p.site || p.location;
-        if (!existing.projectId) existing.projectId = p.id;
-      } else {
-        allClientsMap.set(key, {
-          id: `LED-${p.id}`,
-          name: cName,
-          type: 'client',
-          phone: p.clientPhone || '',
-          address: p.site || p.location || '',
-          projectId: p.id,
-          totalBilled: Number(p.contractValue) || 0,
-          totalReceived: Number(p.receivedAmount) || 0,
-          dueBalance: Math.max(0, (Number(p.contractValue) || 0) - (Number(p.receivedAmount) || 0)),
-          status: p.status || 'Active'
-        });
-      }
+    const clientName = (p.client || '').trim();
+    if (clientName) {
+      const pTxns = (data.transactions || []).filter(t =>
+        t.projectId === p.id ||
+        (t.projectId && t.projectId.toLowerCase() === p.id.toLowerCase()) ||
+        (p.name && t.party && t.party.toLowerCase().includes(p.name.toLowerCase()))
+      );
+      const txReceived = pTxns.filter(t => t.type === 'income').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+      const effectiveBilled = Number(p.contractValue) || 0;
+      const effectiveReceived = Math.max(Number(p.receivedAmount) || 0, txReceived);
+      const effectiveDue = Math.max(0, effectiveBilled - effectiveReceived);
+
+      const matchingLedger = (data.ledgers || []).find(l =>
+        l.type === 'client' && (
+          l.projectId === p.id ||
+          l.id === `LED-${p.id}` ||
+          l.name.toLowerCase().trim() === clientName.toLowerCase()
+        )
+      );
+
+      clientProjectRows.push({
+        id: `CP-${p.id}`,
+        ledgerId: matchingLedger?.id || `LED-${p.id}`,
+        projectId: p.id,
+        name: clientName,
+        clientName: clientName,
+        projectName: p.name,
+        category: p.category || 'Steel Structure',
+        phone: p.clientPhone || matchingLedger?.phone || '',
+        address: p.site || p.location || matchingLedger?.address || '',
+        totalBilled: effectiveBilled,
+        totalReceived: effectiveReceived,
+        dueBalance: effectiveDue,
+        status: p.status || 'In Progress',
+        isProjectBased: true
+      });
     }
   });
 
-  const clients = Array.from(allClientsMap.values()).map(client => {
-    const linkedProjects = (data.projects || []).filter(p => 
-      (client.projectId && p.id === client.projectId) ||
-      (p.client && p.client.toLowerCase() === client.name.toLowerCase()) ||
-      (p.name && client.name.toLowerCase().includes(p.name.toLowerCase()))
+  // 2. Any ledger clients without an active project in data.projects
+  (data.ledgers || []).filter(l => l.type === 'client').forEach(l => {
+    const alreadyIncluded = clientProjectRows.some(r =>
+      (l.projectId && r.projectId === l.projectId) ||
+      (r.projectName && l.projectName && r.projectName.toLowerCase() === l.projectName.toLowerCase())
     );
-
-    const projectBilled = linkedProjects.reduce((sum, p) => sum + (Number(p.contractValue) || 0), 0);
-    const projectReceived = linkedProjects.reduce((sum, p) => sum + (Number(p.receivedAmount) || 0), 0);
-
-    // Also look up transactions matching this client
-    const clientTxns = (data.transactions || []).filter(t => 
-      t.type === 'income' && (
-        (t.party && t.party.toLowerCase().includes(client.name.toLowerCase())) ||
-        (client.name.toLowerCase().includes(t.party?.toLowerCase())) ||
-        linkedProjects.some(lp => lp.id === t.projectId)
-      )
-    );
-    const txnReceived = clientTxns.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-    const effectiveBilled = Math.max(Number(client.totalBilled) || 0, projectBilled);
-    const effectiveReceived = Math.max(Number(client.totalReceived) || 0, projectReceived, txnReceived);
-    const effectiveDue = Math.max(0, effectiveBilled - effectiveReceived);
-
-    return {
-      ...client,
-      linkedProjects,
-      totalBilled: effectiveBilled,
-      totalReceived: effectiveReceived,
-      dueBalance: effectiveDue
-    };
+    if (!alreadyIncluded) {
+      const effectiveBilled = Number(l.totalBilled) || 0;
+      const effectiveReceived = Number(l.totalReceived) || 0;
+      const effectiveDue = l.dueBalance !== undefined ? Number(l.dueBalance) : Math.max(0, effectiveBilled - effectiveReceived);
+      clientProjectRows.push({
+        id: l.id,
+        ledgerId: l.id,
+        projectId: l.projectId || null,
+        name: l.name,
+        clientName: l.name,
+        projectName: l.projectName || (language === 'bn' ? 'সাধারণ খাতা (নির্দিষ্ট প্রজেক্ট নেই)' : 'General / No Project'),
+        category: 'General Client',
+        phone: l.phone || '',
+        address: l.address || '',
+        totalBilled: effectiveBilled,
+        totalReceived: effectiveReceived,
+        dueBalance: effectiveDue,
+        status: l.status || 'Active',
+        isProjectBased: false
+      });
+    }
   });
 
-  const suppliers = data.ledgers.filter(l => l.type === 'supplier');
+  // Unique clients list for dropdown filter
+  const distinctClientNames = Array.from(new Set(clientProjectRows.map(r => r.name))).filter(Boolean);
 
-  const activeList = (activeTab === 'clients' ? clients : suppliers).filter(item => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    const hasProjectMatch = item.linkedProjects && item.linkedProjects.some(p => 
-      p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
+  // Summary figures
+  const totalClientBilled = clientProjectRows.reduce((sum, r) => sum + r.totalBilled, 0);
+  const totalClientReceived = clientProjectRows.reduce((sum, r) => sum + r.totalReceived, 0);
+  const totalClientDue = clientProjectRows.reduce((sum, r) => sum + r.dueBalance, 0);
+
+  const suppliers = (data.ledgers || []).filter(l => l.type === 'supplier');
+
+  const activeList = (activeTab === 'clients' ? clientProjectRows : suppliers).filter(item => {
+    if (activeTab === 'clients' && selectedClientFilter !== 'all' && item.name.toLowerCase() !== selectedClientFilter.toLowerCase()) {
+      return false;
+    }
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (item.name && item.name.toLowerCase().includes(q)) ||
+      (item.projectName && item.projectName.toLowerCase().includes(q)) ||
+      (item.phone && item.phone.toLowerCase().includes(q)) ||
+      (item.address && item.address.toLowerCase().includes(q)) ||
+      (item.projectId && item.projectId.toLowerCase().includes(q))
     );
-    return item.name.toLowerCase().includes(q) || item.phone?.toLowerCase().includes(q) || item.address?.toLowerCase().includes(q) || hasProjectMatch;
   });
 
-  // Generate WhatsApp reminder link
+  // Generate WhatsApp reminder link mentioning exact project name
   const getWhatsAppLink = (party) => {
     const cleanPhone = (party.phone || '').replace(/[^0-9]/g, '');
     const recipient = cleanPhone.startsWith('88') ? cleanPhone : `88${cleanPhone}`;
+    const projectText = party.projectName && party.projectName !== 'General / No Project' ? ` "${party.projectName}" প্রজেক্টের` : '';
+    const partyName = party.clientName || party.name;
     const msg = encodeURIComponent(
-      `শ্রদ্ধেয় ${party.name}, শুভেচ্ছা জানবেন। এশিয়া ইঞ্জিনিয়ার্স (ASIA ENGINEERS)-এর স্টিল স্ট্রাকচার প্রজেক্টের আপনার বকেয়া বিলের পরিমাণ: ${formatBDT(party.dueBalance)}। অনুগ্রহ করে বকেয়া পরিশোধের ব্যবস্থা গ্রহণ করবেন। ধন্যবাদ - Engr. M. A. Hannan (Managing Director, 01830002040)`
+      `শ্রদ্ধেয় ${partyName}, শুভেচ্ছা জানবেন। এশিয়া ইঞ্জিনিয়ার্স (ASIA ENGINEERS)-এর${projectText} আপনার বকেয়া বিলের পরিমাণ: ${formatBDT(party.dueBalance)}। অনুগ্রহ করে বকেয়া পরিশোধের ব্যবস্থা গ্রহণ করবেন। ধন্যবাদ - Engr. M. A. Hannan (Managing Director, 01830002040)`
     );
     return `https://wa.me/${recipient}?text=${msg}`;
   };
@@ -153,48 +181,132 @@ export const LedgersView = () => {
           </h2>
           <p className="text-xs text-slate-400">
             {language === 'bn' 
-              ? 'গ্রাহক থেকে পাওনা (Receivables) এবং সাপ্লায়ার দেনা (Payables) স্টেটমেন্ট' 
-              : 'Track party balance ledgers, receivables aging, and WhatsApp reminder triggers'}
+              ? 'প্রতিটি ক্লায়েন্টের প্রজেক্ট-ভিত্তিক বিল, জমা ও বকেয়া পাওনা (Receivables) এবং সাপ্লায়ার দেনা স্টেটমেন্ট' 
+              : 'Party balance ledgers, project-wise receivables, and WhatsApp reminder triggers'}
           </p>
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl shadow transition self-start"
+          onClick={() => {
+            setFormData({
+              name: '',
+              projectName: '',
+              projectId: '',
+              type: activeTab === 'clients' ? 'client' : 'supplier',
+              phone: '',
+              address: '',
+              totalBilled: '',
+              totalReceived: '',
+              totalPurchased: '',
+              totalPaid: '',
+              dueBalance: ''
+            });
+            setShowAddModal(true);
+          }}
+          className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl shadow transition self-start cursor-pointer"
         >
           <PlusCircle className="w-4 h-4" />
           <span>{language === 'bn' ? '+ নতুন খাতা খুলুন' : '+ New Party Ledger'}</span>
         </button>
       </div>
 
-      {/* View Switcher & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start">
-          <button
-            onClick={() => setActiveTab('clients')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeTab === 'clients' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            {language === 'bn' ? 'ক্লায়েন্ট পাওনা খাতা (Receivables)' : 'Client Receivables'}
-          </button>
-          <button
-            onClick={() => setActiveTab('suppliers')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-              activeTab === 'suppliers' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            {language === 'bn' ? 'সাপ্লায়ার দেনা খাতা (Payables)' : 'Supplier Payables'}
-          </button>
+      {/* Summary KPI Bar for Clients */}
+      {activeTab === 'clients' && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+              {language === 'bn' ? 'মোট ক্লায়েন্ট ও প্রজেক্ট' : 'Client Projects'}
+            </span>
+            <div className="font-bold text-white text-sm sm:text-base font-mono mt-0.5">
+              {distinctClientNames.length} {language === 'bn' ? 'ক্লায়েন্ট' : 'Clients'} • {clientProjectRows.length} {language === 'bn' ? 'প্রজেক্ট' : 'Projects'}
+            </div>
+          </div>
+
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+              {language === 'bn' ? 'সর্বমোট বিল (Billed)' : 'Total Billed'}
+            </span>
+            <div className="font-bold text-slate-200 text-sm sm:text-base font-mono mt-0.5">
+              {formatBDT(totalClientBilled)}
+            </div>
+          </div>
+
+          <div className="bg-slate-800/80 border border-emerald-500/30 rounded-xl p-3 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-emerald-400 block tracking-wider">
+              {language === 'bn' ? 'সর্বমোট জমা (Received)' : 'Total Received'}
+            </span>
+            <div className="font-bold text-emerald-400 text-sm sm:text-base font-mono mt-0.5">
+              +{formatBDT(totalClientReceived)}
+            </div>
+          </div>
+
+          <div className="bg-slate-800/80 border border-amber-500/30 rounded-xl p-3 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
+              {language === 'bn' ? 'সর্বমোট বকেয়া পাওনা' : 'Total Due Balance'}
+            </span>
+            <div className="font-bold text-amber-400 text-sm sm:text-base font-mono mt-0.5">
+              {formatBDT(totalClientDue)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Switcher, Client Filter & Search Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start">
+            <button
+              onClick={() => setActiveTab('clients')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                activeTab === 'clients' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {language === 'bn' ? 'ক্লায়েন্ট পাওনা খাতা (Receivables)' : 'Client Receivables'}
+            </button>
+            <button
+              onClick={() => setActiveTab('suppliers')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                activeTab === 'suppliers' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {language === 'bn' ? 'সাপ্লায়ার দেনা খাতা (Payables)' : 'Supplier Payables'}
+            </button>
+          </div>
+
+          {/* Client Filter Dropdown: easily filter all projects under one client */}
+          {activeTab === 'clients' && distinctClientNames.length > 1 && (
+            <div className="flex items-center gap-1.5 self-start sm:self-auto">
+              <label className="text-xs text-slate-400 font-medium whitespace-nowrap">
+                {language === 'bn' ? 'ক্লায়েন্ট:' : 'Client:'}
+              </label>
+              <select
+                value={selectedClientFilter}
+                onChange={(e) => setSelectedClientFilter(e.target.value)}
+                className="bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400 font-medium cursor-pointer"
+              >
+                <option value="all">
+                  🌐 {language === 'bn' ? `সকল ক্লায়েন্ট (${distinctClientNames.length})` : `All Clients (${distinctClientNames.length})`}
+                </option>
+                {distinctClientNames.map(cName => {
+                  const pCount = clientProjectRows.filter(r => r.name.toLowerCase() === cName.toLowerCase()).length;
+                  return (
+                    <option key={cName} value={cName}>
+                      {cName} ({pCount} {language === 'bn' ? 'টি প্রজেক্ট' : 'Projects'})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
         </div>
 
-        <div className="relative min-w-[220px]">
+        <div className="relative min-w-[240px]">
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={language === 'bn' ? 'নাম বা মোবাইল খুঁজুন...' : 'Search party, phone...'}
+            placeholder={activeTab === 'clients' ? (language === 'bn' ? 'ক্লায়েন্ট বা প্রজেক্ট খুঁজুন...' : 'Search client, project...') : (language === 'bn' ? 'সাপ্লায়ার নাম খুঁজুন...' : 'Search supplier...')}
             className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
           />
         </div>
@@ -206,22 +318,22 @@ export const LedgersView = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-slate-900/90 border-b border-slate-700/80 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
-                <th className="py-3 px-3">Party Name</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'যোগাযোগ ও ঠিকানা' : 'Contact & Address'}</th>
+                <th className="py-3 px-3">{activeTab === 'clients' ? (language === 'bn' ? 'ক্লায়েন্ট নেম (Client Name)' : 'Client Name') : 'Party Name'}</th>
+                <th className="py-3 px-3">{language === 'bn' ? 'যোগাযোগ ও সাইট' : 'Contact & Site'}</th>
                 {activeTab === 'clients' && (
-                  <th className="py-3 px-3">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট' : 'Linked Project'}</th>
+                  <th className="py-3 px-3">{language === 'bn' ? 'প্রজেক্টের নাম (Project Name)' : 'Project Name'}</th>
                 )}
                 {activeTab === 'clients' ? (
                   <>
                     <th className="py-3 px-3 text-right">{language === 'bn' ? 'মোট বিল (Billed)' : 'Total Billed'}</th>
-                    <th className="py-3 px-3 text-right">{language === 'bn' ? 'মোট জমা (Received)' : 'Total Received'}</th>
-                    <th className="py-3 px-3 text-right">{language === 'bn' ? 'বকেয়া পাওনা (Due)' : 'Outstanding Due'}</th>
+                    <th className="py-3 px-3 text-right text-emerald-400">{language === 'bn' ? 'মোট জমা (Received)' : 'Total Received'}</th>
+                    <th className="py-3 px-3 text-right text-amber-400">{language === 'bn' ? 'বকেয়া পাওনা (Due)' : 'Outstanding Due'}</th>
                   </>
                 ) : (
                   <>
                     <th className="py-3 px-3 text-right">{language === 'bn' ? 'মোট ক্রয় (Purchased)' : 'Total Purchased'}</th>
-                    <th className="py-3 px-3 text-right">{language === 'bn' ? 'মোট পরিশোধ (Paid)' : 'Total Paid'}</th>
-                    <th className="py-3 px-3 text-right">{language === 'bn' ? 'প্রদেয় দেনা (Payable)' : 'Balance Payable'}</th>
+                    <th className="py-3 px-3 text-right text-emerald-400">{language === 'bn' ? 'মোট পরিশোধ (Paid)' : 'Total Paid'}</th>
+                    <th className="py-3 px-3 text-right text-rose-400">{language === 'bn' ? 'প্রদেয় দেনা (Payable)' : 'Balance Payable'}</th>
                   </>
                 )}
                 <th className="py-3 px-3 text-center">{language === 'bn' ? 'তাকাদা / রিমাইন্ডার' : 'Reminder'}</th>
@@ -231,56 +343,59 @@ export const LedgersView = () => {
             <tbody className="divide-y divide-slate-800">
               {activeList.map((party) => {
                 const hasDue = (party.dueBalance || 0) > 0;
+                const clientProjectsCount = activeTab === 'clients'
+                  ? clientProjectRows.filter(r => r.name.toLowerCase() === party.name.toLowerCase()).length
+                  : 0;
+
                 return (
                   <tr key={party.id} className="hover:bg-slate-800/50 transition">
                     <td className="py-3 px-3">
-                      <div className="font-bold text-white text-xs">{party.name}</div>
-                      <div className="text-[10px] text-slate-400 uppercase font-mono">{party.id}</div>
+                      <div className="font-bold text-white text-xs flex items-center gap-1.5">
+                        <span>{party.clientName || party.name}</span>
+                        {activeTab === 'clients' && clientProjectsCount > 1 && (
+                          <span className="text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded font-semibold" title={`${clientProjectsCount} projects under this client`}>
+                            {clientProjectsCount} {language === 'bn' ? 'টি প্রজেক্ট' : 'prjs'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                        {party.projectId || party.id}
+                      </div>
                     </td>
+
                     <td className="py-3 px-3">
                       <div className="text-slate-300 flex items-center gap-1">
                         <Phone className="w-3 h-3 text-slate-400" />
-                        <span>{party.phone}</span>
+                        <span>{party.phone || '-'}</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 truncate max-w-xs">{party.address}</div>
+                      <div className="text-[11px] text-slate-400 truncate max-w-xs">{party.address || '-'}</div>
                     </td>
 
+                    {/* Column 3: Project Name (Dedicated Column per Project) */}
                     {activeTab === 'clients' && (
                       <td className="py-3 px-3">
-                        {party.linkedProjects && party.linkedProjects.length > 0 ? (
-                          <div className="space-y-1">
-                            {party.linkedProjects.map(lp => (
-                              <div key={lp.id} className="inline-block max-w-[200px]">
-                                <span className="font-semibold text-amber-400 text-xs flex items-center gap-1" title={`${lp.name} (${lp.id})`}>
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
-                                  <span className="truncate">{lp.name}</span>
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-mono block">
-                                  {lp.id} {lp.site ? `• ${lp.site}` : ''}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-slate-500 text-[11px] italic">
-                            {language === 'bn' ? 'কোন প্রজেক্ট লিংক নেই' : 'No project linked'}
-                          </span>
-                        )}
+                        <div className="font-bold text-amber-300 text-xs flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                          <span className="truncate max-w-xs">{party.projectName}</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          {party.category || 'Steel Structure'} {party.status ? `• ${party.status}` : ''}
+                        </div>
                       </td>
                     )}
 
                     {activeTab === 'clients' ? (
                       <>
-                        <td className="py-3 px-3 text-right font-mono text-slate-300">{formatBDT(party.totalBilled)}</td>
-                        <td className="py-3 px-3 text-right font-mono text-emerald-400">{formatBDT(party.totalReceived)}</td>
+                        <td className="py-3 px-3 text-right font-mono text-slate-300 font-semibold">{formatBDT(party.totalBilled)}</td>
+                        <td className="py-3 px-3 text-right font-mono text-emerald-400 font-bold">{formatBDT(party.totalReceived)}</td>
                         <td className="py-3 px-3 text-right font-bold text-amber-400 font-mono text-xs">
                           {formatBDT(party.dueBalance)}
                         </td>
                       </>
                     ) : (
                       <>
-                        <td className="py-3 px-3 text-right font-mono text-slate-300">{formatBDT(party.totalPurchased)}</td>
-                        <td className="py-3 px-3 text-right font-mono text-emerald-400">{formatBDT(party.totalPaid)}</td>
+                        <td className="py-3 px-3 text-right font-mono text-slate-300 font-semibold">{formatBDT(party.totalPurchased)}</td>
+                        <td className="py-3 px-3 text-right font-mono text-emerald-400 font-bold">{formatBDT(party.totalPaid)}</td>
                         <td className="py-3 px-3 text-right font-bold text-rose-400 font-mono text-xs">
                           {formatBDT(party.dueBalance)}
                         </td>
@@ -294,7 +409,7 @@ export const LedgersView = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-2.5 py-1 rounded-lg text-[11px] font-semibold transition"
-                          title="Send WhatsApp Payment Due Notice"
+                          title={language === 'bn' ? `হোয়াটসঅ্যাপে "${party.projectName || party.name}" বকেয়ার তাকাদা পাঠান` : "Send WhatsApp Payment Due Notice"}
                         >
                           <MessageSquare className="w-3 h-3" />
                           <span>WhatsApp</span>
@@ -307,19 +422,31 @@ export const LedgersView = () => {
                     <td className="py-3 px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
-                          onClick={() => setEditingLedger({ ...party })}
-                          className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
+                          onClick={() => setEditingLedger({
+                            id: party.ledgerId || party.id,
+                            projectId: party.projectId,
+                            name: party.clientName || party.name,
+                            projectName: party.projectName || '',
+                            type: party.type || 'client',
+                            phone: party.phone || '',
+                            address: party.address || '',
+                            totalBilled: party.totalBilled || 0,
+                            totalReceived: party.totalReceived || 0,
+                            dueBalance: party.dueBalance || 0
+                          })}
+                          className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs cursor-pointer"
                           title={language === 'bn' ? 'খাতা এডিট করুন' : 'Edit Ledger'}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => {
-                            if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত "${party.name}" খাতাটি মুছে ফেলতে চান?` : `Delete ledger "${party.name}"?`)) {
-                              deleteLedger(party.id);
+                            const itemName = party.projectName ? `${party.name} (${party.projectName})` : party.name;
+                            if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত "${itemName}" খাতাটি মুছে ফেলতে চান?` : `Delete ledger "${itemName}"?`)) {
+                              deleteLedger(party.ledgerId || party.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                          className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs cursor-pointer"
                           title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -370,46 +497,36 @@ export const LedgersView = () => {
                 </button>
               </div>
 
-              {formData.type === 'client' && (
-                <div>
-                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট (ঐচ্ছিক)' : 'Linked Project (Optional)'}</label>
-                  <select
-                    value={formData.projectId || ''}
-                    onChange={(e) => {
-                      const pId = e.target.value;
-                      const selectedPrj = (data.projects || []).find(p => p.id === pId);
-                      setFormData(prev => ({
-                        ...prev,
-                        projectId: pId,
-                        name: prev.name || selectedPrj?.client || '',
-                        phone: prev.phone || selectedPrj?.clientPhone || '',
-                        address: prev.address || selectedPrj?.site || selectedPrj?.location || '',
-                        totalBilled: selectedPrj?.contractValue || prev.totalBilled || '',
-                        totalReceived: selectedPrj?.receivedAmount || prev.totalReceived || '',
-                        dueBalance: selectedPrj ? Math.max(0, (selectedPrj.contractValue || 0) - (selectedPrj.receivedAmount || 0)) : prev.dueBalance
-                      }));
-                    }}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
-                  >
-                    <option value="">-- {language === 'bn' ? 'প্রজেক্ট নির্বাচন করুন (যদি থাকে)' : 'Select Project (If any)'} --</option>
-                    {(data.projects || []).map(p => (
-                      <option key={p.id} value={p.id}>{p.name} ({p.client}) - {p.id}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               <div>
-                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Company Name'} *</label>
+                <label className="block text-slate-400 mb-1 font-medium">
+                  {formData.type === 'client' ? (language === 'bn' ? 'ক্লায়েন্ট / প্রতিষ্ঠানের নাম' : 'Client Name') : (language === 'bn' ? 'সাপ্লায়ার নাম' : 'Supplier Name')} *
+                </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Anwar Galvanizing Ltd"
+                  placeholder={formData.type === 'client' ? "e.g. RFL Group / PHP Automobiles Ltd" : "e.g. BSRM Steels Ltd"}
                   value={formData.name}
                   onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
                 />
               </div>
+
+              {formData.type === 'client' && (
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্টের নাম (Project Name)' : 'Project Name'} *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Beam Supply / Lift Core / Plate Cutting"
+                    value={formData.projectName || ''}
+                    onChange={(e) => setFormData(p => ({ ...p, projectName: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-amber-300 font-bold focus:outline-none focus:border-amber-400"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    {language === 'bn' ? 'ক্লায়েন্টের এই নির্দিষ্ট প্রজেক্টের নাম দিন (যেমন: Beam Supply, Lift Core, ইত্যাদি)' : 'Specific project name under this client'}
+                  </span>
+                </div>
+              )}
 
               <div>
                 <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোবাইল / হোয়াটসঅ্যাপ নম্বর' : 'Phone / WhatsApp'} *</label>
@@ -479,24 +596,10 @@ export const LedgersView = () => {
               }}
               className="p-5 space-y-3.5 text-xs"
             >
-              {editingLedger.type === 'client' && (
-                <div>
-                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'সংশ্লিষ্ট প্রজেক্ট' : 'Linked Project'}</label>
-                  <select
-                    value={editingLedger.projectId || ''}
-                    onChange={(e) => setEditingLedger(p => ({ ...p, projectId: e.target.value }))}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400"
-                  >
-                    <option value="">-- {language === 'bn' ? 'কোন প্রজেক্ট লিংক নেই' : 'None'} --</option>
-                    {(data.projects || []).map(p => (
-                      <option key={p.id} value={p.id}>{p.name} ({p.client}) - {p.id}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               <div>
-                <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Company Name'} *</label>
+                <label className="block text-slate-400 mb-1 font-medium">
+                  {editingLedger.type === 'client' ? (language === 'bn' ? 'ক্লায়েন্ট / প্রতিষ্ঠানের নাম' : 'Client Name') : (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Company Name')} *
+                </label>
                 <input
                   type="text"
                   required
@@ -505,6 +608,19 @@ export const LedgersView = () => {
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold"
                 />
               </div>
+
+              {editingLedger.type === 'client' && (
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্টের নাম (Project Name)' : 'Project Name'} *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingLedger.projectName || ''}
+                    onChange={(e) => setEditingLedger(p => ({ ...p, projectName: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-amber-300 font-bold focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'মোবাইল / হোয়াটসঅ্যাপ' : 'Phone / WhatsApp'} *</label>
