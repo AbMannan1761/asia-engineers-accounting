@@ -11,12 +11,56 @@
   font-display: swap;
 }
 
+html {
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+}
+
 :root {
   font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
+  font-size: 17px;
 }
 
 *, body, button, input, select, textarea, table, th, td, h1, h2, h3, h4, h5, h6, span, p, div {
   font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
+}
+
+/* Enhancing Bengali Typography Legibility across the entire app */
+.text-\[10px\] {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+.text-\[11px\] {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+
+.text-xs {
+  font-size: 13.5px !important;
+  line-height: 1.45 !important;
+}
+
+.text-sm {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+/* Form controls & tables comfortably sized for Bengali */
+input, select, textarea {
+  font-size: 14.5px !important;
+}
+
+table th {
+  font-size: 13.5px !important;
+}
+
+table td {
+  font-size: 14px !important;
+}
+
+label {
+  font-size: 13.5px !important;
 }
 
 /* Custom scrollbars */
