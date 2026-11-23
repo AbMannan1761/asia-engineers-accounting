@@ -66,13 +66,6 @@ export const DashboardView = () => {
               <PlusCircle className="w-4 h-4" />
               <span>{language === 'bn' ? '+ খরচ / ভাউচার' : '+ Payment Voucher'}</span>
             </button>
-            <button
-              onClick={() => setActiveTab('accounting')}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
-            >
-              <ArrowLeftRight className="w-4 h-4" />
-              <span>{language === 'bn' ? 'ফান্ড ট্রান্সফার' : 'Transfer'}</span>
-            </button>
           </div>
         </div>
       </div>

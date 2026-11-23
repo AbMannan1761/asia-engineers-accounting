@@ -196,6 +196,14 @@ body.theme-light,
 }
 
 /* Alert Banners & KPI Summary Cards */
+.theme-light .from-slate-800\/90,
+.theme-light .bg-gradient-to-r {
+  background-image: none !important;
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
 .theme-light .stock-alert-banner,
 .theme-light .bg-amber-950\/50,
 .theme-light .bg-amber-950\/40,
