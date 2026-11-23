@@ -432,25 +432,25 @@ export const ProjectsView = () => {
         </div>
 
         {/* Global Financial Metrics Pills for Filtered Projects */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800/80 text-xs">
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/60">
-            <span className="text-[10px] text-slate-400 block">{language === 'bn' ? 'প্রদর্শিত প্রজেক্ট চুক্তি মূল্য:' : 'Contract Total:'}</span>
-            <span className="font-bold text-white text-sm">{formatBDT(totalFilteredContract)}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-slate-800/80 text-xs">
+          <div className="bg-slate-950/60 project-kpi-card rounded-xl p-3 border border-slate-800/60 shadow-xs">
+            <span className="text-[11px] text-slate-400 block font-medium mb-0.5">{language === 'bn' ? 'প্রদর্শিত প্রজেক্ট চুক্তি মূল্য:' : 'Contract Total:'}</span>
+            <span className="font-bold text-white text-base">{formatBDT(totalFilteredContract)}</span>
           </div>
 
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/60">
-            <span className="text-[10px] text-slate-400 block">{language === 'bn' ? 'মোট বিল প্রাপ্তি (জমা):' : 'Total Received:'}</span>
-            <span className="font-bold text-emerald-400 text-sm">{formatBDT(totalFilteredReceived)}</span>
+          <div className="bg-slate-950/60 project-kpi-card rounded-xl p-3 border border-slate-800/60 shadow-xs">
+            <span className="text-[11px] text-slate-400 block font-medium mb-0.5">{language === 'bn' ? 'মোট বিল প্রাপ্তি (জমা):' : 'Total Received:'}</span>
+            <span className="font-bold text-emerald-400 text-base">{formatBDT(totalFilteredReceived)}</span>
           </div>
 
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/60">
-            <span className="text-[10px] text-slate-400 block">{language === 'bn' ? 'মোট প্রজেক্ট খরচ:' : 'Total Spent:'}</span>
-            <span className="font-bold text-rose-400 text-sm">{formatBDT(totalFilteredSpent)}</span>
+          <div className="bg-slate-950/60 project-kpi-card rounded-xl p-3 border border-slate-800/60 shadow-xs">
+            <span className="text-[11px] text-slate-400 block font-medium mb-0.5">{language === 'bn' ? 'মোট প্রজেক্ট খরচ:' : 'Total Spent:'}</span>
+            <span className="font-bold text-rose-400 text-base">{formatBDT(totalFilteredSpent)}</span>
           </div>
 
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/60">
-            <span className="text-[10px] text-slate-400 block">{language === 'bn' ? 'বর্তমান মোট নিট লাভ:' : 'Net Profit:'}</span>
-            <span className={`font-bold text-sm ${totalFilteredProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className="bg-slate-950/60 project-kpi-card rounded-xl p-3 border border-slate-800/60 shadow-xs">
+            <span className="text-[11px] text-slate-400 block font-medium mb-0.5">{language === 'bn' ? 'বর্তমান মোট নিট লাভ:' : 'Net Profit:'}</span>
+            <span className={`font-bold text-base ${totalFilteredProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {formatBDT(totalFilteredProfit)}
             </span>
           </div>
@@ -557,21 +557,21 @@ export const ProjectsView = () => {
                 </div>
 
                 {/* Financial Breakdown Table in card */}
-                <div className="bg-slate-900/85 rounded-xl p-3 border border-slate-800/80 space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">{language === 'bn' ? 'চুক্তি মূল্য:' : 'Contract:'}</span>
+                <div className="bg-slate-900/85 project-breakdown-box rounded-xl p-3 border border-slate-800/80 space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 font-medium">{language === 'bn' ? 'চুক্তি মূল্য:' : 'Contract:'}</span>
                     <span className="font-bold text-white">{formatBDT(contractVal)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">{language === 'bn' ? 'বিল প্রাপ্তি (জমা):' : 'Received:'}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 font-medium">{language === 'bn' ? 'বিল প্রাপ্তি (জমা):' : 'Received:'}</span>
                     <span className="font-bold text-emerald-400">{formatBDT(received)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">{language === 'bn' ? 'প্রজেক্ট খরচ (মালামাল+শ্রম):' : 'Spent:'}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 font-medium">{language === 'bn' ? 'প্রজেক্ট খরচ (মালামাল+শ্রম):' : 'Spent:'}</span>
                     <span className="font-bold text-rose-400">{formatBDT(spent)}</span>
                   </div>
-                  <div className="flex justify-between pt-1 border-t border-slate-800">
-                    <span className="text-slate-300 font-medium">{language === 'bn' ? 'বর্তমান নিট মার্জিন:' : 'Net Margin:'}</span>
+                  <div className="flex justify-between items-center pt-1.5 border-t border-slate-800/60">
+                    <span className="text-slate-300 font-semibold">{language === 'bn' ? 'বর্তমান নিট মার্জিন:' : 'Net Margin:'}</span>
                     <span className={`font-bold ${currentProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {formatBDT(currentProfit)}
                     </span>
