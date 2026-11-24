@@ -82,9 +82,18 @@ label {
 /* ========================================================
    BULLETPROOF PRINT ENGINE FOR VOUCHERS
    Ensures ONLY the official voucher is printed on paper.
+   Hides all website elements & browser extension widgets.
    ======================================================== */
 @media print {
-  /* 1. Strictly hide all application layout, navigation, and controls */
+  /* 1. Global visibility kill switch: Hide EVERYTHING on the page by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. Hide any third-party browser extension widgets or injected DOM elements */
+  body > *:not(#root),
+  body > iframe,
+  body > div:not(#root),
   header,
   aside,
   nav,
@@ -107,7 +116,7 @@ label {
     border: none !important;
   }
 
-  /* 2. Reset document structure so it flows cleanly without constraints */
+  /* 3. Reset document structure so it flows cleanly without constraints */
   html,
   body {
     width: 100% !important;
@@ -142,16 +151,18 @@ label {
     box-shadow: none !important;
   }
 
-  .print-only {
-    display: block !important;
+  /* 4. The Printable Voucher Card - ONLY this element and its contents are visible */
+  .printable-voucher-card,
+  .printable-voucher-card * {
     visibility: visible !important;
   }
 
-  /* 3. The Printable Voucher Card */
   .printable-voucher-card {
     display: block !important;
-    visibility: visible !important;
-    position: relative !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
@@ -164,10 +175,6 @@ label {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
-  }
-
-  .printable-voucher-card * {
-    visibility: visible !important;
   }
 }
 

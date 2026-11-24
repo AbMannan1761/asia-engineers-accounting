@@ -117,9 +117,18 @@ export const VouchersView = () => {
             size: ${paperSize} portrait;
             margin: ${paperSize === 'A4' ? '10mm 12mm' : '5mm 6mm'};
           }
+          /* Hide EVERYTHING on the entire webpage by default */
+          body * {
+            visibility: hidden !important;
+          }
+          /* Hide any Chrome extensions or external floating widgets injected into body */
+          body > *:not(#root),
+          body > iframe,
           header, aside, nav, footer, .no-print, button {
             display: none !important;
             visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
           }
           body, html, #root, #root > div, main {
             overflow: visible !important;
@@ -131,13 +140,24 @@ export const VouchersView = () => {
             padding: 0 !important;
             background: #ffffff !important;
           }
+          /* STRICTLY make ONLY the voucher card and its children visible */
+          .printable-voucher-card,
+          .printable-voucher-card * {
+            visibility: visible !important;
+          }
           .printable-voucher-card {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 auto !important;
             box-shadow: none !important;
             border: 1.5px solid #0f172a !important;
             padding: ${paperSize === 'A4' ? '24px 28px' : '16px 20px'} !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
       `}</style>
