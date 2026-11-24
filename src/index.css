@@ -401,11 +401,111 @@ body.theme-light,
   color: #94a3b8 !important;
 }
 
-/* Header & Sidebar in Light Mode */
-.theme-light header {
-  background-color: #ffffff !important;
-  border-bottom-color: #e2e8f0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+/* ========================================================
+   Executive Corporate Header (Harmonious Brand Color)
+   Deep Asia Engineers Navy (#07192f) with Amber Accent Line
+   ======================================================== */
+header,
+.app-main-header,
+.theme-light header,
+.theme-light .app-main-header,
+.theme-dark header,
+.theme-dark .app-main-header {
+  background: linear-gradient(180deg, #07192f 0%, #0a1b34 100%) !important;
+  border-bottom: 2.5px solid #f59e0b !important;
+  box-shadow: 0 4px 14px -2px rgba(7, 25, 47, 0.35) !important;
+  color: #f8fafc !important;
+}
+
+/* Header Text Contrast Overrides */
+header .text-white,
+.theme-light header .text-white,
+.app-main-header .text-white,
+.theme-light .app-main-header .text-white {
+  color: #ffffff !important;
+}
+
+header .text-slate-100,
+header .text-slate-200,
+.theme-light header .text-slate-100,
+.theme-light header .text-slate-200,
+.app-main-header .text-slate-100,
+.app-main-header .text-slate-200 {
+  color: #f1f5f9 !important;
+}
+
+header .text-slate-300,
+.theme-light header .text-slate-300,
+.app-main-header .text-slate-300 {
+  color: #cbd5e1 !important;
+}
+
+header .text-slate-400,
+.theme-light header .text-slate-400,
+.app-main-header .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+header .text-amber-400,
+.theme-light header .text-amber-400,
+.app-main-header .text-amber-400 {
+  color: #fbbf24 !important;
+}
+
+header .text-emerald-400,
+.theme-light header .text-emerald-400,
+.app-main-header .text-emerald-400 {
+  color: #34d399 !important;
+}
+
+header .text-blue-400,
+.theme-light header .text-blue-400,
+.app-main-header .text-blue-400 {
+  color: #60a5fa !important;
+}
+
+header .text-rose-400,
+.theme-light header .text-rose-400,
+.app-main-header .text-rose-400 {
+  color: #fb7185 !important;
+}
+
+/* Header Buttons and Ticker Pills */
+header .bg-slate-800,
+header .bg-slate-800\/80,
+header .bg-slate-800\/90,
+header .bg-slate-800\/95,
+.theme-light header .bg-slate-800,
+.theme-light header .bg-slate-800\/80,
+.theme-light header .bg-slate-800\/90,
+.theme-light header .bg-slate-800\/95,
+.app-main-header .bg-slate-800,
+.theme-light .app-main-header .bg-slate-800 {
+  background-color: #112240 !important;
+  color: #e2e8f0 !important;
+  border-color: #233554 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+header .bg-slate-800:hover,
+.theme-light header .bg-slate-800:hover,
+header button:hover:not(.bg-amber-500):not(.bg-emerald-600),
+.theme-light header button:hover:not(.bg-amber-500):not(.bg-emerald-600) {
+  background-color: #1d3356 !important;
+  color: #ffffff !important;
+}
+
+header .border-slate-700,
+header .border-slate-700\/60,
+header .border-slate-700\/80,
+header .border-slate-800,
+.theme-light header .border-slate-700,
+.theme-light header .border-slate-700\/60,
+.theme-light header .border-slate-700\/80,
+.theme-light header .border-slate-800,
+.app-main-header .border-slate-700,
+.theme-light .app-main-header .border-slate-700 {
+  border-color: #233554 !important;
 }
 
 .theme-light aside {

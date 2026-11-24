@@ -73,7 +73,7 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 bg-slate-900 border-b border-slate-800 px-4 lg:px-6 py-2.5 shadow-md">
+    <header className="app-main-header sticky top-0 z-40 shrink-0 bg-slate-900 border-b border-slate-800 px-4 lg:px-6 py-2.5 shadow-md">
       <div className="flex items-center justify-between gap-4">
         {/* Left: Mobile/Desktop Sidebar Toggle + Company Brand */}
         <div className="flex items-center gap-3">
