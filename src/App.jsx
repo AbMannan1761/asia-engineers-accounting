@@ -155,7 +155,7 @@ const MainLayout = () => {
         {!sidebarOpen && (
           <button
             onClick={openSidebar}
-            className="hidden lg:flex fixed left-0 top-20 z-40 bg-slate-900 border border-slate-700 border-l-0 rounded-r-xl p-2.5 text-amber-400 hover:bg-slate-800 hover:text-amber-300 shadow-2xl transition-all items-center gap-1.5 cursor-pointer group"
+            className="no-print hidden lg:flex fixed left-0 top-20 z-40 bg-slate-900 border border-slate-700 border-l-0 rounded-r-xl p-2.5 text-amber-400 hover:bg-slate-800 hover:text-amber-300 shadow-2xl transition-all items-center gap-1.5 cursor-pointer group"
             title="সাইড প্যানেল খুলুন (Open Sidebar)"
           >
             <PanelLeftOpen className="w-4 h-4" />

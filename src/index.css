@@ -79,44 +79,95 @@ label {
   background: rgba(148, 163, 184, 0.6);
 }
 
-/* Dedicated Print Styles for Vouchers and Receipts (A5 Paper Format) */
+/* ========================================================
+   BULLETPROOF PRINT ENGINE FOR VOUCHERS
+   Ensures ONLY the official voucher is printed on paper.
+   ======================================================== */
 @media print {
-  @page {
-    size: A5 landscape;
-    margin: 6mm 8mm;
-  }
-
-  html, body {
-    width: 100% !important;
-    height: 100% !important;
+  /* 1. Strictly hide all application layout, navigation, and controls */
+  header,
+  aside,
+  nav,
+  footer,
+  .no-print,
+  .app-main-header,
+  [class*="Sidebar"],
+  [class*="Header"],
+  button,
+  input,
+  select,
+  textarea {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
+    border: none !important;
+  }
+
+  /* 2. Reset document structure so it flows cleanly without constraints */
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  body, table, th, td, div, span, p {
-    background: transparent !important;
-    color: black !important;
-    font-size: 10pt;
-    font-family: 'Nikosh', 'NikoshBAN', serif, sans-serif !important;
-  }
-  .no-print {
-    display: none !important;
-  }
-  .print-only {
+  #root,
+  #root > div,
+  main {
     display: block !important;
-  }
-  .printable-voucher-card {
-    box-shadow: none !important;
-    border: 1.5px solid #0f172a !important;
-    margin: 0 auto !important;
-    padding: 16px 20px !important;
-    page-break-inside: avoid;
     width: 100% !important;
     max-width: 100% !important;
-    font-family: 'Nikosh', 'NikoshBAN', serif, sans-serif !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* 3. The Printable Voucher Card */
+  .printable-voucher-card {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px 24px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #0f172a !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
+  }
+
+  .printable-voucher-card * {
+    visibility: visible !important;
   }
 }
 

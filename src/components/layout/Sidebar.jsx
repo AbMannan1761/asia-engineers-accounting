@@ -117,13 +117,13 @@ export const Sidebar = ({ isOpen, onClose, onToggle }) => {
       {isOpen && (
         <div 
           onClick={onClose} 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs transition-opacity"
+          className="no-print fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs transition-opacity"
         />
       )}
 
       {/* Main Desktop Sidebar / Mobile Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 ease-in-out lg:static h-full shrink-0 ${
+        className={`no-print fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 ease-in-out lg:static h-full shrink-0 ${
           isOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:w-0 lg:overflow-hidden lg:border-none'
         }`}
       >
@@ -173,7 +173,7 @@ export const Sidebar = ({ isOpen, onClose, onToggle }) => {
       </aside>
 
       {/* iPhone Safari Bottom Navigation Bar (Fixed for quick touch navigation on mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 py-1.5 px-2 flex justify-around items-center lg:hidden pb-safe">
+      <nav className="no-print fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 py-1.5 px-2 flex justify-around items-center lg:hidden pb-safe">
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`flex flex-col items-center gap-1 p-1 rounded-lg text-[10px] ${

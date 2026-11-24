@@ -115,7 +115,29 @@ export const VouchersView = () => {
         @media print {
           @page {
             size: ${paperSize} portrait;
-            margin: ${paperSize === 'A4' ? '12mm 14mm' : '6mm 8mm'};
+            margin: ${paperSize === 'A4' ? '10mm 12mm' : '5mm 6mm'};
+          }
+          header, aside, nav, footer, .no-print, button {
+            display: none !important;
+            visibility: hidden !important;
+          }
+          body, html, #root, #root > div, main {
+            overflow: visible !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+          }
+          .printable-voucher-card {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+            box-shadow: none !important;
+            border: 1.5px solid #0f172a !important;
+            padding: ${paperSize === 'A4' ? '24px 28px' : '16px 20px'} !important;
           }
         }
       `}</style>
