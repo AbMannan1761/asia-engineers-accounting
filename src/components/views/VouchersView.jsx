@@ -90,13 +90,13 @@ export const VouchersView = () => {
 
   const titleInfo = getVoucherTitleInfo();
 
-  const partyLabel = isIncome 
+  const partyLabel = isIncome
     ? (language === 'bn' ? 'টাকা প্রাপ্তি (Received with thanks from)' : 'Received with thanks from')
     : isTransfer
-    ? (language === 'bn' ? 'উৎস ও গন্তব্য হিসাব (Transfer)' : 'Transfer Accounts')
-    : (language === 'bn' ? 'প্রাপক / ব্যয়ের খাত (Paid in favor of)' : 'Paid in favor of (Payee)');
+      ? (language === 'bn' ? 'উৎস ও গন্তব্য হিসাব (Transfer)' : 'Transfer Accounts')
+      : (language === 'bn' ? 'প্রাপক / ব্যয়ের খাত (Paid in favor of)' : 'Paid in favor of (Payee)');
 
-  const onAccountLabel = isIncome 
+  const onAccountLabel = isIncome
     ? (language === 'bn' ? 'যে বাবদ প্রাপ্তি (On Account / Purpose of)' : 'On Account / Purpose of')
     : (language === 'bn' ? 'যে বাবদ প্রদান (Being the payment for)' : 'Being the payment for');
 
@@ -177,8 +177,8 @@ export const VouchersView = () => {
               <span>{language === 'bn' ? `ডেবিট ও ক্রেডিট ভাউচার প্রিন্ট প্রিভিউ (${paperSize})` : `Debit & Credit Voucher Printing (${paperSize})`}</span>
             </h2>
             <p className="text-xs text-slate-400">
-              {language === 'bn' 
-                ? `অফিসিয়াল ${paperSize} প্রিন্ট লেআউট, টাকার অংক কথায় ও স্বাক্ষরের স্থান` 
+              {language === 'bn'
+                ? `অফিসিয়াল ${paperSize} প্রিন্ট লেআউট, টাকার অংক কথায় ও স্বাক্ষরের স্থান`
                 : `Standard ${paperSize} print format with amount in words and official signature blocks`}
             </p>
           </div>
@@ -224,43 +224,39 @@ export const VouchersView = () => {
             <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 gap-1">
               <button
                 onClick={() => setFilterType('all')}
-                className={`px-2.5 py-1 rounded-lg font-medium transition ${
-                  filterType === 'all'
-                    ? 'bg-amber-500 text-slate-950 font-bold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-2.5 py-1 rounded-lg font-medium transition ${filterType === 'all'
+                  ? 'bg-amber-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 {language === 'bn' ? 'সকল' : 'All'}
               </button>
               <button
                 onClick={() => setFilterType('debit')}
-                className={`px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1 ${
-                  filterType === 'debit'
-                    ? 'bg-rose-600 text-white font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1 ${filterType === 'debit'
+                  ? 'bg-rose-600 text-white font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 <span className="w-2 h-2 rounded-full bg-rose-400"></span>
                 <span>{language === 'bn' ? 'ডেবিট ভাউচার (ব্যয়)' : 'Debit Vouchers'}</span>
               </button>
               <button
                 onClick={() => setFilterType('credit')}
-                className={`px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1 ${
-                  filterType === 'credit'
-                    ? 'bg-emerald-600 text-white font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1 ${filterType === 'credit'
+                  ? 'bg-emerald-600 text-white font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 <span>{language === 'bn' ? 'ক্রেডিট ভাউচার (জমা)' : 'Credit Vouchers'}</span>
               </button>
               <button
                 onClick={() => setFilterType('transfer')}
-                className={`px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1 ${
-                  filterType === 'transfer'
-                    ? 'bg-blue-600 text-white font-bold shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1 ${filterType === 'transfer'
+                  ? 'bg-blue-600 text-white font-bold shadow'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 <span className="w-2 h-2 rounded-full bg-blue-400"></span>
                 <span>{language === 'bn' ? 'জার্নাল ভাউচার' : 'Journal'}</span>
@@ -276,22 +272,20 @@ export const VouchersView = () => {
               <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 gap-1 text-[11px]">
                 <button
                   onClick={() => setPaperSize('A4')}
-                  className={`px-3 py-1 rounded-lg transition font-bold ${
-                    paperSize === 'A4'
-                      ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition font-bold ${paperSize === 'A4'
+                    ? 'bg-amber-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                   title="A4 Size Paper (Full Sheet)"
                 >
                   A4
                 </button>
                 <button
                   onClick={() => setPaperSize('A5')}
-                  className={`px-3 py-1 rounded-lg transition font-bold ${
-                    paperSize === 'A5'
-                      ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition font-bold ${paperSize === 'A5'
+                    ? 'bg-amber-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                   title="A5 Size Paper (Standard Voucher Pad)"
                 >
                   A5
@@ -307,42 +301,38 @@ export const VouchersView = () => {
               <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 gap-1 text-[11px]">
                 <button
                   onClick={() => setSelectedTitleMode('auto')}
-                  className={`px-2 py-1 rounded-lg transition ${
-                    selectedTitleMode === 'auto'
-                      ? 'bg-amber-500 text-slate-950 font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`px-2 py-1 rounded-lg transition ${selectedTitleMode === 'auto'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                   title="Automatically match Debit / Credit"
                 >
                   {language === 'bn' ? 'Auto' : 'Auto'}
                 </button>
                 <button
                   onClick={() => setSelectedTitleMode('debit')}
-                  className={`px-2 py-1 rounded-lg transition ${
-                    selectedTitleMode === 'debit'
-                      ? 'bg-rose-600 text-white font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`px-2 py-1 rounded-lg transition ${selectedTitleMode === 'debit'
+                    ? 'bg-rose-600 text-white font-bold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'ডেবিট' : 'Debit'}
                 </button>
                 <button
                   onClick={() => setSelectedTitleMode('credit')}
-                  className={`px-2 py-1 rounded-lg transition ${
-                    selectedTitleMode === 'credit'
-                      ? 'bg-emerald-600 text-white font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`px-2 py-1 rounded-lg transition ${selectedTitleMode === 'credit'
+                    ? 'bg-emerald-600 text-white font-bold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'ক্রেডিট' : 'Credit'}
                 </button>
                 <button
                   onClick={() => setSelectedTitleMode('receipt')}
-                  className={`px-2 py-1 rounded-lg transition ${
-                    selectedTitleMode === 'receipt'
-                      ? 'bg-emerald-700 text-white font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`px-2 py-1 rounded-lg transition ${selectedTitleMode === 'receipt'
+                    ? 'bg-emerald-700 text-white font-bold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'রিসিট' : 'Receipt'}
                 </button>
@@ -353,23 +343,25 @@ export const VouchersView = () => {
       </div>
 
       {/* Printable Voucher Paper Card (A4 / A5 Canvas) */}
-      <div className={`printable-voucher-card bg-white text-slate-900 rounded-2xl p-5 sm:p-7 shadow-2xl mx-auto border border-slate-300 transition-all ${
-        paperSize === 'A4' ? 'max-w-2xl' : 'max-w-xl'
-      }`}>
+      <div className={`printable-voucher-card bg-white text-slate-900 rounded-2xl p-5 sm:p-7 shadow-2xl mx-auto border border-slate-300 transition-all ${paperSize === 'A4' ? 'max-w-2xl' : 'max-w-xl'
+        }`}>
         {/* Company Header */}
         <div className="border-b-2 border-slate-900 pb-3 mb-4">
           <div className="flex items-start justify-between gap-4">
             {/* Left: Brand Logo on top, Address & Contact directly underneath */}
             <div className="flex flex-col items-start gap-1.5">
               <div className="h-12 px-2.5 py-1 bg-[#07192f] border border-slate-800 rounded-lg flex items-center justify-center shrink-0">
-                <img 
-                  src="./images/asia_engineers_logo.png" 
-                  alt="Asia Engineers" 
+                <img
+                  src="./images/asia_engineers_logo.png"
+                  alt="Asia Engineers"
                   className="h-9 object-contain"
                 />
               </div>
               <div className="text-[10px] sm:text-[11px] text-slate-600 leading-snug mt-0.5">
-                <div className="font-medium text-slate-700">{COMPANY_INFO.address}</div>
+                <div className="font-medium text-slate-700">
+                  <div>CJKS Shopping Complex (Room 3028),</div>
+                  <div>Kajir Dewri, Chattogram-4217, Bangladesh</div>
+                </div>
                 <div className="mt-0.5">
                   Phone: <span className="font-semibold text-slate-900">{COMPANY_INFO.phone}</span> | Web: <span className="font-semibold text-slate-900">{COMPANY_INFO.website}</span>
                 </div>
@@ -400,7 +392,7 @@ export const VouchersView = () => {
           <div className="flex items-baseline gap-2 border-b border-dashed border-slate-300 pb-2">
             <span className="font-bold text-slate-700 w-48 shrink-0">{partyLabel}:</span>
             <span className="font-bold text-sm sm:text-base text-slate-950 uppercase">
-              {isTransfer 
+              {isTransfer
                 ? `${account?.name || activeTxn?.accountId} ➔ ${toAccount?.name || activeTxn?.toAccountId}`
                 : activeTxn?.party}
             </span>
@@ -431,7 +423,7 @@ export const VouchersView = () => {
             <div className="flex items-baseline gap-2">
               <span className="font-bold text-slate-700 shrink-0">Payment Method:</span>
               <span className="font-medium text-slate-900">
-                {isTransfer 
+                {isTransfer
                   ? `Bank Transfer (${account?.name} to ${toAccount?.name})`
                   : `${account?.name || activeTxn?.accountId} ${activeTxn?.note ? `(${activeTxn.note})` : ''}`}
               </span>
