@@ -82,18 +82,9 @@ label {
 /* ========================================================
    BULLETPROOF PRINT ENGINE FOR VOUCHERS
    Ensures ONLY the official voucher is printed on paper.
-   Hides all website elements & browser extension widgets.
    ======================================================== */
 @media print {
-  /* 1. Global visibility kill switch: Hide EVERYTHING on the page by default */
-  body * {
-    visibility: hidden !important;
-  }
-
-  /* 2. Hide any third-party browser extension widgets or injected DOM elements */
-  body > *:not(#root),
-  body > iframe,
-  body > div:not(#root),
+  /* 1. Hide all application layout, navigation, and external widgets */
   header,
   aside,
   nav,
@@ -105,7 +96,9 @@ label {
   button,
   input,
   select,
-  textarea {
+  textarea,
+  body > iframe,
+  body > *:not(#root) {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -116,7 +109,7 @@ label {
     border: none !important;
   }
 
-  /* 3. Reset document structure so it flows cleanly without constraints */
+  /* 2. Reset document structure so it flows cleanly without constraints */
   html,
   body {
     width: 100% !important;
@@ -151,18 +144,10 @@ label {
     box-shadow: none !important;
   }
 
-  /* 4. The Printable Voucher Card - ONLY this element and its contents are visible */
-  .printable-voucher-card,
-  .printable-voucher-card * {
-    visibility: visible !important;
-  }
-
+  /* 3. The Printable Voucher Card in full natural document flow */
   .printable-voucher-card {
     display: block !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    position: relative !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
@@ -175,6 +160,10 @@ label {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     font-family: 'Nikosh', 'NikoshBAN', 'SolaimanLipi', sans-serif !important;
+  }
+
+  .printable-voucher-card * {
+    visibility: visible !important;
   }
 }
 

@@ -117,18 +117,25 @@ export const VouchersView = () => {
             size: ${paperSize} portrait;
             margin: ${paperSize === 'A4' ? '10mm 12mm' : '5mm 6mm'};
           }
-          /* Hide EVERYTHING on the entire webpage by default */
-          body * {
-            visibility: hidden !important;
-          }
-          /* Hide any Chrome extensions or external floating widgets injected into body */
-          body > *:not(#root),
+          /* Hide all application navigation, controls, and external browser extension widgets */
+          header,
+          aside,
+          nav,
+          footer,
+          .no-print,
+          button,
+          input,
+          select,
+          textarea,
           body > iframe,
-          header, aside, nav, footer, .no-print, button {
+          body > *:not(#root) {
             display: none !important;
             visibility: hidden !important;
-            width: 0 !important;
             height: 0 !important;
+            width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
           }
           body, html, #root, #root > div, main {
             overflow: visible !important;
@@ -136,26 +143,25 @@ export const VouchersView = () => {
             min-height: 0 !important;
             max-height: none !important;
             display: block !important;
+            position: static !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-          }
-          /* STRICTLY make ONLY the voucher card and its children visible */
-          .printable-voucher-card,
-          .printable-voucher-card * {
-            visibility: visible !important;
+            box-shadow: none !important;
+            border: none !important;
           }
           .printable-voucher-card {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
+            display: block !important;
+            position: relative !important;
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 auto !important;
             box-shadow: none !important;
             border: 1.5px solid #0f172a !important;
+            border-radius: 6px !important;
             padding: ${paperSize === 'A4' ? '24px 28px' : '16px 20px'} !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
