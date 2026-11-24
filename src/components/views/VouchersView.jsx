@@ -407,20 +407,24 @@ export const VouchersView = () => {
             </span>
           </div>
 
-          {/* Amount In Figures & Words */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-dashed border-slate-300 pb-2">
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold text-slate-700 shrink-0">Amount in Figures:</span>
-              <span className="font-black text-base sm:text-lg text-slate-950 bg-slate-100 px-2.5 py-0.5 rounded border border-slate-300 font-mono">
-                {formatBDT(activeTxn?.amount)}
-              </span>
-            </div>
-            <div className="sm:col-span-2 flex items-baseline gap-2">
-              <span className="font-bold text-slate-700 shrink-0">In Words:</span>
-              <span className="font-semibold text-slate-900 italic capitalize">
-                {numberToWords(activeTxn?.amount)}
-              </span>
-            </div>
+          {/* Amount In Figures */}
+          <div className="flex items-center gap-3 border-b border-dashed border-slate-300 pb-2">
+            <span className="font-bold text-slate-700 shrink-0">
+              {language === 'bn' ? 'টাকার পরিমাণ (অংকে):' : 'Amount in Figures:'}
+            </span>
+            <span className="font-black text-base sm:text-lg text-slate-950 bg-slate-100 px-3 py-1 rounded border border-slate-400 font-mono shadow-2xs">
+              {formatBDT(activeTxn?.amount)}
+            </span>
+          </div>
+
+          {/* Amount In Words (Dedicated row below figures) */}
+          <div className="flex items-start sm:items-center gap-2 border-b border-dashed border-slate-300 pb-2">
+            <span className="font-bold text-slate-700 shrink-0">
+              {language === 'bn' ? 'টাকার পরিমাণ (কথায়):' : 'Amount in Words:'}
+            </span>
+            <span className="font-semibold text-slate-950 italic capitalize text-xs sm:text-sm bg-slate-50 px-2.5 py-1 rounded border border-slate-200 flex-1">
+              {numberToWords(activeTxn?.amount)}
+            </span>
           </div>
 
           {/* Payment Method & Project Code */}
