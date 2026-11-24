@@ -84,29 +84,25 @@ const MainLayout = () => {
   const { activeTab, theme } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('AE_SIDEBAR_OPEN');
-      if (saved !== null) return saved === 'true';
+      try {
+        localStorage.removeItem('AE_SIDEBAR_OPEN');
+      } catch (e) {}
+      // By default on desktop, sidebar is always open in front
       return window.innerWidth >= 1024;
     }
     return true;
   });
 
   const toggleSidebar = () => {
-    setSidebarOpen(prev => {
-      const next = !prev;
-      try { localStorage.setItem('AE_SIDEBAR_OPEN', String(next)); } catch (e) {}
-      return next;
-    });
+    setSidebarOpen(prev => !prev);
   };
 
   const closeSidebar = () => {
     setSidebarOpen(false);
-    try { localStorage.setItem('AE_SIDEBAR_OPEN', 'false'); } catch (e) {}
   };
 
   const openSidebar = () => {
     setSidebarOpen(true);
-    try { localStorage.setItem('AE_SIDEBAR_OPEN', 'true'); } catch (e) {}
   };
 
   const renderCurrentView = () => {

@@ -105,7 +105,10 @@ export const Sidebar = ({ isOpen, onClose, onToggle }) => {
 
   const handleSelect = (id) => {
     setActiveTab(id);
-    if (onClose) onClose();
+    // Only close drawer on mobile screens (< 1024px)
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      if (onClose) onClose();
+    }
   };
 
   return (
