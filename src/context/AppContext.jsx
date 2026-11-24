@@ -27,20 +27,35 @@ const STORAGE_KEY = 'AE_ACCOUNTING_DATA_V1';
 
 export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => localStorage.getItem('AE_LANG') || 'bn');
-  const [theme, setTheme] = useState(() => localStorage.getItem('AE_THEME') || 'light');
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('AE_THEME_V2');
+      if (saved) return saved;
+      // Default: Black/Dark Mode as requested
+      return 'dark';
+    } catch (e) {
+      return 'dark';
+    }
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('AE_AUTH') !== 'false');
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const toggleTheme = () => {
     setTheme(prev => {
       const next = prev === 'light' ? 'dark' : 'light';
-      localStorage.setItem('AE_THEME', next);
+      try {
+        localStorage.setItem('AE_THEME_V2', next);
+        localStorage.setItem('AE_THEME', next);
+      } catch (e) {}
       return next;
     });
   };
 
   useEffect(() => {
-    localStorage.setItem('AE_THEME', theme);
+    try {
+      localStorage.setItem('AE_THEME_V2', theme);
+      localStorage.setItem('AE_THEME', theme);
+    } catch (e) {}
     if (theme === 'light') {
       document.documentElement.classList.add('theme-light');
       document.documentElement.classList.remove('theme-dark');
