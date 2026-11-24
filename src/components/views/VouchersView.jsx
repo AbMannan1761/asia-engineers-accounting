@@ -27,7 +27,7 @@ export const VouchersView = () => {
 
   const [filterType, setFilterType] = useState('all'); // all | debit | credit | transfer
   const [selectedTitleMode, setSelectedTitleMode] = useState('auto'); // auto | debit | credit | receipt | journal
-  const [printOrientation, setPrintOrientation] = useState('landscape'); // landscape | portrait
+  const [paperSize, setPaperSize] = useState('A5'); // A4 | A5
 
   // Filter transaction list based on type
   const filteredTransactions = data.transactions.filter(t => {
@@ -110,12 +110,12 @@ export const VouchersView = () => {
 
   return (
     <div className="space-y-6 pb-20 lg:pb-8">
-      {/* Injected Print Stylesheet for A5 Paper */}
+      {/* Injected Print Stylesheet for A4 / A5 Paper */}
       <style>{`
         @media print {
           @page {
-            size: ${printOrientation === 'portrait' ? 'A5 portrait' : 'A5 landscape'};
-            margin: 6mm 8mm;
+            size: ${paperSize} portrait;
+            margin: ${paperSize === 'A4' ? '12mm 14mm' : '6mm 8mm'};
           }
         }
       `}</style>
@@ -126,12 +126,12 @@ export const VouchersView = () => {
           <div>
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-amber-400" />
-              <span>{language === 'bn' ? 'ডেবিট ও ক্রেডিট ভাউচার প্রিন্ট প্রিভিউ (A5)' : 'Debit & Credit Voucher Printing (A5)'}</span>
+              <span>{language === 'bn' ? `ডেবিট ও ক্রেডিট ভাউচার প্রিন্ট প্রিভিউ (${paperSize})` : `Debit & Credit Voucher Printing (${paperSize})`}</span>
             </h2>
             <p className="text-xs text-slate-400">
               {language === 'bn' 
-                ? 'অফিসিয়াল A5 প্রিন্ট লেআউট, টাকার অংক কথায় ও স্বাক্ষরের স্থান' 
-                : 'Standard A5 print format with amount in words and official signature blocks'}
+                ? `অফিসিয়াল ${paperSize} প্রিন্ট লেআউট, টাকার অংক কথায় ও স্বাক্ষরের স্থান` 
+                : `Standard ${paperSize} print format with amount in words and official signature blocks`}
             </p>
           </div>
 
@@ -152,14 +152,14 @@ export const VouchersView = () => {
               ))}
             </select>
 
-            {/* Print Button (A5) */}
+            {/* Print Button (A4 / A5) */}
             <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-4 py-2 rounded-xl shadow-lg transition"
-              title="Print voucher on A5 size paper"
+              title={`Print voucher on ${paperSize} size paper`}
             >
               <Printer className="w-4 h-4" />
-              <span>{language === 'bn' ? 'প্রিন্ট করুন (A5)' : 'Print Voucher (A5)'}</span>
+              <span>{language === 'bn' ? `প্রিন্ট করুন (${paperSize})` : `Print Voucher (${paperSize})`}</span>
             </button>
           </div>
         </div>
@@ -222,31 +222,31 @@ export const VouchersView = () => {
 
           {/* Right: Print Title Format & A5 Orientation Switcher */}
           <div className="flex items-center gap-3 flex-wrap">
-            {/* Orientation Switcher */}
+            {/* Paper Size Switcher: A4 or A5 */}
             <div className="flex items-center gap-1.5">
               <span className="text-slate-400 font-semibold">{language === 'bn' ? 'সাইজ:' : 'Paper:'}</span>
               <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 gap-1 text-[11px]">
                 <button
-                  onClick={() => setPrintOrientation('landscape')}
-                  className={`px-2 py-1 rounded-lg transition ${
-                    printOrientation === 'landscape'
-                      ? 'bg-amber-500 text-slate-950 font-bold'
+                  onClick={() => setPaperSize('A4')}
+                  className={`px-3 py-1 rounded-lg transition font-bold ${
+                    paperSize === 'A4'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
-                  title="A5 Landscape (Horizontal Voucher Pad - Recommended)"
+                  title="A4 Size Paper (Full Sheet)"
                 >
-                  A5 {language === 'bn' ? 'ল্যান্ডস্কেপ' : 'Landscape'}
+                  A4
                 </button>
                 <button
-                  onClick={() => setPrintOrientation('portrait')}
-                  className={`px-2 py-1 rounded-lg transition ${
-                    printOrientation === 'portrait'
-                      ? 'bg-amber-500 text-slate-950 font-bold'
+                  onClick={() => setPaperSize('A5')}
+                  className={`px-3 py-1 rounded-lg transition font-bold ${
+                    paperSize === 'A5'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
-                  title="A5 Portrait (Vertical)"
+                  title="A5 Size Paper (Standard Voucher Pad)"
                 >
-                  A5 {language === 'bn' ? 'পোর্ট্রেট' : 'Portrait'}
+                  A5
                 </button>
               </div>
             </div>
@@ -304,9 +304,9 @@ export const VouchersView = () => {
         </div>
       </div>
 
-      {/* Printable Voucher Paper Card (A5 Canvas) */}
+      {/* Printable Voucher Paper Card (A4 / A5 Canvas) */}
       <div className={`printable-voucher-card bg-white text-slate-900 rounded-2xl p-5 sm:p-7 shadow-2xl mx-auto border border-slate-300 transition-all ${
-        printOrientation === 'portrait' ? 'max-w-xl' : 'max-w-3xl'
+        paperSize === 'A4' ? 'max-w-2xl' : 'max-w-xl'
       }`}>
         {/* Company Header */}
         <div className="border-b-2 border-slate-900 pb-3 mb-4">
@@ -432,7 +432,7 @@ export const VouchersView = () => {
         {/* Footer Note */}
         <div className="mt-4 pt-2 border-t border-slate-200 flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500">
           <div>Generated by ASIA ENGINEERS Cloud ERP Software</div>
-          <div>Printed on: {new Date().toLocaleString()} (A5 Format)</div>
+          <div>Printed on: {new Date().toLocaleString()} ({paperSize} Format)</div>
         </div>
       </div>
     </div>
