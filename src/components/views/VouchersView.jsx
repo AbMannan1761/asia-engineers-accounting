@@ -358,17 +358,18 @@ export const VouchersView = () => {
       }`}>
         {/* Company Header */}
         <div className="border-b-2 border-slate-900 pb-3 mb-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="h-12 sm:h-14 px-2.5 py-1 bg-[#07192f] border border-slate-800 rounded-lg flex items-center justify-center shrink-0">
+          <div className="flex items-start justify-between gap-4">
+            {/* Left: Brand Logo on top, Address & Contact directly underneath */}
+            <div className="flex flex-col items-start gap-1.5">
+              <div className="h-12 px-2.5 py-1 bg-[#07192f] border border-slate-800 rounded-lg flex items-center justify-center shrink-0">
                 <img 
                   src="./images/asia_engineers_logo.png" 
                   alt="Asia Engineers" 
-                  className="h-9 sm:h-10 object-contain"
+                  className="h-9 object-contain"
                 />
               </div>
-              <div className="text-[10px] sm:text-[11px] text-slate-600 leading-tight">
-                <div className="font-medium text-slate-700 leading-snug">{COMPANY_INFO.address}</div>
+              <div className="text-[10px] sm:text-[11px] text-slate-600 leading-snug mt-0.5">
+                <div className="font-medium text-slate-700">{COMPANY_INFO.address}</div>
                 <div className="mt-0.5">
                   Phone: <span className="font-semibold text-slate-900">{COMPANY_INFO.phone}</span> | Web: <span className="font-semibold text-slate-900">{COMPANY_INFO.website}</span>
                 </div>
