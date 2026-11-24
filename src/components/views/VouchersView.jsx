@@ -359,25 +359,17 @@ export const VouchersView = () => {
         {/* Company Header */}
         <div className="border-b-2 border-slate-900 pb-3 mb-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="h-12 sm:h-14 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-12 sm:h-14 px-2.5 py-1 bg-[#07192f] border border-slate-800 rounded-lg flex items-center justify-center shrink-0">
                 <img 
                   src="./images/asia_engineers_logo.png" 
                   alt="Asia Engineers" 
                   className="h-9 sm:h-10 object-contain"
                 />
               </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-black text-slate-950 tracking-wide leading-tight">
-                  {COMPANY_INFO.name}
-                </h1>
-                <div className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-wider">
-                  {COMPANY_INFO.tagline}
-                </div>
-                <div className="text-[10px] sm:text-[11px] text-slate-600 leading-tight mt-0.5">
-                  {COMPANY_INFO.address}
-                </div>
-                <div className="text-[10px] sm:text-[11px] text-slate-600">
+              <div className="text-[10px] sm:text-[11px] text-slate-600 leading-tight">
+                <div className="font-medium text-slate-700 leading-snug">{COMPANY_INFO.address}</div>
+                <div className="mt-0.5">
                   Phone: <span className="font-semibold text-slate-900">{COMPANY_INFO.phone}</span> | Web: <span className="font-semibold text-slate-900">{COMPANY_INFO.website}</span>
                 </div>
               </div>
