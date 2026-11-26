@@ -163,7 +163,82 @@ const MainLayout = () => {
           </button>
         )}
 
-        <main className={`flex-1 overflow-y-auto p-4 lg:p-6 w-full min-h-0 transition-all duration-300 ${
+        {/* Background Steel Structure Architectural Blueprint Graphics */}
+        <div
+          aria-hidden="true"
+          className={`no-print pointer-events-none absolute inset-0 overflow-hidden z-0 ${
+            theme === 'light' ? 'text-[#0B2240]/[0.065]' : 'text-amber-400/[0.06]'
+          }`}
+        >
+          <svg
+            className="w-full h-full"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid slice"
+            viewBox="0 0 1200 800"
+          >
+            <defs>
+              <pattern id="cad-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                <path
+                  d="M 32 0 L 0 0 0 32"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.6"
+                  strokeOpacity="0.45"
+                />
+              </pattern>
+            </defs>
+            <rect width="1200" height="800" fill="url(#cad-grid)" />
+
+            {/* 3D Isometric Pre-Engineered Steel Building (PEB) Frame */}
+            <g
+              transform="translate(260, 120) scale(1.05)"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {/* Portal Frame 1 (Front) */}
+              <path d="M 120 480 L 120 230 L 320 140 L 520 230 L 520 480" strokeWidth="2.8" />
+              {/* Portal Frame 2 */}
+              <path d="M 220 420 L 220 185 L 420 95 L 620 185 L 620 420" strokeWidth="2.2" />
+              {/* Portal Frame 3 */}
+              <path d="M 320 360 L 320 140 L 520 50 L 720 140 L 720 360" strokeWidth="2" />
+              {/* Portal Frame 4 (Back) */}
+              <path d="M 420 300 L 420 95 L 620 5 L 820 95 L 820 300" strokeWidth="1.8" />
+
+              {/* Eave Struts & Ridge Beam */}
+              <line x1="120" y1="230" x2="420" y2="95" strokeWidth="2.2" />
+              <line x1="320" y1="140" x2="620" y2="5" strokeWidth="2.4" />
+              <line x1="520" y1="230" x2="820" y2="95" strokeWidth="2.2" />
+
+              {/* Roof Purlins */}
+              <line x1="186" y1="200" x2="486" y2="65" strokeWidth="1.2" strokeDasharray="6 4" />
+              <line x1="253" y1="170" x2="553" y2="35" strokeWidth="1.2" strokeDasharray="6 4" />
+              <line x1="386" y1="170" x2="686" y2="35" strokeWidth="1.2" strokeDasharray="6 4" />
+              <line x1="453" y1="200" x2="753" y2="65" strokeWidth="1.2" strokeDasharray="6 4" />
+
+              {/* Sidewall Girts & Base Line */}
+              <line x1="120" y1="355" x2="420" y2="215" strokeWidth="1.3" />
+              <line x1="120" y1="480" x2="420" y2="300" strokeWidth="2" />
+              <line x1="520" y1="355" x2="820" y2="215" strokeWidth="1.3" />
+              <line x1="520" y1="480" x2="820" y2="300" strokeWidth="2" />
+              <line x1="120" y1="480" x2="520" y2="480" strokeWidth="1.6" />
+
+              {/* Cable X-Bracing (Bay 1 & Bay 3) */}
+              <line x1="120" y1="230" x2="220" y2="420" strokeWidth="1.2" />
+              <line x1="220" y1="185" x2="120" y2="480" strokeWidth="1.2" />
+              <line x1="520" y1="230" x2="620" y2="420" strokeWidth="1.2" />
+              <line x1="620" y1="185" x2="520" y2="480" strokeWidth="1.2" />
+              <line x1="320" y1="140" x2="420" y2="300" strokeWidth="1.1" />
+              <line x1="420" y1="95" x2="320" y2="360" strokeWidth="1.1" />
+
+              {/* Mezzanine / Crane Girder Hint */}
+              <line x1="120" y1="310" x2="520" y2="310" strokeWidth="1.4" strokeDasharray="8 5" />
+            </g>
+          </svg>
+        </div>
+
+        <main className={`relative z-10 flex-1 overflow-y-auto p-4 lg:p-6 w-full min-h-0 transition-all duration-300 ${
           sidebarOpen ? 'max-w-7xl mx-auto' : 'w-full max-w-[1600px] mx-auto px-4 lg:px-8'
         }`}>
           <ErrorBoundary>
