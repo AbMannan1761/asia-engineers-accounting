@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   BookOpenCheck,
@@ -15,13 +15,22 @@ import {
 import { formatBDT } from '../../utils/formatters';
 
 export const LedgersView = () => {
-  const { language, data, addLedger, updateLedger, deleteLedger } = useApp();
+  const { language, data, addLedger, updateLedger, deleteLedger, deepLinkFilter, setDeepLinkFilter } = useApp();
 
   const [activeTab, setActiveTab] = useState('clients'); // clients | suppliers
   const [selectedClientFilter, setSelectedClientFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingLedger, setEditingLedger] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (deepLinkFilter && deepLinkFilter.tab === 'ledgers') {
+      if (deepLinkFilter.ledgerTab) {
+        setActiveTab(deepLinkFilter.ledgerTab);
+      }
+      setDeepLinkFilter(null);
+    }
+  }, [deepLinkFilter, setDeepLinkFilter]);
 
   const [formData, setFormData] = useState({
     name: '',

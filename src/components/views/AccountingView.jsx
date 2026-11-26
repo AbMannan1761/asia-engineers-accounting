@@ -232,8 +232,8 @@ export const AccountingView = () => {
               } else {
                 setPullMsg({
                   type: 'warning',
-                  text: language === 'bn' 
-                    ? 'গুগল শীট থেকে সরাসরি ডেটা আনতে প্রথমে "গুগল ড্রাইভ ও শীট সিংক" মেনু থেকে Apps Script Web App URL লিংকটি সেট করতে হবে।' 
+                  text: language === 'bn'
+                    ? 'গুগল শীট থেকে সরাসরি ডেটা আনতে প্রথমে "গুগল ড্রাইভ ও শীট সিংক" মেনু থেকে Apps Script Web App URL লিংকটি সেট করতে হবে।'
                     : (res?.error || 'Please configure Google Apps Script Web App URL first.')
                 });
               }
@@ -294,22 +294,20 @@ export const AccountingView = () => {
       <div className="flex flex-wrap items-center gap-2 bg-slate-800/70 p-1.5 rounded-2xl border border-slate-700/70 w-fit">
         <button
           onClick={() => setAccountingMode('ledger')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-            accountingMode === 'ledger'
-              ? 'bg-amber-500 text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${accountingMode === 'ledger'
+            ? 'bg-amber-500 text-slate-950 shadow'
+            : 'text-slate-400 hover:text-white'
+            }`}
         >
           <Receipt className="w-4 h-4" />
           <span>{language === 'bn' ? 'মূল হিসাব ও ভাউচার' : 'Main Ledger & Vouchers'}</span>
         </button>
         <button
           onClick={() => setAccountingMode('advances')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-            accountingMode === 'advances'
-              ? 'bg-amber-500 text-slate-950 shadow'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${accountingMode === 'advances'
+            ? 'bg-amber-500 text-slate-950 shadow'
+            : 'text-slate-400 hover:text-white'
+            }`}
         >
           <UserCheck className="w-4 h-4" />
           <span>{language === 'bn' ? 'ম্যানেজার অগ্রিম ও সমন্বয় (আর্কাইভ)' : 'Manager Advances & Archive'}</span>
@@ -322,11 +320,10 @@ export const AccountingView = () => {
       </div>
 
       {pullMsg && (
-        <div className={`p-3.5 rounded-xl text-xs flex items-center justify-between gap-3 animate-fade-in shadow-md border ${
-          pullMsg.type === 'success'
-            ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-200'
-            : 'bg-amber-950/85 border-amber-500/60 text-amber-200'
-        }`}>
+        <div className={`p-3.5 rounded-xl text-xs flex items-center justify-between gap-3 animate-fade-in shadow-md border ${pullMsg.type === 'success'
+          ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-200'
+          : 'bg-amber-950/85 border-amber-500/60 text-amber-200'
+          }`}>
           <div className="flex items-center gap-2.5">
             {pullMsg.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -363,215 +360,215 @@ export const AccountingView = () => {
       ) : (
         <>
           {/* Account Balances Cards Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {data.accounts.map(acc => (
-          <div
-            key={acc.id}
-            onClick={() => setSelectedAccountId(selectedAccountId === acc.id ? 'all' : acc.id)}
-            className={`cursor-pointer border rounded-xl p-3 transition-all ${selectedAccountId === acc.id
-              ? 'bg-amber-500/10 border-amber-500/60 ring-1 ring-amber-500/30'
-              : 'bg-slate-800/80 border-slate-700/60 hover:border-slate-600'
-              }`}
-          >
-            <div className="text-[11px] text-slate-400 truncate">{acc.name}</div>
-            <div className="text-sm font-bold text-white mt-1">{formatBDT(acc.balance)}</div>
-            <div className="text-[10px] text-slate-400 mt-0.5 truncate">{acc.accountNumber}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Filters & Search Toolbar */}
-      <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-        {/* Type Tabs */}
-        <div className="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start">
-          {[
-            { id: 'all', label: language === 'bn' ? 'সকল ভাউচার' : 'All Vouchers' },
-            { id: 'income', label: language === 'bn' ? 'ক্রেডিট ভাউচার (জমা)' : 'Credit (Income)' },
-            { id: 'expense', label: language === 'bn' ? 'ডেবিট ভাউচার (খরচ)' : 'Debit (Expense)' },
-            { id: 'transfer', label: language === 'bn' ? 'জার্নাল (স্থানান্তর)' : 'Journal (Transfer)' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeFilter === tab.id
-                ? 'bg-amber-500 text-slate-950 font-bold shadow'
-                : 'text-slate-400 hover:text-white'
-                }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Dropdown Filters & Search Box */}
-        <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
-          {/* Project Filter */}
-          <select
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
-          >
-            <option value="all">{language === 'bn' ? 'সকল প্রজেক্ট' : 'All Projects'}</option>
-            {data.projects.map(p => (
-              <option key={p.id} value={p.id}>{p.id} - {p.name}</option>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {data.accounts.map(acc => (
+              <div
+                key={acc.id}
+                onClick={() => setSelectedAccountId(selectedAccountId === acc.id ? 'all' : acc.id)}
+                className={`cursor-pointer border rounded-xl p-3 transition-all ${selectedAccountId === acc.id
+                  ? 'bg-amber-500/10 border-amber-500/60 ring-1 ring-amber-500/30'
+                  : 'bg-slate-800/80 border-slate-700/60 hover:border-slate-600'
+                  }`}
+              >
+                <div className="text-[11px] text-slate-400 truncate">{acc.name}</div>
+                <div className="text-sm font-bold text-white mt-1">{formatBDT(acc.balance)}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5 truncate">{acc.accountNumber}</div>
+              </div>
             ))}
-          </select>
-
-          {/* Category / Head Filter */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400 max-w-[170px] truncate"
-          >
-            <option value="all">{language === 'bn' ? 'সকল খরচের হেড / ক্যাটাগরি' : 'All Categories'}</option>
-            {Array.from(new Set([...incomeCategories, ...expenseCategories, ...data.transactions.map(t => t.category).filter(Boolean)])).map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-
-          {/* Search Box */}
-          <div className="relative min-w-[180px]">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={language === 'bn' ? 'ভাউচার, বিবরণ বা পক্ষ খুঁজুন...' : 'Search voucher, party...'}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
-            />
           </div>
 
-          {/* Clear / Reset Filter Button */}
-          {(activeFilter !== 'all' || selectedAccountId !== 'all' || selectedProjectId !== 'all' || selectedCategory !== 'all' || searchQuery) && (
-            <button
-              onClick={() => {
-                setActiveFilter('all');
-                setSelectedAccountId('all');
-                setSelectedProjectId('all');
-                setSelectedCategory('all');
-                setSearchQuery('');
-              }}
-              className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-semibold transition"
-              title="সকল ফিল্টার রিসেট করুন"
-            >
-              {language === 'bn' ? 'ফিল্টার মুছুন' : 'Reset'}
-            </button>
-          )}
-        </div>
-      </div>
+          {/* Filters & Search Toolbar */}
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+            {/* Type Tabs */}
+            <div className="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800 self-start">
+              {[
+                { id: 'all', label: language === 'bn' ? 'সকল ভাউচার' : 'All Vouchers' },
+                { id: 'income', label: language === 'bn' ? 'ক্রেডিট ভাউচার (জমা)' : 'Credit (Income)' },
+                { id: 'expense', label: language === 'bn' ? 'ডেবিট ভাউচার (খরচ)' : 'Debit (Expense)' },
+                { id: 'transfer', label: language === 'bn' ? 'জার্নাল (স্থানান্তর)' : 'Journal (Transfer)' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveFilter(tab.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${activeFilter === tab.id
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-      {/* Transactions Table */}
-      <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden shadow">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-slate-900/90 border-b border-slate-700/80 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
-                <th className="py-3 px-3">Voucher No</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'তারিখ' : 'Date'}</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'পক্ষ / বিবরণ' : 'Party & Description'}</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'অ্যাকাউন্ট' : 'Account'}</th>
-                <th className="py-3 px-3">{language === 'bn' ? 'প্রজেক্ট' : 'Project'}</th>
-                <th className="py-3 px-3 text-right">{language === 'bn' ? 'পরিমাণ (৳)' : 'Amount'}</th>
-                <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন ও প্রিন্ট' : 'Actions & Print'}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800">
-              {filteredTxns.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-400 text-xs">
-                    {language === 'bn' ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}
-                  </td>
-                </tr>
-              ) : (
-                filteredTxns.map((txn) => {
-                  const isIncome = txn.type === 'income';
-                  const isTransfer = txn.type === 'transfer';
-                  const account = data.accounts.find(a => a.id === txn.accountId);
-                  const toAccount = txn.toAccountId ? data.accounts.find(a => a.id === txn.toAccountId) : null;
-                  const project = data.projects.find(p => p.id === txn.projectId);
+            {/* Dropdown Filters & Search Box */}
+            <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
+              {/* Project Filter */}
+              <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
+              >
+                <option value="all">{language === 'bn' ? 'সকল প্রজেক্ট' : 'All Projects'}</option>
+                {data.projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.id} - {p.name}</option>
+                ))}
+              </select>
 
-                  return (
-                    <tr key={txn.id} className="hover:bg-slate-800/50 transition">
-                      <td className="py-3 px-3 font-mono font-bold text-amber-400">
-                        {txn.voucherNo}
-                      </td>
-                      <td className="py-3 px-3 text-slate-300">
-                        {formatDate(txn.date)}
-                      </td>
-                      <td className="py-3 px-3">
-                        <div className="font-semibold text-slate-200">{txn.party}</div>
-                        <div className="text-[11px] text-slate-400 max-w-xs truncate">{txn.description}</div>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700/60 text-slate-300 text-[11px]">
-                          {txn.category}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-slate-300">
-                        {isTransfer ? (
-                          <div className="text-[11px]">
-                            <span className="text-rose-400">{account?.name || txn.accountId}</span>
-                            <span className="text-slate-500 mx-1">➔</span>
-                            <span className="text-emerald-400">{toAccount?.name || txn.toAccountId}</span>
-                          </div>
-                        ) : (
-                          <span>{account?.name || '-'}</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 text-slate-300">
-                        {project ? (
-                          <span className="text-amber-300 font-mono text-[11px]">
-                            {project.id}
-                          </span>
-                        ) : (
-                          <span className="text-slate-500">-</span>
-                        )}
-                      </td>
-                      <td className={`py-3 px-3 text-right font-bold text-xs ${isIncome ? 'text-emerald-400' : isTransfer ? 'text-blue-400' : 'text-rose-400'
-                        }`}>
-                        {isIncome ? '+' : isTransfer ? '⇄ ' : '-'}{formatBDT(txn.amount)}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            onClick={() => setEditingTxn({ ...txn })}
-                            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
-                            title={language === 'bn' ? 'লেনদেন এডিট করুন' : 'Edit Transaction'}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedVoucherForPrint(txn);
-                              setActiveTab('vouchers');
-                            }}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shadow-xs"
-                            title={language === 'bn' ? 'ভাউচার প্রিন্ট করুন (A5)' : 'View / Print A5 Voucher'}
-                          >
-                            <Printer className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${txn.voucherNo} ভাউচারটি মুছে ফেলতে চান?` : `Delete voucher ${txn.voucherNo}?`)) {
-                                deleteTransaction(txn.id);
-                              }
-                            }}
-                            className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
-                            title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+              {/* Category / Head Filter */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400 max-w-[170px] truncate"
+              >
+                <option value="all">{language === 'bn' ? 'সকল খরচের হেড / ক্যাটাগরি' : 'All Categories'}</option>
+                {Array.from(new Set([...incomeCategories, ...expenseCategories, ...data.transactions.map(t => t.category).filter(Boolean)])).map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+
+              {/* Search Box */}
+              <div className="relative min-w-[180px]">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={language === 'bn' ? 'ভাউচার, বিবরণ বা পক্ষ খুঁজুন...' : 'Search voucher, party...'}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              {/* Clear / Reset Filter Button */}
+              {(activeFilter !== 'all' || selectedAccountId !== 'all' || selectedProjectId !== 'all' || selectedCategory !== 'all' || searchQuery) && (
+                <button
+                  onClick={() => {
+                    setActiveFilter('all');
+                    setSelectedAccountId('all');
+                    setSelectedProjectId('all');
+                    setSelectedCategory('all');
+                    setSearchQuery('');
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 text-xs font-semibold transition"
+                  title="সকল ফিল্টার রিসেট করুন"
+                >
+                  {language === 'bn' ? 'ফিল্টার মুছুন' : 'Reset'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden shadow">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-900/90 border-b border-slate-700/80 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+                    <th className="py-3 px-3">Voucher No</th>
+                    <th className="py-3 px-3">{language === 'bn' ? 'তারিখ' : 'Date'}</th>
+                    <th className="py-3 px-3">{language === 'bn' ? 'পক্ষ / বিবরণ' : 'Party & Description'}</th>
+                    <th className="py-3 px-3">{language === 'bn' ? 'ক্যাটাগরি' : 'Category'}</th>
+                    <th className="py-3 px-3">{language === 'bn' ? 'অ্যাকাউন্ট' : 'Account'}</th>
+                    <th className="py-3 px-3">{language === 'bn' ? 'প্রজেক্ট' : 'Project'}</th>
+                    <th className="py-3 px-3 text-right">{language === 'bn' ? 'পরিমাণ (৳)' : 'Amount'}</th>
+                    <th className="py-3 px-3 text-center">{language === 'bn' ? 'অ্যাকশন ও প্রিন্ট' : 'Actions & Print'}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {filteredTxns.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-slate-400 text-xs">
+                        {language === 'bn' ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No transactions found'}
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  ) : (
+                    filteredTxns.map((txn) => {
+                      const isIncome = txn.type === 'income';
+                      const isTransfer = txn.type === 'transfer';
+                      const account = data.accounts.find(a => a.id === txn.accountId);
+                      const toAccount = txn.toAccountId ? data.accounts.find(a => a.id === txn.toAccountId) : null;
+                      const project = data.projects.find(p => p.id === txn.projectId);
+
+                      return (
+                        <tr key={txn.id} className="hover:bg-slate-800/50 transition">
+                          <td className="py-3 px-3 font-mono font-bold text-amber-400">
+                            {txn.voucherNo}
+                          </td>
+                          <td className="py-3 px-3 text-slate-300">
+                            {formatDate(txn.date)}
+                          </td>
+                          <td className="py-3 px-3">
+                            <div className="font-semibold text-slate-200">{txn.party}</div>
+                            <div className="text-[11px] text-slate-400 max-w-xs truncate">{txn.description}</div>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700/60 text-slate-300 text-[11px]">
+                              {txn.category}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-slate-300">
+                            {isTransfer ? (
+                              <div className="text-[11px]">
+                                <span className="text-rose-400">{account?.name || txn.accountId}</span>
+                                <span className="text-slate-500 mx-1">➔</span>
+                                <span className="text-emerald-400">{toAccount?.name || txn.toAccountId}</span>
+                              </div>
+                            ) : (
+                              <span>{account?.name || '-'}</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-slate-300">
+                            {project ? (
+                              <span className="text-amber-300 font-mono text-[11px]">
+                                {project.id}
+                              </span>
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
+                          </td>
+                          <td className={`py-3 px-3 text-right font-bold text-xs ${isIncome ? 'text-emerald-400' : isTransfer ? 'text-blue-400' : 'text-rose-400'
+                            }`}>
+                            {isIncome ? '+' : isTransfer ? '⇄ ' : '-'}{formatBDT(txn.amount)}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => setEditingTxn({ ...txn })}
+                                className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
+                                title={language === 'bn' ? 'লেনদেন এডিট করুন' : 'Edit Transaction'}
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedVoucherForPrint(txn);
+                                  setActiveTab('vouchers');
+                                }}
+                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition shadow-xs"
+                                title={language === 'bn' ? 'ভাউচার প্রিন্ট করুন (A5)' : 'View / Print A5 Voucher'}
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(language === 'bn' ? `আপনি কি নিশ্চিত ${txn.voucherNo} ভাউচারটি মুছে ফেলতে চান?` : `Delete voucher ${txn.voucherNo}?`)) {
+                                    deleteTransaction(txn.id);
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 transition shadow-xs"
+                                title={language === 'bn' ? 'মুছে ফেলুন (Delete)' : 'Delete'}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </>
       )}
 
@@ -1120,22 +1117,20 @@ export const AccountingView = () => {
                 <button
                   type="button"
                   onClick={() => setCatModalType('income')}
-                  className={`flex-1 py-1.5 rounded-lg font-bold text-xs transition ${
-                    catModalType === 'income'
-                      ? 'bg-emerald-600 text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex-1 py-1.5 rounded-lg font-bold text-xs transition ${catModalType === 'income'
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'জমা (Income) ক্যাটাগরি' : 'Income Categories'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setCatModalType('expense')}
-                  className={`flex-1 py-1.5 rounded-lg font-bold text-xs transition ${
-                    catModalType === 'expense'
-                      ? 'bg-rose-600 text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex-1 py-1.5 rounded-lg font-bold text-xs transition ${catModalType === 'expense'
+                    ? 'bg-rose-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   {language === 'bn' ? 'খরচ (Expense) ক্যাটাগরি' : 'Expense Categories'}
                 </button>
@@ -1181,8 +1176,8 @@ export const AccountingView = () => {
               {/* Current Categories List */}
               <div className="space-y-2 pt-2 border-t border-slate-800">
                 <span className="text-slate-400 font-medium block">
-                  {language === 'bn' 
-                    ? `বর্তমান ${catModalType === 'income' ? 'জমা' : 'খরচ'} ক্যাটাগরি তালিকা (${(catModalType === 'income' ? incomeCategories : expenseCategories).length} টি):` 
+                  {language === 'bn'
+                    ? `বর্তমান ${catModalType === 'income' ? 'জমা' : 'খরচ'} ক্যাটাগরি তালিকা (${(catModalType === 'income' ? incomeCategories : expenseCategories).length} টি):`
                     : `Active ${catModalType} Categories:`}
                 </span>
                 <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">

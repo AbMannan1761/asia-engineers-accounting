@@ -30,7 +30,8 @@ export const DashboardView = () => {
     totalPayable,
     lowStockItems,
     setActiveTab,
-    setSelectedVoucherForPrint
+    setSelectedVoucherForPrint,
+    navigateWithFilter
   } = useApp();
 
   const netBalance = totalIncome - totalExpense;
@@ -70,77 +71,97 @@ export const DashboardView = () => {
         </div>
       </div>
 
-      {/* Primary Financial Metric Cards */}
+      {/* Primary Financial Metric Cards (Interactive) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {/* Cash in Hand */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden">
+        <div
+          onClick={() => navigateWithFilter('accounting', { accountId: 'acc-cash', txnType: 'all' })}
+          className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden cursor-pointer hover:border-emerald-500/60 hover:-translate-y-0.5 hover:shadow-lg transition-all group"
+          title={language === 'bn' ? 'ক্যাশ ইন হ্যান্ড-এর পূর্ণাঙ্গ হিসাব দেখতে ক্লিক করুন' : 'View Main Office Cash Ledger'}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400 font-medium">
               {language === 'bn' ? 'ক্যাশ ইন হ্যান্ড (Main Office Cash)' : 'Cash in Hand (Main Office Cash)'}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Wallet className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl lg:text-2xl font-bold text-white mt-2">
             {formatBDT(totalCashBalance)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            {language === 'bn' ? 'অফিস ক্যাশ বাক্স' : 'Main Office Drawer'}
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>{language === 'bn' ? 'অফিস ক্যাশ বাক্স' : 'Main Office Drawer'}</span>
+            <span className="text-emerald-400 font-semibold opacity-80 group-hover:opacity-100">→</span>
           </div>
         </div>
 
         {/* Total Bank Balance */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden">
+        <div
+          onClick={() => navigateWithFilter('accounting', { accountId: 'all', txnType: 'all' })}
+          className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden cursor-pointer hover:border-blue-500/60 hover:-translate-y-0.5 hover:shadow-lg transition-all group"
+          title={language === 'bn' ? 'সকল ব্যাংক ও মোবাইল ব্যাংকিং হিসাব দেখতে ক্লিক করুন' : 'View All Bank & Mobile Banking Ledgers'}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400 font-medium">
               {language === 'bn' ? 'ব্যাংক ও মোবাইল ব্যাংকিং' : 'Total Bank Balances'}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Building className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl lg:text-2xl font-bold text-white mt-2">
             {formatBDT(totalBankBalance)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            {data.accounts.filter(a => a.type !== 'cash').length} {language === 'bn' ? 'টি সক্রিয় একাউন্ট' : 'Active Accounts'}
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>{data.accounts.filter(a => a.type !== 'cash').length} {language === 'bn' ? 'টি সক্রিয় একাউন্ট' : 'Active Accounts'}</span>
+            <span className="text-blue-400 font-semibold opacity-80 group-hover:opacity-100">→</span>
           </div>
         </div>
 
         {/* Client Receivables (পাওনা) */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden">
+        <div
+          onClick={() => navigateWithFilter('ledgers', { ledgerTab: 'clients' })}
+          className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden cursor-pointer hover:border-amber-500/60 hover:-translate-y-0.5 hover:shadow-lg transition-all group"
+          title={language === 'bn' ? 'ক্লায়েন্টদের পূর্ণাঙ্গ পাওনা খাতা দেখতে ক্লিক করুন' : 'View Full Client Receivables Ledger'}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400 font-medium">
               {language === 'bn' ? 'ক্লায়েন্টের কাছে পাওনা (Due)' : 'Receivables from Clients'}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <ArrowDownRight className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl lg:text-2xl font-bold text-amber-400 mt-2">
             {formatBDT(totalReceivable)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            {language === 'bn' ? 'বকেয়া বিল আদায়যোগ্য' : 'Outstanding invoices'}
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>{language === 'bn' ? 'বকেয়া বিল আদায়যোগ্য' : 'Outstanding invoices'}</span>
+            <span className="text-amber-400 font-semibold opacity-80 group-hover:opacity-100">→</span>
           </div>
         </div>
 
         {/* Supplier Payables (দেনা) */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden">
+        <div
+          onClick={() => navigateWithFilter('ledgers', { ledgerTab: 'suppliers' })}
+          className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden cursor-pointer hover:border-rose-500/60 hover:-translate-y-0.5 hover:shadow-lg transition-all group"
+          title={language === 'bn' ? 'সাপ্লায়ারদের পূর্ণাঙ্গ দেনা খাতা দেখতে ক্লিক করুন' : 'View Full Supplier Payables Ledger'}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400 font-medium">
               {language === 'bn' ? 'সাপ্লায়ার দেনা (Payable)' : 'Payable to Suppliers'}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl lg:text-2xl font-bold text-rose-400 mt-2">
             {formatBDT(totalPayable)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            {language === 'bn' ? 'স্টিল/মালামাল বিল প্রদেয়' : 'Material bill balance'}
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+            <span>{language === 'bn' ? 'স্টিল/মালামাল বিল প্রদেয়' : 'Material bill balance'}</span>
+            <span className="text-rose-400 font-semibold opacity-80 group-hover:opacity-100">→</span>
           </div>
         </div>
       </div>
@@ -166,7 +187,9 @@ export const DashboardView = () => {
             {data.accounts.map((acc) => (
               <div 
                 key={acc.id}
-                className="bg-slate-900/40 border border-slate-800 rounded-xl p-3 flex items-center justify-between hover:border-amber-500/30 transition shadow-2xs"
+                onClick={() => navigateWithFilter('accounting', { accountId: acc.id, txnType: 'all' })}
+                className="bg-slate-900/40 border border-slate-800 rounded-xl p-3 flex items-center justify-between hover:border-amber-500/50 cursor-pointer transition shadow-2xs"
+                title={language === 'bn' ? `${acc.name}-এর পূর্ণাঙ্গ লেনদেন দেখতে ক্লিক করুন` : `View ${acc.name} ledger`}
               >
                 <div>
                   <div className="font-semibold text-slate-200 text-xs">{acc.name}</div>
@@ -194,7 +217,11 @@ export const DashboardView = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 income-summary-box">
+            <div
+              onClick={() => navigateWithFilter('accounting', { accountId: 'all', txnType: 'income' })}
+              className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 income-summary-box cursor-pointer hover:border-emerald-500/60 transition"
+              title={language === 'bn' ? 'সকল জমার পূর্ণাঙ্গ হিসাব দেখতে ক্লিক করুন' : 'View all income vouchers'}
+            >
               <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-1">
                 <TrendingUp className="w-4 h-4" />
                 <span>{language === 'bn' ? 'সর্বমোট জমা / বিল প্রাপ্তি' : 'Total Income Received'}</span>
@@ -204,7 +231,11 @@ export const DashboardView = () => {
               </div>
             </div>
 
-            <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl p-4 expense-summary-box">
+            <div
+              onClick={() => navigateWithFilter('accounting', { accountId: 'all', txnType: 'expense' })}
+              className="bg-rose-500/10 border border-rose-500/25 rounded-xl p-4 expense-summary-box cursor-pointer hover:border-rose-500/60 transition"
+              title={language === 'bn' ? 'সকল খরচের পূর্ণাঙ্গ হিসাব দেখতে ক্লিক করুন' : 'View all expense vouchers'}
+            >
               <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 font-semibold mb-1">
                 <TrendingDown className="w-4 h-4" />
                 <span>{language === 'bn' ? 'সর্বমোট খরচ / মালামাল ও শ্রম' : 'Total Expenses Disbursed'}</span>

@@ -174,6 +174,12 @@ export const AppProvider = ({ children }) => {
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedVoucherForPrint, setSelectedVoucherForPrint] = useState(null);
+  const [deepLinkFilter, setDeepLinkFilter] = useState(null);
+
+  const navigateWithFilter = (tab, filterObj = {}) => {
+    setDeepLinkFilter({ tab, ...filterObj, ts: Date.now() });
+    setActiveTab(tab);
+  };
 
   // Google Sheets Instant Real-Time Sync State
   const [gsheetWebhookUrl, setGsheetWebhookUrlState] = useState(() => {
@@ -1643,6 +1649,9 @@ export const AppProvider = ({ children }) => {
         logout,
         activeTab,
         setActiveTab,
+        deepLinkFilter,
+        setDeepLinkFilter,
+        navigateWithFilter,
         data,
         selectedVoucherForPrint,
         setSelectedVoucherForPrint,
