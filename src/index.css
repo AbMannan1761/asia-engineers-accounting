@@ -461,7 +461,7 @@ header,
 .theme-dark header,
 .theme-dark .app-main-header {
   background: linear-gradient(180deg, #07192f 0%, #0a1b34 100%) !important;
-  border-bottom: 2.5px solid #f59e0b !important;
+  border-bottom: none !important;
   box-shadow: 0 4px 14px -2px rgba(7, 25, 47, 0.35) !important;
   color: #f8fafc !important;
 }
