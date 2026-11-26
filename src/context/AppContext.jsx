@@ -115,6 +115,7 @@ export const AppProvider = ({ children }) => {
           materials: parsed.materials || INITIAL_MATERIALS,
           employees: parsed.employees || INITIAL_EMPLOYEES,
           transactions: parsed.transactions || INITIAL_TRANSACTIONS,
+          managerAdvances: parsed.managerAdvances || [],
           stockMovements: parsed.stockMovements || INITIAL_STOCK_MOVEMENTS,
           salarySheet: parsed.salarySheet || INITIAL_SALARY_SHEET,
           dailyLabors: parsed.dailyLabors || INITIAL_DAILY_LABORS,
@@ -152,6 +153,7 @@ export const AppProvider = ({ children }) => {
       materials: INITIAL_MATERIALS,
       employees: INITIAL_EMPLOYEES,
       transactions: INITIAL_TRANSACTIONS,
+      managerAdvances: [],
       stockMovements: INITIAL_STOCK_MOVEMENTS,
       salarySheet: INITIAL_SALARY_SHEET,
       dailyLabors: INITIAL_DAILY_LABORS,
@@ -484,6 +486,146 @@ export const AppProvider = ({ children }) => {
 
     logAudit('ACCOUNT_TRANSFER', `Transferred ৳${numAmount.toLocaleString()} from ${fromAcc.name} to ${toAcc.name}`);
     return true;
+  };
+
+  // --- PROJECT MANAGER ADVANCES & SETTLEMENT ARCHIVE ---
+  const addManagerAdvance = ({ managerName, projectId, accountId, amountGiven, dateGiven, note }) => {
+    const amt = Number(amountGiven);
+    if (!managerName || !amt || amt <= 0) return null;
+
+    const year = new Date().getFullYear();
+    const existingCount = (data.managerAdvances || []).length;
+    const voucherRef = `ADV-${year}-${String(existingCount + 1).padStart(4, '0')}`;
+    const newAdv = {
+      id: `ADV-${Date.now()}`,
+      voucherRef,
+      managerName: managerName.trim(),
+      projectId: projectId || null,
+      accountId: accountId || 'acc-cash',
+      amountGiven: amt,
+      dateGiven: dateGiven || new Date().toISOString().slice(0, 10),
+      note: (note || '').trim(),
+      status: 'active',
+      settledDate: null,
+      settledItems: [],
+      totalSpent: 0,
+      returnedAmount: 0,
+      extraPaidAmount: 0,
+      returnAccountId: accountId || 'acc-cash',
+      settlementNote: ''
+    };
+
+    setData(prev => ({
+      ...prev,
+      accounts: prev.accounts.map(acc =>
+        acc.id === newAdv.accountId ? { ...acc, balance: acc.balance - amt } : acc
+      ),
+      managerAdvances: [newAdv, ...(prev.managerAdvances || [])]
+    }));
+
+    logAudit('MANAGER_ADVANCE_GIVEN', `${voucherRef}: Issued ${amt} to ${newAdv.managerName}`);
+    return newAdv;
+  };
+
+  const settleAndArchiveAdvance = (advanceId, { settledDate, items, returnAccountId, settlementNote }) => {
+    setData(prev => {
+      const adv = (prev.managerAdvances || []).find(a => a.id === advanceId);
+      if (!adv || adv.status === 'archived') return prev;
+
+      const validItems = (items || []).filter(i => Number(i.amount) > 0);
+      const totalSpent = validItems.reduce((sum, i) => sum + Number(i.amount), 0);
+      const returnedAmount = adv.amountGiven > totalSpent ? adv.amountGiven - totalSpent : 0;
+      const extraPaidAmount = totalSpent > adv.amountGiven ? totalSpent - adv.amountGiven : 0;
+      const targetReturnAcc = returnAccountId || adv.accountId || 'acc-cash';
+
+      const netAccountDelta = returnedAmount - extraPaidAmount;
+      const updatedAccounts = prev.accounts.map(acc =>
+        acc.id === targetReturnAcc ? { ...acc, balance: acc.balance + netAccountDelta } : acc
+      );
+
+      const year = new Date().getFullYear();
+      const pvPrefix = `AE-PV-${year}-`;
+      let pvSeq = prev.transactions.filter(t => t.voucherNo && t.voucherNo.startsWith(pvPrefix)).length;
+
+      const newTxns = validItems.map((item, idx) => {
+        pvSeq += 1;
+        const vNo = `${pvPrefix}${String(pvSeq).padStart(4, '0')}`;
+        const txnAmt = Number(item.amount);
+        return {
+          id: `TXN-${Date.now()}-${idx}`,
+          voucherNo: vNo,
+          type: 'expense',
+          date: settledDate || new Date().toISOString().slice(0, 10),
+          party: adv.managerName,
+          category: item.category || 'Site Expense',
+          projectId: item.projectId || adv.projectId || null,
+          amount: txnAmt,
+          accountId: adv.accountId,
+          description: item.description || `${adv.managerName} — Advance Settlement (${adv.voucherRef})`,
+          note: `Adjusted from ${adv.voucherRef}${settlementNote ? ` | ${settlementNote}` : ''}`
+        };
+      });
+
+      let updatedProjects = [...prev.projects];
+      newTxns.forEach(t => {
+        if (t.projectId) {
+          updatedProjects = updatedProjects.map(p =>
+            p.id === t.projectId ? { ...p, spentAmount: (p.spentAmount || 0) + t.amount } : p
+          );
+        }
+      });
+
+      const settledItemsWithVoucher = validItems.map((item, idx) => ({
+        ...item,
+        amount: Number(item.amount),
+        voucherNo: newTxns[idx]?.voucherNo
+      }));
+
+      const updatedAdvances = (prev.managerAdvances || []).map(a =>
+        a.id === advanceId
+          ? {
+              ...a,
+              status: 'archived',
+              settledDate: settledDate || new Date().toISOString().slice(0, 10),
+              settledItems: settledItemsWithVoucher,
+              totalSpent,
+              returnedAmount,
+              extraPaidAmount,
+              returnAccountId: targetReturnAcc,
+              settlementNote: (settlementNote || '').trim()
+            }
+          : a
+      );
+
+      return {
+        ...prev,
+        accounts: updatedAccounts,
+        projects: updatedProjects,
+        transactions: [...newTxns.reverse(), ...prev.transactions],
+        managerAdvances: updatedAdvances
+      };
+    });
+
+    logAudit('MANAGER_ADVANCE_SETTLED', `Settled & archived manager advance ${advanceId}`);
+  };
+
+  const deleteManagerAdvance = (advanceId) => {
+    setData(prev => {
+      const target = (prev.managerAdvances || []).find(a => a.id === advanceId);
+      if (!target) return prev;
+      let updatedAccounts = [...prev.accounts];
+      if (target.status === 'active') {
+        updatedAccounts = updatedAccounts.map(acc =>
+          acc.id === target.accountId ? { ...acc, balance: acc.balance + target.amountGiven } : acc
+        );
+      }
+      return {
+        ...prev,
+        accounts: updatedAccounts,
+        managerAdvances: (prev.managerAdvances || []).filter(a => a.id !== advanceId)
+      };
+    });
+    logAudit('MANAGER_ADVANCE_DELETED', `Deleted manager advance ${advanceId}`);
   };
 
   // 3. Projects
@@ -1510,6 +1652,9 @@ export const AppProvider = ({ children }) => {
         updateTransaction,
         deleteTransaction,
         transferFunds,
+        addManagerAdvance,
+        settleAndArchiveAdvance,
+        deleteManagerAdvance,
         addProject,
         updateProject,
         deleteProject,

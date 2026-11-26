@@ -21,10 +21,12 @@ import {
   RefreshCw,
   FileSpreadsheet,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  UserCheck
 } from 'lucide-react';
 import { formatBDT, formatDate } from '../../utils/formatters';
 import { DateInput } from '../common/DateInput';
+import { ManagerAdvanceSection } from './ManagerAdvanceSection';
 
 export const AccountingView = () => {
   const {
@@ -47,6 +49,8 @@ export const AccountingView = () => {
   } = useApp();
 
   const [activeFilter, setActiveFilter] = useState('all'); // all | income | expense | transfer
+  const [accountingMode, setAccountingMode] = useState('ledger'); // 'ledger' | 'advances'
+  const [showAdvanceAddModal, setShowAdvanceAddModal] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState('all');
   const [selectedProjectId, setSelectedProjectId] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -272,7 +276,49 @@ export const AccountingView = () => {
             <ArrowLeftRight className="w-4 h-4" />
             <span>{language === 'bn' ? 'জার্নাল (ট্রান্সফার)' : 'Journal Transfer'}</span>
           </button>
+
+          <button
+            onClick={() => {
+              setAccountingMode('advances');
+              setShowAdvanceAddModal(true);
+            }}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl shadow transition cursor-pointer"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>{language === 'bn' ? '+ ম্যানেজার অগ্রিম' : '+ Manager Advance'}</span>
+          </button>
         </div>
+      </div>
+
+      {/* Mode Switcher: Main Ledger vs Manager Advances & Archive */}
+      <div className="flex flex-wrap items-center gap-2 bg-slate-800/70 p-1.5 rounded-2xl border border-slate-700/70 w-fit">
+        <button
+          onClick={() => setAccountingMode('ledger')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+            accountingMode === 'ledger'
+              ? 'bg-amber-500 text-slate-950 shadow'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Receipt className="w-4 h-4" />
+          <span>{language === 'bn' ? 'মূল হিসাব ও ভাউচার' : 'Main Ledger & Vouchers'}</span>
+        </button>
+        <button
+          onClick={() => setAccountingMode('advances')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+            accountingMode === 'advances'
+              ? 'bg-amber-500 text-slate-950 shadow'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          <span>{language === 'bn' ? 'ম্যানেজার অগ্রিম ও সমন্বয় (আর্কাইভ)' : 'Manager Advances & Archive'}</span>
+          {(data.managerAdvances || []).filter(a => a.status === 'active').length > 0 && (
+            <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-rose-600 text-white font-bold">
+              {(data.managerAdvances || []).filter(a => a.status === 'active').length}
+            </span>
+          )}
+        </button>
       </div>
 
       {pullMsg && (
@@ -309,7 +355,14 @@ export const AccountingView = () => {
         </div>
       )}
 
-      {/* Account Balances Cards Row */}
+      {accountingMode === 'advances' ? (
+        <ManagerAdvanceSection
+          externalShowAdd={showAdvanceAddModal}
+          setExternalShowAdd={setShowAdvanceAddModal}
+        />
+      ) : (
+        <>
+          {/* Account Balances Cards Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {data.accounts.map(acc => (
           <div
@@ -519,6 +572,8 @@ export const AccountingView = () => {
           </table>
         </div>
       </div>
+        </>
+      )}
 
       {/* Modal: New Income/Expense Transaction */}
       {showAddModal && (
