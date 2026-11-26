@@ -83,7 +83,7 @@ export const INITIAL_BACKUP_SNAPSHOTS = [
 ];
 
 export const INITIAL_ACCOUNTS = [
-  { id: "acc-cash", name: "Main Office Petty Cash", type: "cash", balance: 145000, accountNumber: "Cash in Hand" },
+  { id: "acc-cash", name: "Main Office Cash", type: "cash", balance: 145000, accountNumber: "Cash in Hand" },
   { id: "acc-city", name: "The City Bank Ltd", type: "bank", balance: 1250000, accountNumber: "CD-120392019201", branch: "Agrabad Branch, CTG" },
   { id: "acc-dbbl", name: "Dutch Bangla Bank Ltd", type: "bank", balance: 840000, accountNumber: "CA-117105002931", branch: "GEC Circle Branch, CTG" },
   { id: "acc-bkash", name: "bKash Merchant Account", type: "mobile_banking", balance: 65000, accountNumber: "01830002040" },
@@ -512,7 +512,7 @@ export const INITIAL_SALARY_SHEET = [
     netPayable: 35000,
     status: "Paid",
     paidDate: "2026-03-01",
-    paymentMethod: "Main Office Petty Cash",
+    paymentMethod: "Main Office Cash",
     voucherNo: "AE-PV-2026-0006"
   },
   {
@@ -526,7 +526,7 @@ export const INITIAL_SALARY_SHEET = [
     netPayable: 33500,
     status: "Paid",
     paidDate: "2026-03-01",
-    paymentMethod: "Main Office Petty Cash",
+    paymentMethod: "Main Office Cash",
     voucherNo: "AE-PV-2026-0007"
   },
   {

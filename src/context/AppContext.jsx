@@ -103,8 +103,14 @@ export const AppProvider = ({ children }) => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const rawAccounts = parsed.accounts || INITIAL_ACCOUNTS;
+        const migratedAccounts = rawAccounts.map(acc =>
+          acc.id === 'acc-cash' && acc.name === 'Main Office Petty Cash'
+            ? { ...acc, name: 'Main Office Cash' }
+            : acc
+        );
         return {
-          accounts: parsed.accounts || INITIAL_ACCOUNTS,
+          accounts: migratedAccounts,
           projects: parsed.projects || INITIAL_PROJECTS,
           materials: parsed.materials || INITIAL_MATERIALS,
           employees: parsed.employees || INITIAL_EMPLOYEES,

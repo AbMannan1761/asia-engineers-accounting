@@ -76,7 +76,7 @@ export const DashboardView = () => {
         <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400 font-medium">
-              {language === 'bn' ? 'ক্যাশ ইন হ্যান্ড (Petty Cash)' : 'Cash in Hand'}
+              {language === 'bn' ? 'ক্যাশ ইন হ্যান্ড (Main Office Cash)' : 'Cash in Hand (Main Office Cash)'}
             </span>
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
               <Wallet className="w-4 h-4" />
