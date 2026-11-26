@@ -17,7 +17,8 @@ import {
   Check,
   Sun,
   Moon,
-  PanelLeftOpen
+  PanelLeftOpen,
+  User
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
@@ -234,9 +235,12 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
           </button>
 
           {/* Current User Pill */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-bold flex items-center justify-center text-xs shadow">
-              {(currentUser?.loginId || currentUser?.name || 'A').charAt(0).toUpperCase()}
+          <div
+            className="flex items-center gap-2 pl-2 border-l border-slate-800"
+            title={currentUser?.loginId || currentUser?.email || currentUser?.name || '01830002040'}
+          >
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 flex items-center justify-center shadow">
+              <User className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div className="hidden lg:block text-left">
               <div className="text-xs font-mono font-semibold text-amber-300 leading-none">
