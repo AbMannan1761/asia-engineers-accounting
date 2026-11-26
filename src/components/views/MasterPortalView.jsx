@@ -616,13 +616,6 @@ export const MasterPortalView = () => {
                         <div className="flex items-center gap-1.5 font-mono text-slate-300">
                           <Phone className="w-3 h-3 text-slate-400" />
                           <span>{e.mobile}</span>
-                          <a
-                            href={`tel:${e.mobile}`}
-                            className="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-amber-400 hover:text-white border border-slate-700"
-                            title="Call"
-                          >
-                            Call
-                          </a>
                         </div>
                       </td>
                       <td className="py-3 px-3 text-right font-mono font-bold text-white text-xs">
