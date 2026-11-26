@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Building2,
@@ -18,7 +18,9 @@ import {
   Sun,
   Moon,
   PanelLeftOpen,
-  User
+  User,
+  Bell,
+  AlertTriangle
 } from 'lucide-react';
 import { formatBDT } from '../../utils/formatters';
 
@@ -40,12 +42,25 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
     data,
     totalCashBalance,
     totalBankBalance,
+    lowStockItems = [],
     exportAllToExcel,
     downloadBackupJSON
   } = useApp();
 
   // Local animated sync state: 'idle' | 'syncing' | 'completed'
   const [syncAnimState, setSyncAnimState] = useState('idle');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notifRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSyncClick = async () => {
     if (syncAnimState === 'syncing') return;
@@ -132,6 +147,82 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
 
         {/* Right: Cloud Sync, Excel Export, Language & User Badge */}
         <div className="flex items-center gap-2">
+          {/* Notification Bell with Stock Alerts */}
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setShowNotifications((prev) => !prev)}
+              type="button"
+              className="relative flex items-center justify-center p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
+              title={language === 'bn' ? 'নোটিফিকেশন ও স্টক অ্যালার্ট' : 'Notifications & Stock Alerts'}
+            >
+              <Bell className={`w-4 h-4 ${lowStockItems.length > 0 ? 'text-amber-400' : 'text-slate-300'}`} />
+              {lowStockItems.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center shadow ring-2 ring-[#07192f]">
+                  {lowStockItems.length}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="notification-dropdown absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl z-50 overflow-hidden text-left">
+                <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-bold text-white">
+                      {language === 'bn' ? 'নোটিফিকেশন ও সতর্কতা' : 'Notifications & Alerts'}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                    {lowStockItems.length} {language === 'bn' ? 'টি অ্যালার্ট' : 'Alerts'}
+                  </span>
+                </div>
+
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-800/80">
+                  {lowStockItems.length > 0 ? (
+                    lowStockItems.map((m) => (
+                      <div
+                        key={m.id}
+                        onClick={() => {
+                          setActiveTab('inventory');
+                          setShowNotifications(false);
+                        }}
+                        className="p-3.5 hover:bg-slate-800/70 transition cursor-pointer flex items-start gap-3"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                          <AlertTriangle className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-bold text-amber-300 truncate">{m.name}</div>
+                          <div className="text-[11px] text-slate-300 mt-0.5">
+                            {language === 'bn'
+                              ? `বর্তমান স্টক: ${m.currentStock} ${m.unit} (মিনিমাম: ${m.minStockAlert} ${m.unit})`
+                              : `Remaining: ${m.currentStock} ${m.unit} (Min: ${m.minStockAlert} ${m.unit})`}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-xs text-slate-400">
+                      {language === 'bn' ? 'কোনো পেন্ডিং সতর্কতা নেই ✓' : 'No active alerts ✓'}
+                    </div>
+                  )}
+                </div>
+
+                {lowStockItems.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setActiveTab('inventory');
+                      setShowNotifications(false);
+                    }}
+                    className="w-full py-2.5 px-4 text-xs font-bold text-amber-400 hover:bg-slate-800 border-t border-slate-800 text-center transition"
+                  >
+                    {language === 'bn' ? 'স্টক ইনভেন্টরি দেখুন →' : 'View Stock Inventory →'}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Google Sheet Live Real-time Sync Button with Animation & Tick Mark */}
           <button
             onClick={handleSyncClick}

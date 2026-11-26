@@ -786,3 +786,35 @@ header .border-slate-800,
 .theme-light .bg-amber-500 .text-slate-950 {
   color: #9a3412 !important;
 }
+
+/* Notification Dropdown Light Mode Contrast */
+.theme-light .notification-dropdown {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+.theme-light .notification-dropdown > div:first-child {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+.theme-light .notification-dropdown .text-white {
+  color: #0f172a !important;
+}
+.theme-light .notification-dropdown .text-amber-300 {
+  color: #b45309 !important;
+}
+.theme-light .notification-dropdown .text-slate-300 {
+  color: #475569 !important;
+}
+.theme-light .notification-dropdown .divide-slate-800\/80 > div:hover {
+  background-color: #fff7ed !important;
+}
+.theme-light .notification-dropdown button {
+  background-color: #f8fafc !important;
+  color: #b45309 !important;
+  border-top-color: #e2e8f0 !important;
+}
+.theme-light .notification-dropdown button:hover {
+  background-color: #ffedd5 !important;
+  color: #7c2d12 !important;
+}
