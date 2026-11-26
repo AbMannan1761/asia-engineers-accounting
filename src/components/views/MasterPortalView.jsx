@@ -542,8 +542,8 @@ export const MasterPortalView = () => {
                             {p.status}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
+                        <td className="py-3 px-2 text-center">
+                          <div className="flex flex-col items-center justify-center gap-1.5">
                             <button
                               onClick={() => setEditingItem({ ...p })}
                               className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
@@ -640,8 +640,8 @@ export const MasterPortalView = () => {
                           {e.status}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-3 px-2 text-center">
+                        <div className="flex flex-col items-center justify-center gap-1.5">
                           <button
                             onClick={() => setEditingItem({ ...e })}
                             className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
@@ -749,8 +749,8 @@ export const MasterPortalView = () => {
                             <span className="text-[10px] text-slate-500 font-medium">Cleared</span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
+                        <td className="py-3 px-2 text-center">
+                          <div className="flex flex-col items-center justify-center gap-1.5">
                             <button
                               onClick={() => setEditingItem({ ...v })}
                               className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 transition shadow-xs"
