@@ -79,10 +79,10 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className={`p-2 rounded-lg transition focus:outline-none cursor-pointer flex items-center gap-1.5 ${
+            className={`p-2 rounded-lg transition focus:outline-none cursor-pointer flex items-center gap-1.5 border ${
               !isSidebarOpen
-                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                ? 'bg-slate-800 text-amber-400 border-amber-500/40 hover:bg-slate-700'
+                : 'bg-slate-800 text-slate-200 border-slate-700 hover:text-white hover:bg-slate-700'
             }`}
             aria-label="Toggle Navigation"
             title={isSidebarOpen ? (language === 'bn' ? 'সাইড প্যানেল লুকান' : 'Hide Side Panel') : (language === 'bn' ? 'সাইড প্যানেল খুলুন' : 'Open Side Panel')}
