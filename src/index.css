@@ -766,17 +766,17 @@ header .border-slate-800,
 .bg-amber-500,
 .theme-light .bg-amber-500,
 .theme-dark .bg-amber-500 {
-  background-color: #fed7aa !important; /* Soft Light Orange */
+  background-color: #ffedd5 !important; /* Ultra-Soft Light Orange */
   color: #7c2d12 !important;
-  border: 1px solid #fb923c !important;
-  box-shadow: 0 2px 6px rgba(251, 146, 60, 0.22) !important;
+  border: 1px solid #fdba74 !important;
+  box-shadow: 0 1px 4px rgba(251, 146, 60, 0.16) !important;
 }
 
 .bg-amber-500:hover,
 .hover\:bg-amber-400:hover,
 .hover\:bg-amber-500:hover,
 .theme-light .bg-amber-500:hover {
-  background-color: #fdba74 !important;
+  background-color: #fed7aa !important;
   color: #7c2d12 !important;
 }
 
