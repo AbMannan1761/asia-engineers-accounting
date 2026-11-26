@@ -233,16 +233,6 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
             )}
           </button>
 
-          {/* Language Toggle */}
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-            title="বাংলা / English"
-          >
-            <Globe2 className="w-3.5 h-3.5 text-amber-400" />
-            <span>{language === 'bn' ? 'ENG' : 'বাং'}</span>
-          </button>
-
           {/* Current User Pill */}
           <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-bold flex items-center justify-center text-xs shadow">
