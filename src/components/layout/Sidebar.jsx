@@ -163,13 +163,6 @@ export const Sidebar = ({ isOpen, onClose, onToggle }) => {
             );
           })}
         </div>
-
-        {/* Bottom Quick Support & Office Address */}
-        <div className="p-3 border-t border-slate-800 text-[11px] text-slate-400 bg-slate-950/40">
-          <div className="font-semibold text-slate-300">Room 3028, CJKS Shopping Complex</div>
-          <div>Kajir Dewri, Chattogram</div>
-          <div className="text-amber-400 font-medium mt-0.5">Hotline: 01830002040</div>
-        </div>
       </aside>
 
       {/* iPhone Safari Bottom Navigation Bar (Fixed for quick touch navigation on mobile) */}
