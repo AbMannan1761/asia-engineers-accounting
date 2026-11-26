@@ -51,20 +51,20 @@ export const DashboardView = () => {
           </div>
 
           {/* Quick Action Shortcuts */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => setActiveTab('accounting')}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
+              className="flex items-center gap-1 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-xs transition"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>{language === 'bn' ? '+ জমা / রিসিট' : '+ Money Receipt'}</span>
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>{language === 'bn' ? 'জমা / রিসিট' : 'Money Receipt'}</span>
             </button>
             <button
               onClick={() => setActiveTab('accounting')}
-              className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition"
+              className="flex items-center gap-1 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-xs transition"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>{language === 'bn' ? '+ খরচ / ভাউচার' : '+ Payment Voucher'}</span>
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>{language === 'bn' ? 'খরচ / ভাউচার' : 'Payment Voucher'}</span>
             </button>
           </div>
         </div>
