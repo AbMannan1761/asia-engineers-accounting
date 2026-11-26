@@ -91,13 +91,17 @@ export const Header = ({ onToggleSidebar, isSidebarOpen = true }) => {
             {isSidebarOpen ? <Menu className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5 text-amber-400" />}
           </button>
 
-          <div className="flex items-center gap-3">
+          <div
+            onClick={() => setActiveTab('dashboard')}
+            className="brand-logo-animated relative overflow-hidden rounded-lg px-1.5 py-0.5 flex items-center gap-3 cursor-pointer select-none"
+            title="ASIA ENGINEERS — Steel Structure & Construction"
+          >
             <img
               src="./images/asia_engineers_logo.png"
               alt="ASIA ENGINEERS STEEL STRUCTURE"
-              className="h-8 sm:h-9 max-w-[180px] sm:max-w-[210px] object-contain"
+              className="h-8 sm:h-9 max-w-[180px] sm:max-w-[210px] object-contain relative z-10 transition-transform duration-300 hover:scale-105"
             />
-            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] uppercase font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded">
+            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] uppercase font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded relative z-10">
               ERP v1.0
             </span>
           </div>

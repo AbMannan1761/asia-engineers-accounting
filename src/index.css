@@ -714,3 +714,48 @@ header .border-slate-800,
   background-color: #f1f5f9 !important;
   color: #334155 !important;
 }
+
+/* ========================================================
+   ANIMATED HEADER BRAND LOGO (Metallic Sheen + Gold Glow)
+   ======================================================== */
+@keyframes logoFloatGlow {
+  0%, 100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.25));
+  }
+  50% {
+    transform: translateY(-1.5px);
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.65));
+  }
+}
+
+@keyframes logoShimmerSweep {
+  0% {
+    transform: translateX(-140%) skewX(-24deg);
+  }
+  45%, 100% {
+    transform: translateX(260%) skewX(-24deg);
+  }
+}
+
+.brand-logo-animated img {
+  animation: logoFloatGlow 3.2s ease-in-out infinite;
+}
+
+.brand-logo-animated::after {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: 0;
+  width: 38%;
+  height: 120%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(251, 191, 36, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: logoShimmerSweep 3.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 20;
+}
