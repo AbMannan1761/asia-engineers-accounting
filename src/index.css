@@ -759,3 +759,30 @@ header .border-slate-800,
   pointer-events: none;
   z-index: 20;
 }
+
+/* ========================================================
+   SOFT LIGHT ORANGE THEME FOR ACTIVE TABS & PRIMARY BUTTONS
+   ======================================================== */
+.bg-amber-500,
+.theme-light .bg-amber-500,
+.theme-dark .bg-amber-500 {
+  background-color: #fed7aa !important; /* Soft Light Orange */
+  color: #7c2d12 !important;
+  border: 1px solid #fb923c !important;
+  box-shadow: 0 2px 6px rgba(251, 146, 60, 0.22) !important;
+}
+
+.bg-amber-500:hover,
+.hover\:bg-amber-400:hover,
+.hover\:bg-amber-500:hover,
+.theme-light .bg-amber-500:hover {
+  background-color: #fdba74 !important;
+  color: #7c2d12 !important;
+}
+
+.bg-amber-500 svg,
+.bg-amber-500 .text-slate-950,
+.theme-light .bg-amber-500 svg,
+.theme-light .bg-amber-500 .text-slate-950 {
+  color: #9a3412 !important;
+}
