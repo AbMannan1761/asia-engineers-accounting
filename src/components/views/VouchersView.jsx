@@ -91,7 +91,7 @@ export const VouchersView = () => {
   const titleInfo = getVoucherTitleInfo();
 
   const partyLabel = isIncome
-    ? (language === 'bn' ? 'টাকা প্রাপ্তি (Received with thanks from)' : 'Received with thanks from')
+    ? (language === 'bn' ? 'টাকা প্রাপ্তি' : 'Received from')
     : isTransfer
       ? (language === 'bn' ? 'উৎস ও গন্তব্য হিসাব (Transfer)' : 'Transfer Accounts')
       : (language === 'bn' ? 'প্রাপক / ব্যয়ের খাত (Paid in favor of)' : 'Paid in favor of (Payee)');
