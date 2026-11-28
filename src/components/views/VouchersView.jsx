@@ -391,7 +391,7 @@ export const VouchersView = () => {
         <div className="space-y-3 text-xs sm:text-sm">
           {/* Party row */}
           <div className="flex items-baseline gap-2 border-b border-dashed border-slate-300 pb-2">
-            <span className="font-bold text-slate-700 w-48 shrink-0">{partyLabel}:</span>
+            <span className="font-bold text-slate-700 shrink-0">{partyLabel}:</span>
             <span className="font-bold text-sm sm:text-base text-slate-950 uppercase">
               {isTransfer
                 ? `${account?.name || activeTxn?.accountId} ➔ ${toAccount?.name || activeTxn?.toAccountId}`
@@ -400,11 +400,11 @@ export const VouchersView = () => {
           </div>
 
           {/* Amount In Figures */}
-          <div className="flex items-center gap-3 border-b border-dashed border-slate-300 pb-2">
+          <div className="flex items-center gap-2 border-b border-dashed border-slate-300 pb-2">
             <span className="font-bold text-slate-700 shrink-0">
               {language === 'bn' ? 'টাকার পরিমাণ (অংকে):' : 'Amount in Figures:'}
             </span>
-            <span className="font-black text-base sm:text-lg text-slate-950 bg-slate-100 px-3 py-1 rounded border border-slate-400 font-mono shadow-2xs">
+            <span className="font-bold text-sm sm:text-base text-slate-950 bg-slate-100 px-2.5 py-0.5 rounded border border-slate-400 font-mono leading-tight">
               {formatBDT(activeTxn?.amount)}
             </span>
           </div>
