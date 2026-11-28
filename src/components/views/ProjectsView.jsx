@@ -1266,7 +1266,7 @@ export const ProjectsView = () => {
                   <input
                     type="number"
                     required
-                    min="1"
+                    min="0"
                     value={editFormData.contractValue}
                     onChange={(e) => setEditFormData(p => ({ ...p, contractValue: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-hidden focus:border-amber-400"
@@ -1276,9 +1276,30 @@ export const ProjectsView = () => {
                   <label className="block text-slate-400 mb-1 font-medium">{language === 'bn' ? 'বাজেট (Budget BDT)' : 'Budget'}</label>
                   <input
                     type="number"
+                    min="0"
                     value={editFormData.budget}
                     onChange={(e) => setEditFormData(p => ({ ...p, budget: e.target.value }))}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-hidden focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-emerald-400 mb-1 font-medium">{language === 'bn' ? 'বিল প্রাপ্তি / জমা (Received BDT)' : 'Received Amount'}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editFormData.receivedAmount}
+                    onChange={(e) => setEditFormData(p => ({ ...p, receivedAmount: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold focus:outline-hidden focus:border-emerald-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-rose-400 mb-1 font-medium">{language === 'bn' ? 'প্রজেক্ট খরচ (Spent BDT)' : 'Spent Amount'}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editFormData.spentAmount}
+                    onChange={(e) => setEditFormData(p => ({ ...p, spentAmount: e.target.value }))}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-rose-400 font-bold focus:outline-hidden focus:border-rose-400"
                   />
                 </div>
               </div>
